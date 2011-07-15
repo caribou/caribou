@@ -1,13 +1,13 @@
-# triface
+# Interface mark III
 
-FIXME: write description
+type interaction kernel
 
 ## Usage
 
-FIXME: write
+Interface is essentially an API
 
 ## License
 
-Copyright (C) 2011 FIXME
+Copyright (C) 2011 
 
 Distributed under the Eclipse Public License, the same as Clojure.
