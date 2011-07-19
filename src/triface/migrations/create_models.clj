@@ -1,5 +1,4 @@
-(ns triface.migrations.create-models
-  (require [triface.db :as db]))
+(in-ns 'triface.migration)
 
 (defn create-migration-table []
   (db/create-table
@@ -15,8 +14,7 @@
    [:name "varchar(55)"]
    [:description :text]
    [:position :integer]
-   [:nested :boolean]
-   [:locked :boolean]
+   [:nested :boolean]   [:locked :boolean]
    [:abstract :boolean]
    [:ancestor_id :integer]
    [:created_at "timestamp with time zone" "NOT NULL" "DEFAULT current_timestamp"]
@@ -31,6 +29,7 @@
     :abstract false
     :ancestor_id 0}))
 
-(defn run []
+(def migrate (fn []
   (create-migration-table)
-  (create-model-table))
+  (create-model-table)))
+
