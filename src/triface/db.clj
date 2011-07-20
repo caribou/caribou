@@ -24,14 +24,11 @@
           (rep retr i)
           (recur (inc i) (rep retr i)))))))
 
-
-"IF EXISTS (SELECT relname FROM pg_class WHERE relname='migration') THEN SELECT 1 ELSE SELECT 2 END IF"
-
 (defn query [q & args]
   (sql/with-connection db
     (sql/with-query-results res
       [(clause q args)]
-      (into [] res))))
+      (doall res))))
 
 (defn insert [name values]
   (sql/with-connection db

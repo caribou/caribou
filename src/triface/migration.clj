@@ -10,6 +10,9 @@
 (def migration-list
      (ref ["create_models"]))
 
+(defn push-migration [name]
+  (dosync (alter migration-list #(cons name %))))
+
 (defn migrations-to-run []
   (let [already-run (map #(% :name) (db/query "select * from migration"))]
     (set/difference @migration-list already-run)))
