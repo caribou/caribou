@@ -2,6 +2,10 @@
 
 type interaction kernel
 
+## Setup
+
+Download and install Leiningen: https://github.com/technomancy/leiningen
+
 ## Usage
 
 Interface is essentially an API
