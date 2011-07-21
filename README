@@ -11,6 +11,7 @@ Download and install leiningen: https://github.com/technomancy/leiningen
 
 At the command line:
 
+  lein migrate
   lein ring server
 
 ## License --------------------

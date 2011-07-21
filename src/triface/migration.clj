@@ -1,5 +1,4 @@
 (ns triface.migration
-  (use [triface.debug])
   (require [clojure.set :as set]
            [triface.db :as db]))
 
@@ -26,11 +25,9 @@
   (db/insert :migration {:name name}))
 
 (defn run-migrations []
-  (do
-    (if (debug (not (db/table? "migration")))
-      (map run-migration premigration-list))
-    (debug (not (db/table? "migration")))
-    (let [names (migration-names)]
-      (map #(if (not (some #{%} names)) (run-migration %)) @migration-list))))
+  (if (not (db/table? "migration"))
+    (doall (map run-migration premigration-list)))
+  (map #(if (not (some #{%} (migration-names))) (run-migration %))
+       @migration-list))
 
 
