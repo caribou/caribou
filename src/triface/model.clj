@@ -49,8 +49,6 @@
 
 (defn fetch-model [name]
   (fetch-fields (first (db/query "select * from model where name = '%1'" name))))
-    ;;     fields (db/query "select * from field where model_id = %1" (str (row :id)))]
-    ;; (assoc row :fields (rows-to-fields fields))))
 
 (defn model-table-additions [model]
   (reduce #(concat %1 (table-additions %2)) [] (vals (model :fields))))
