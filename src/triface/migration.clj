@@ -5,7 +5,7 @@
 (def migrate (fn [] :nothing))
 
 (def premigration-list
-     ["create_models"])
+     ["create_base_tables"])
 
 (def migration-list
      (ref ["create_models"]))
@@ -27,7 +27,7 @@
 (defn run-migrations []
   (if (not (db/table? "migration"))
     (doall (map run-migration premigration-list)))
-  (map #(if (not (some #{%} (migration-names))) (run-migration %))
-       @migration-list))
+  (doall (map #(if (not (some #{%} (migration-names))) (run-migration %))
+       @migration-list)))
 
 
