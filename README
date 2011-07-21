@@ -1,16 +1,19 @@
-# Interface mark III
+# Interface mark III ----------
 
 type interaction kernel
 
-## Setup
+## Setup ----------------------
 
-Download and install Leiningen: https://github.com/technomancy/leiningen
+Download and install postgresql: http://www.postgresql.org/download/
+Download and install leiningen: https://github.com/technomancy/leiningen
 
-## Usage
+## Usage ----------------------
 
-Interface is essentially an API
+At the command line:
 
-## License
+  lein ring server
+
+## License --------------------
 
 Copyright (C) 2011 
 

@@ -29,7 +29,3 @@
     (map #(if (not (some #{%} already-run)) (run-migration %)) @migration-list)))
 
 
-
-
-
-
