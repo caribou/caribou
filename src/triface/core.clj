@@ -16,13 +16,13 @@
 (defn content-field [slug id field]
   ((content-item slug id) field))
 
-
-
 (defn render [slug content]
   (model/model-render (model/models (keyword slug)) content))
 
 (defn render-field [slug content field]
   (model/render (((model/models (keyword slug)) :fields) (keyword field)) content))
+
+;; actions ------------------------------------------------
 
 (defn home []
   (json/json-str {:message "welcome to interface"}))
@@ -31,13 +31,15 @@
   (json/json-str (map #(render slug %) (content-list slug))))
 
 (defn model-spec [slug]
-  (json/json-str (render slug (first (db/query "select * from model where name = '%1'" slug)))))
+  (json/json-str (render "model" (first (db/query "select * from model where name = '%1'" slug)))))
 
 (defn item-detail [slug id]
   (json/json-str (render slug (content-item slug id))))
 
 (defn field-detail [slug id field]
   (json/json-str (render-field slug (content-item slug id) field)))
+
+;; routes --------------------------------------------------
 
 (defroutes main-routes
   (GET "/" [] (home))

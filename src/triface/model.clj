@@ -4,7 +4,7 @@
 (defprotocol Field
   "a protocol for expected behavior of all model fields"
   (table-additions [this] "the set of additions to this db table based on the given name")
-  (render [this content]))
+  (render [this content]) "renders out a single field from this content item")
 
 (defrecord IntegerField [row]
   Field
