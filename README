@@ -1,6 +1,6 @@
 # Interface mark III ----------
 
-type interaction kernel
+model relation interaction kernel
 
 ## Setup ----------------------
 
@@ -11,6 +11,7 @@ Download and install leiningen: https://github.com/technomancy/leiningen
 
 At the command line:
 
+  lein deps
   lein migrate
   lein ring server
 
@@ -18,4 +19,4 @@ At the command line:
 
 Copyright (C) 2011 
 
-Distributed under the Eclipse Public License, the same as Clojure.
+Distributed under the Eclipse Public License.
