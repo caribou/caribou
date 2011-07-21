@@ -1,15 +1,15 @@
 (ns triface.model
-  (require [triface.db :as db]))
+  (:require [triface.db :as db]))
 
 (defprotocol Field
   "a protocol for expected behavior of all model fields"
   (table-additions [this] "the set of additions to this db table based on the given name")
-  (render [this content]) "renders out a single field from this content item")
+  (render [this content] "renders out a single field from this content item"))
 
 (defrecord IntegerField [row]
   Field
   (table-additions [this] [[(keyword (row :name)) :integer "DEFAULT 0"]])
-  (render [this content] (str (content (keyword (row :name))))))
+  (render [this content] (content (keyword (row :name)))))
   
 (defrecord StringField [row]
   Field
@@ -24,7 +24,7 @@
 (defrecord BooleanField [row]
   Field
   (table-additions [this] [[(keyword (row :name)) :boolean]])
-  (render [this content] (str (content (keyword (row :name))))))
+  (render [this content] (content (keyword (row :name)))))
 
 (defrecord TimestampField [row]
   Field
