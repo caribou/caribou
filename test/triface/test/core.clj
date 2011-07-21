@@ -2,5 +2,7 @@
   (:use [triface.core])
   (:use [clojure.test]))
 
-(deftest replace-me
-  (is false "No tests have been written."))
+(deftest core-test
+  (is true (> (count (content-list "model")) 0)))
+
+
