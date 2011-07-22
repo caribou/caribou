@@ -3,6 +3,6 @@
   (:use [clojure.test]))
 
 (deftest core-test
-  (is true (> (count (content-list "model")) 0)))
+  (is (> (count (content-list "model")) 0)))
 
 
