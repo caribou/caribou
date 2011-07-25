@@ -1,4 +1,5 @@
 (ns triface.db
+  (:use [triface.debug])
   (:require [clojure.java.jdbc :as sql]))
 
 (def db
@@ -8,7 +9,7 @@
    :user "postgres"})
 
 (defn sanitize [s]
-  (.replaceAll (re-matcher #"[\\\";#%]" (.replaceAll s "'" "''")) ""))
+  (.replaceAll (re-matcher #"[\\\";#%]" (.replaceAll (str s) "'" "''")) ""))
 
 (defn clause [pred args]
   (letfn [(rep [s i] (.replaceAll s (str "%" (inc i))
@@ -34,9 +35,19 @@
   (sql/with-connection db
     (sql/insert-record name values)))
 
+(defn delete [name & where]
+  (sql/with-connection db
+    (sql/delete-rows name [(if (not (empty? where)) (clause (first where) (rest where)))])))
+
 (defn table? [name]
-  (< 0 (count (query (str "select true from pg_class where relname='" (sanitize name) "'")))))
+  (< 0 (count (query "select true from pg_class where relname='%1'" name))))
 
 (defn create-table [name & fields]
   (sql/with-connection db
     (apply sql/create-table (cons name fields))))
+
+(defn drop-table [name]
+  (sql/with-connection db
+    (sql/drop-table name)))
+
+
