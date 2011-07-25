@@ -48,7 +48,7 @@
   (assoc model :fields (rows-to-fields rows)))
 
 (defn fetch-fields [model]
-  (invoke-field-records model (db/query "select * from field where model_id = %1" (str (model :id)))))
+  (invoke-field-records model (db/query "select * from field where model_id = %1" (model :id))))
 
 (defn define-fields [model]
   (invoke-field-records model (model :fields)))
@@ -102,8 +102,8 @@
 
 (defn delete-model [name]
   (let [model (fetch-model name)]
-    (db/delete :field "model_id = %1" (str (model :id)))
-    (db/delete :model "id = %1" (str (model :id)))
+    (db/delete :field "model_id = %1" (model :id))
+    (db/delete :model "id = %1" (model :id))
     (db/drop-table (model :name))
     (dosync (alter models dissoc (keyword (model :name))))
     model))
