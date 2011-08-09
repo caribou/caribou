@@ -1,30 +1,31 @@
 triface.admin = function() {
+    var template = function() {
+        var column = _.template('<td><%= m[f] %></td>');
+        var heading = _.template('<th><%= h %></th>');
+        var row = _.template('<tr><%= fields.join("") %></tr>');
+        var table = _.template('<table cellspacing=5><thead><%= row({fields: _.map(fields, function(f) {return heading({h: f})})}) %></thead><tbody><%= _.map(rows, function(model) {return row({fields: _.map(fields, function(f) {return column({m: model, f: f})})});}).join("") %></tbody></table>');
+
+        return {
+            table: function(rows) {
+                return table({
+                    rows: rows,
+                    fields: _.keys(_.first(rows)),
+                    row: row,
+                    heading: heading,
+                    column: column
+                });
+            }
+        };
+    }();
+
     return {
         init: function() {
             triface.api.get({
                 url: '/model',
                 success: function(response) {
-                    var directives = {
-                        'li': {
-                            'model<-models':{'.':'model.name'}
-                        },
-                    };
-                    var models = {'headers': ['name', 'id'], 'models': response};
-                    var body = $('<ul><li class="models"></li></ul>').directives(directives).render(models);
+                    var body = template.table(response);
                     $('#triface').append(body);
                     console.log(response);
-
-                    // var directives = {
-                    //     'th': {
-                    //         'header<-headers':{'.':'header'}
-                    //     },
-                    //     'td': {
-                    //         'model<-models':{'.':'model'}
-                    //     }
-                    // };
-
-                    // var table = '<table class="models"><thead><tr><th class="headings"></th></tr></thead><tbody><tr><td></td></tr></tbody></table>';
-                    //var body = $(table).directives(directives).render(models);
                 }
             });
         }
