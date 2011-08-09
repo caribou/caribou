@@ -1,9 +1,29 @@
 triface.admin = function() {
     var template = function() {
-        var column = _.template('<td><%= m[f] %></td>');
-        var heading = _.template('<th><%= h %></th>');
-        var row = _.template('<tr><%= fields.join("") %></tr>');
-        var table = _.template('<table cellspacing=5><thead><%= row({fields: _.map(fields, function(f) {return heading({h: f})})}) %></thead><tbody><%= _.map(rows, function(model) {return row({fields: _.map(fields, function(f) {return column({m: model, f: f})})});}).join("") %></tbody></table>');
+        var mtable = " \
+<table cellspacing=5> \
+  <thead> \
+    <tr> \
+    {{#headings}} \
+      <th>{{.}}</th>\
+    {{/headings}} \
+    </tr> \
+  </thead> \
+  <tbody> \
+  {{#items}} \
+    <tr> \
+    {{#headings}} \
+      <td>{{item[heading]}}</td> \
+    {{/headings}} \
+    </tr> \
+  {{/items}} \
+  </tbody> \
+</table>";
+
+        var column = _.template('<td><%= value %></td>');
+        var heading = _.template('<th><%= value %></th>');
+        var row = _.template('<tr><%= _.map(fields, function(f) {return cell({value: f})}).join("") %></tr>');
+        var table = _.template('<table cellspacing=5><thead><%= row({fields: fields, cell: heading}) %></thead><tbody><%= _.map(rows, function(model) {return row({fields: _.map(fields, function(f) {return model[f];}), cell: column})}).join("") %></tbody></table>');
 
         return {
             table: function(rows) {
