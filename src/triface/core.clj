@@ -8,6 +8,10 @@
             [clojure.contrib.json :as json]))
 
 
+(dosync (alter models
+               reduce #(assoc %1 (keyword (%2 :name)) (model/fetch-fields %2)) {}
+               (db/query "select * from model")))
+
 (defn content-list [slug]
   (db/query "select * from %1" slug))
 
@@ -18,10 +22,10 @@
   ((content-item slug id) field))
 
 (defn render [slug content]
-  (model/model-render (model/models (keyword slug)) content))
+  (model/model-render (models (keyword slug)) content))
 
 (defn render-field [slug content field]
-  (model/render (((model/models (keyword slug)) :fields) (keyword field)) content))
+  (model/render (((models (keyword slug)) :fields) (keyword field)) content))
 
 ;; actions ------------------------------------------------
 

@@ -1,6 +1,7 @@
 (ns triface.migration
   (require [clojure.set :as set]
-           [triface.db :as db]))
+           [triface.db :as db]
+           [triface.model :as model]))
 
 (def migrate (fn [] :nothing))
 
@@ -8,7 +9,7 @@
      ["create_base_tables"])
 
 (def migration-list
-     (ref ["create_models"]))
+     (ref ["create_models" "create_locked_models"]))
 
 (defn push-migration [name]
   (dosync (alter migration-list #(cons name %))))

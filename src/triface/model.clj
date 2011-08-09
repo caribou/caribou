@@ -91,13 +91,12 @@
 (defn model-render [model content]
   (reduce #(assoc %1 %2 (render ((model :fields) %2) content)) content (keys (model :fields))))
 
-(def models (ref (reduce #(assoc %1 (keyword (%2 :name)) (fetch-fields %2)) {}
-                         (db/query "select * from model"))))
-
 (defn create-model-table [model]
   (apply db/create-table
          (cons (keyword (model :name))
                (model-table-additions model))))
+
+(def models (ref {}))
 
 (defn create-model [spec]
   (db/insert :model (dissoc spec :fields))
