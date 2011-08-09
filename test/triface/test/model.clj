@@ -11,7 +11,7 @@
                                       {:name "wibib" :type "boolean"}]})
         yellow (db/insert :yellow {:gogon "obobo" :wibib true})]
 
-    (is (>= 8 (count (model :fields))))
+    (is (<= 8 (count (model :fields))))
     (is (= (model :name) "yellow"))
     (is ((models :yellow) :name "yellow"))
     (is (db/table? "yellow"))

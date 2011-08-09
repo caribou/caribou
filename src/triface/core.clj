@@ -3,6 +3,7 @@
   (:require [triface.db :as db]
             [triface.model :as model]
             [compojure.route :as route]
+            [ring.adapter.jetty :as ring]
             [compojure.handler :as handler]
             [clojure.contrib.json :as json]))
 
@@ -52,4 +53,9 @@
 
 (def app (handler/site main-routes))
 
+(defn start [port]
+  (ring/run-jetty (var app) {:port (or port 33333) :join? false}))
 
+(defn -main []
+  (let [port (Integer/parseInt (or (System/getenv "PORT") "33333"))]
+    (start port)))

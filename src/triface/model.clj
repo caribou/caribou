@@ -31,6 +31,11 @@
   (table-additions [this] [[(keyword (row :name)) "timestamp with time zone" "NOT NULL" "DEFAULT current_timestamp"]])
   (render [this content] (str (content (keyword (row :name))))))
 
+(defrecord LinkField [row]
+  Field
+  (table-additions [this] [])
+  (render [this content] ""))
+
 (def field-constructors
      {:integer (fn [row] (IntegerField. row))
       :string (fn [row] (StringField. row))
@@ -61,7 +66,9 @@
 
 (def base-fields [[:id "SERIAL" "PRIMARY KEY"]
                   [:position :integer "DEFAULT 1"]
-                  [:status :integer "DEFAULT 0"]
+                  [:status :integer "DEFAULT 1"]
+                  [:locale_id :integer "DEFAULT 1"]
+                  [:env_id :integer "DEFAULT 1"]
                   [:locked :boolean "DEFAULT false"]
                   [:created_at "timestamp with time zone" "NOT NULL" "DEFAULT current_timestamp"]
                   [:updated_at "timestamp with time zone" "NOT NULL" "DEFAULT current_timestamp"]])
@@ -69,6 +76,8 @@
 (def base-rows [{:name "id" :type "integer"}
                 {:name "position" :type "integer"}
                 {:name "status" :type "integer"}
+                {:name "locale_id" :type "integer"}
+                {:name "env_id" :type "integer"}
                 {:name "locked" :type "boolean"}
                 {:name "created_at" :type "timestamp"}
                 {:name "updated_at" :type "timestamp"}])
@@ -110,4 +119,6 @@
 
 (defn create-item [type spec]
   (db/insert type spec))
+
+
 
