@@ -6,6 +6,7 @@ model relation interaction kernel
 
 Download and install postgresql: http://www.postgresql.org/download/
 Download and install leiningen: https://github.com/technomancy/leiningen
+Download and install nginx: http://nginx.org/en/download.html
 
 ## Usage ----------------------
 
@@ -13,10 +14,6 @@ At the command line:
 
   lein deps
   lein migrate
-  lein ring server
+  lein run -m triface.core
 
-## License --------------------
 
-Copyright (C) 2011 
-
-Distributed under the Eclipse Public License.
