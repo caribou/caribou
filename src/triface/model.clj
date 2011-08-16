@@ -134,11 +134,10 @@
     (assoc model :fields field-map)))
 
 (defn invoke-models []
-  (dosync
-   (alter models
-          merge
-          (reduce #(assoc %1 (keyword (%2 :name)) (invoke-model %2)) {}
-                  (db/query "select * from model")))))
+  (let [rows (db/query "select * from model")]
+    (dosync
+     (alter models merge
+            (seq-to-map #(keyword (% :name)) (map invoke-model rows))))))
 
 (defn create-model-table [name]
   (apply db/create-table
@@ -159,7 +158,6 @@
     field))
 
 (defn add-fields [model specs]
-  (debug specs)
   (let [fields (map #(create-field (assoc % :model_id (model :id))) specs)]
     ;; TODO: ensure linked models are refreshed as well
     (doall (map additional-processing fields))
