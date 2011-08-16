@@ -51,12 +51,13 @@
   Field
   (table-additions [this] [])
   (additional-processing [this]
-   (let [model (db/choose :model (row :model_id))]
-     (create-field {:name (:name model)
+    (let [model (db/choose :model (row :model_id))
+          belonging (create-field {:name (:name model)
                     :type "belonging"
                     :model_id (row :target_id)
                     :target_id (row :model_id)
-                    :link_id (row :id)})))
+                    :link_id (row :id)})]
+      (db/update :field {:link_id (-> belonging :row :id)} "id = %1" (row :id))))
   (include-by-default? [this] false)
   (render [this content] ""))
 
