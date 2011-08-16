@@ -109,7 +109,7 @@
   (reduce concat [] (map table-additions fields)))
 
 (defn model-table-additions [model]
-  (let [added (remove (set base-field-names) (map keyword (keys (:fields model))))]
+  (let [added (remove (set base-field-names) (keys (:fields model)))]
     (concat base-fields (field-table-additions (map #(% (:fields model)) added)))))
 
 (defn model-render [model content]
