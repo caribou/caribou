@@ -1,5 +1,6 @@
 (ns triface.db
   (:use [triface.debug])
+  (:use [clojure.contrib.str-utils])
   (:require [clojure.java.jdbc :as sql]))
 
 (def db
@@ -28,26 +29,33 @@
 (defn query [q & args]
   (sql/with-connection db
     (sql/with-query-results res
-      [(clause q args)]
+      [(debug (clause q args))]
       (doall res))))
 
-(defn insert [name values]
+(defn insert [table values]
   (sql/with-connection db
-    (sql/insert-record name values)))
+    (sql/insert-record table values)))
 
-(defn delete [name & where]
+(defn delete [table & where]
   (sql/with-connection db
-    (sql/delete-rows name [(if (not (empty? where)) (clause (first where) (rest where)))])))
+    (sql/delete-rows table [(if (not (empty? where)) (clause (first where) (rest where)))])))
 
-(defn table? [name]
-  (< 0 (count (query "select true from pg_class where relname='%1'" name))))
+(defn choose [table id]
+  (first (query "select * from %1 where id = %2" (name table) id)))
 
-(defn create-table [name & fields]
+(defn table? [table]
+  (< 0 (count (query "select true from pg_class where relname='%1'" (name table)))))
+
+(defn create-table [table & fields]
   (sql/with-connection db
-    (apply sql/create-table (cons name fields))))
+    (apply sql/create-table (cons table fields))))
 
-(defn drop-table [name]
+(defn drop-table [table]
   (sql/with-connection db
-    (sql/drop-table name)))
+    (sql/drop-table table)))
 
-
+(defn add-column [table column opts]
+  (let [type (str-join " " (map name opts))]
+    (sql/with-connection db
+      (sql/do-commands
+       (debug (clause "alter table %1 add column %2 %3" (map name [table column type])))))))

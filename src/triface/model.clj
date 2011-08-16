@@ -44,12 +44,18 @@
   (include-by-default? [this] true)
   (render [this content] (str (content (keyword (row :name))))))
 
+;; forward reference for collection-field
+(def create-field)
+
 (defrecord CollectionField [row]
   Field
   (table-additions [this] [])
-  (additional-processing
-   [this]
-   )
+  (additional-processing [this]
+   (let [model (db/choose :model (row :model_id))]
+     (create-field {:name (:name model)
+                    :type "belonging"
+                    :model_id (:target_id row)
+                    :link_id (:id row)})))
   (include-by-default? [this] false)
   (render [this content] ""))
 
@@ -132,27 +138,33 @@
           (reduce #(assoc %1 (keyword (%2 :name)) (invoke-model %2)) {}
                   (db/query "select * from model")))))
 
-(defn create-model-table [model]
+(defn create-model-table [name]
   (apply db/create-table
-         (cons (keyword (model :name))
-               (model-table-additions model))))
+         (cons (keyword name)
+               base-fields)))
 
-(defn create-field [spec]
+(defn create-base-field [spec]
   (db/insert :field spec)
   (let [field-row (first (db/query "select * from field where name = '%1' and model_id = %2"
                                    (spec :name) (spec :model_id)))
         field (make-field field-row)]
-    (additional-processing field)
+    field))
+
+(defn create-field [spec]
+  (let [field (create-base-field spec)
+        model (db/choose :model (spec :model_id))]
+    (doall (map #(db/add-column (model :name) (name (first %)) (rest %)) (table-additions field)))
     field))
 
 (defn create-model [spec]
   (db/insert :model (dissoc spec :fields))
-  (let [model (model-by-name (spec :name))
-        fields (map #(create-field (assoc % :model_id (model :id)))
-                    (concat (spec :fields) base-rows))
+  (create-model-table (:name spec))
+  (let [model (model-by-name (:name spec))
+        fields (concat (map #(create-field (assoc % :model_id (model :id))) (spec :fields))
+                       (map #(create-base-field (assoc % :model_id (model :id))) base-rows))
         field-map (seq-to-map #(keyword (:name (:row %))) fields)
         full-model (assoc model :fields field-map)]
-    (create-model-table full-model)
+    (map additional-processing fields)
     (dosync (alter models assoc (keyword (spec :name)) full-model))
     full-model))
 
