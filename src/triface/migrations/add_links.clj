@@ -1,10 +1,8 @@
 (in-ns 'triface.migration)
 (use 'triface.model)
-(use 'triface.debug)
 
 (defn build-links []
   (invoke-models)
-  (debug ((models :field) :id))
 
   (add-fields (models :site) [{:name "domains"
                                :type "collection"

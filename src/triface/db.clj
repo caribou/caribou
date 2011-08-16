@@ -9,12 +9,12 @@
    :subname "//localhost/triface"
    :user "postgres"})
 
-(defn sanitize [s]
+(defn zap [s]
   (.replaceAll (re-matcher #"[\\\";#%]" (.replaceAll (str s) "'" "''")) ""))
 
 (defn clause [pred args]
   (letfn [(rep [s i] (.replaceAll s (str "%" (inc i))
-                                  (let [item (sanitize (nth args i))]
+                                  (let [item (nth args i)]
                                     (cond
                                      (keyword? item) (name item)
                                      :else
@@ -37,10 +37,22 @@
   (sql/with-connection db
     (sql/insert-record table values)))
 
+(defn update [table values & where]
+  (let [v (str-join ", " (map #(str (name %) " = '" (values %) "'") (keys values)))
+        q (clause "update %1 set %2 where " [(name table) v])
+        w (clause (first where) (rest where))
+        t (str q w)]
+    (sql/with-connection db
+      (sql/do-commands (log t)))))
+
 (defn delete [table & where]
   (log (clause "delete from %1 values %2" [(name table) (apply str where)]))
   (sql/with-connection db
     (sql/delete-rows table [(if (not (empty? where)) (clause (first where) (rest where)))])))
+
+(defn fetch [table & where]
+  (apply query (cons (str "select * from %" (count where) " where " (first where))
+                     (concat (rest where) [(name table)]))))
 
 (defn choose [table id]
   (first (query "select * from %1 where id = %2" (name table) id)))

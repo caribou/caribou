@@ -47,6 +47,8 @@
         yyyz (db/insert :yellow {:gogon "igigi" :wibib false})
         yy (db/insert :yellow {:gogon "lalal" :wibib true})
         zzzap (db/insert :zap {:ibibib "kkkkkkk"})]
+    (db/update :yellow {:gogon "binbin"} "id = %1" (yyy :id))
+    (is (= ((db/choose :yellow (yyy :id)) :gogon) "binbin"))
     (delete-model :yellow)
     (delete-model :zap)))
 

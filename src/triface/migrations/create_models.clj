@@ -181,9 +181,18 @@
       :type "timestamp"
       :model_id model-id})))
 
+(defn forge-link []
+  (let [model (first (db/fetch :model "name = '%1'" "model"))
+        field (first (db/fetch :model "name = '%1'" "field"))
+        collection (first (db/fetch :field "name = '%1' and model_id = %2" "fields" (model :id)))
+        belonging (first (db/fetch :field "name = '%1' and model_id = %2" "model" (field :id)))]
+    (db/update :field {:link_id (collection :id)} "id = %1" (belonging :id))
+    (db/update :field {:link_id (belonging :id)} "id = %1" (collection :id))))
+
 (def migrate (fn []
   (create-model-model)
   (create-model-fields)
   (create-field-model)
-  (create-field-fields)))
+  (create-field-fields)
+  (forge-link)))
 
