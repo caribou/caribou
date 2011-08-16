@@ -27,6 +27,7 @@
    :field
    [:id "SERIAL" "PRIMARY KEY"]
    [:name "varchar(55)" "NOT NULL"]
+   [:slug "varchar(55)" "NOT NULL"]
    [:type "varchar(256)" "NOT NULL"]
    [:model_id :integer "NOT NULL"]
    [:model_position :integer "DEFAULT 0"]

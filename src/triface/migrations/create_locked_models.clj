@@ -10,8 +10,7 @@
                     {:name "action" :type "string"}
                     {:name "parent_id" :type "integer"}
                     {:name "model_id" :type "integer"}
-                    {:name "site_id" :type "integer"}
-                    {:name "name" :type "string"}]})
+                    {:name "site_id" :type "integer"}]})
 
 (def view {:name "view"
            :description "a composition of content facets"

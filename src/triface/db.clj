@@ -52,7 +52,11 @@
 
 (defn drop-table [table]
   (sql/with-connection db
-    (sql/drop-table table)))
+    (sql/drop-table (name table))))
+
+(defn drop-schema []
+  (sql/with-connection db
+    (sql/do-commands "drop schema public cascade")))
 
 (defn add-column [table column opts]
   (let [type (str-join " " (map name opts))]

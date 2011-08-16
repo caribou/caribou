@@ -121,8 +121,8 @@
 (defn model-render [model content]
   (reduce #(assoc %1 (keyword (:name (:row %2))) (render %2 content)) content (vals (model :fields))))
 
-(defn model-by-name [name]
-  (first (db/query "select * from model where name = '%1'" name)))
+(defn model-by-name [table]
+  (first (db/query "select * from model where name = '%1'" (name table))))
 
 (def models (ref {}))
 
@@ -144,7 +144,7 @@
                base-fields)))
 
 (defn create-base-field [spec]
-  (db/insert :field spec)
+  (db/insert :field (assoc spec :slug (or (spec :slug) (spec :name))))
   (let [field-row (first (db/query "select * from field where name = '%1' and model_id = %2"
                                    (spec :name) (spec :model_id)))
         field (make-field field-row)]
@@ -157,7 +157,7 @@
     field))
 
 (defn create-model [spec]
-  (db/insert :model (dissoc spec :fields))
+  (db/insert :model (assoc (dissoc spec :fields) :slug (or (spec :slug) (spec :name))))
   (create-model-table (:name spec))
   (let [model (model-by-name (:name spec))
         fields (concat (map #(create-field (assoc % :model_id (model :id))) (spec :fields))
@@ -171,8 +171,8 @@
 (defn update-model [spec]
   '())
 
-(defn delete-model [name]
-  (let [model (model-by-name name)]
+(defn delete-model [table]
+  (let [model (model-by-name table)]
     (db/delete :field "model_id = %1" (model :id))
     (db/delete :model "id = %1" (model :id))
     (db/drop-table (model :name))
