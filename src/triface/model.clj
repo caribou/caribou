@@ -54,8 +54,9 @@
    (let [model (db/choose :model (row :model_id))]
      (create-field {:name (:name model)
                     :type "belonging"
-                    :model_id (:target_id row)
-                    :link_id (:id row)})))
+                    :model_id (row :target_id)
+                    :target_id (row :model_id)
+                    :link_id (row :id)})))
   (include-by-default? [this] false)
   (render [this content] ""))
 
@@ -119,7 +120,7 @@
     (concat base-fields (field-table-additions (map #(% (:fields model)) added)))))
 
 (defn model-render [model content]
-  (reduce #(assoc %1 (keyword (:name (:row %2))) (render %2 content)) content (vals (model :fields))))
+  (reduce #(assoc %1 (keyword (-> %2 :row :name)) (render %2 content)) content (vals (model :fields))))
 
 (defn model-by-name [table]
   (first (db/query "select * from model where name = '%1'" (name table))))
@@ -128,7 +129,7 @@
 
 (defn invoke-model [model]
   (let [fields (db/query "select * from field where model_id = %1" (model :id))
-        field-map (seq-to-map #(keyword (:name (:row %))) (map make-field fields))]
+        field-map (seq-to-map #(keyword (-> % :row :name)) (map make-field fields))]
     (assoc model :fields field-map)))
 
 (defn invoke-models []
@@ -156,16 +157,21 @@
     (doall (map #(db/add-column (model :name) (name (first %)) (rest %)) (table-additions field)))
     field))
 
-(defn create-model [spec]
-  (db/insert :model (assoc (dissoc spec :fields) :slug (or (spec :slug) (spec :name))))
-  (create-model-table (:name spec))
-  (let [model (model-by-name (:name spec))
-        fields (concat (map #(create-field (assoc % :model_id (model :id))) (spec :fields))
-                       (map #(create-base-field (assoc % :model_id (model :id))) base-rows))
-        field-map (seq-to-map #(keyword (:name (:row %))) fields)
-        full-model (assoc model :fields field-map)]
+(defn add-fields [model specs]
+  (debug specs)
+  (let [fields (map #(create-field (assoc % :model_id (model :id))) specs)]
     ;; TODO: ensure linked models are refreshed as well
     (doall (map additional-processing fields))
+    fields))
+
+(defn create-model [spec]
+  (db/insert :model (assoc (dissoc spec :fields) :slug (or (spec :slug) (spec :name))))
+  (create-model-table (spec :name))
+  (let [model (model-by-name (spec :name))
+        fields (concat (add-fields model (spec :fields))
+                       (map #(create-base-field (assoc % :model_id (model :id))) base-rows))
+        field-map (seq-to-map #(keyword (-> % :row :name)) fields)
+        full-model (assoc model :fields field-map)]
     (dosync (alter models assoc (keyword (spec :name)) full-model))
     full-model))
 

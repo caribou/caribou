@@ -9,7 +9,7 @@
      ["create_base_tables"])
 
 (def migration-list
-     (ref ["create_models" "create_locked_models"]))
+     (ref ["create_models" "create_locked_models" "add_links"]))
 
 (defn push-migration [name]
   (dosync (alter migration-list #(cons name %))))

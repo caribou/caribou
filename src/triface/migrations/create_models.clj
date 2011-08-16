@@ -1,4 +1,5 @@
 (in-ns 'triface.migration)
+(use 'triface.model)
 
 (defn create-model-model []
   (db/insert
@@ -7,6 +8,15 @@
     :slug "model"
     :description "base model for models"
     :position 1
+    :locked true}))
+
+(defn create-field-model []
+  (db/insert
+   :model
+   {:name "field"
+    :slug "field"
+    :description "a model that specifies what fields a model has"
+    :position 2
     :locked true}))
 
 (defn create-model-fields []
@@ -49,6 +59,12 @@
       :model_id model-id})
     (db/insert
      :field
+     {:name "fields"
+      :slug "fields"
+      :type "collection"
+      :model_id model-id})
+    (db/insert
+     :field
      {:name "locked"
       :slug "locked"
       :type "boolean"
@@ -78,27 +94,12 @@
       :type "timestamp"
       :model_id model-id})))
 
-(defn create-field-model []
-  (db/insert
-   :model
-   {:name "field"
-    :slug "field"
-    :description "a model that specifies what fields a model has"
-    :position 2
-    :locked true}))
-
 (defn create-field-fields []
   (let [model-id ((first (db/query "select id from model where name = 'field'")) :id)]
     (db/insert
      :field
      {:name "id"
       :slug "id"
-      :type "integer"
-      :model_id model-id})
-    (db/insert
-     :field
-     {:name "model_id"
-      :slug "model_id"
       :type "integer"
       :model_id model-id})
     (db/insert
@@ -136,6 +137,12 @@
      {:name "position"
       :slug "position"
       :type "integer"
+      :model_id model-id})
+    (db/insert
+     :field
+     {:name "model"
+      :slug "model"
+      :type "belonging"
       :model_id model-id})
     (db/insert
      :field
