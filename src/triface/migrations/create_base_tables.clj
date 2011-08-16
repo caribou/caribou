@@ -12,12 +12,13 @@
    :model
    [:id "SERIAL" "PRIMARY KEY"]
    [:name "varchar(55)" "NOT NULL" "UNIQUE"]
+   [:slug "varchar(55)" "NOT NULL" "UNIQUE"]
    [:description :text "DEFAULT ''"]
    [:position :integer "DEFAULT 0"]
    [:nested :boolean "DEFAULT false"]
    [:locked :boolean "DEFAULT false"]
    [:abstract :boolean "DEFAULT false"]
-   [:ancestor_id :integer "DEFAULT 0"]
+   [:ancestor_id :integer "DEFAULT NULL"]
    [:created_at "timestamp with time zone" "NOT NULL" "DEFAULT current_timestamp"]
    [:updated_at "timestamp with time zone" "NOT NULL" "DEFAULT current_timestamp"]))
 
@@ -25,10 +26,13 @@
   (db/create-table
    :field
    [:id "SERIAL" "PRIMARY KEY"]
-   [:model_id :integer "DEFAULT 0"]
-   [:link_id :integer "DEFAULT 0"]
    [:name "varchar(55)" "NOT NULL"]
    [:type "varchar(256)" "NOT NULL"]
+   [:model_id :integer "NOT NULL"]
+   [:model_position :integer "DEFAULT 0"]
+   [:link_id :integer "DEFAULT NULL"]
+   [:target_id :integer "DEFAULT NULL"]
+   [:target_type "varchar(55)" "DEFAULT NULL"]
    [:description :text "DEFAULT ''"]
    [:position :integer "DEFAULT 0"]
    [:required :boolean "DEFAULT false"]

@@ -58,8 +58,5 @@
 
 (defn -main []
   (let [port (Integer/parseInt (or (System/getenv "PORT") "33333"))]
-    (dosync (alter model/models
-                   merge
-                   (reduce #(assoc %1 (keyword (%2 :name)) (model/fetch-fields %2)) {}
-                   (db/query "select * from model"))))
+    (model/invoke-models)
     (start port)))

@@ -1,7 +1,8 @@
 (ns triface.test.core
   (:use [triface.core])
   (:use [clojure.test])
-  (:require [triface.db :as db]))
+  (:require [triface.db :as db])
+  (:require [triface.model :as model]))
 
 (deftest content-list-test
   (binding [db/query (fn [query & args] (array-map :id 1 :name "model"))]
@@ -17,7 +18,8 @@
 
 ;; TODO: test timestamp fields
 (deftest render-test
-  (let [model (render "model" (array-map :id 1 :name "foo" :description "bar" :position 1 :nested false :locked true :abstract false :ancestor_id 0))]
+  (model/invoke-models)
+  (let [model (render "model" {:id 1 :name "foo" :description "bar" :position 1 :nested false :locked true :abstract false :ancestor_id 0})]
     (is (not (model nil)))
     (is (= (model :name) "foo"))
     (is (= (model :description) "bar"))
@@ -27,4 +29,5 @@
     (is (= (model :ancestor_id) 0))))
 
 (deftest render-field-test
-  (is (="foo" (render-field "model" (array-map :id 1 :name "foo") "name"))))
+  (model/invoke-models)
+  (is (= "yayay" (render-field "model" {:description "yayay"} "description"))))

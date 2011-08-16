@@ -3,7 +3,13 @@
   (:use [triface.model])
   (:use [clojure.test]))
 
+(deftest invoke-model-test
+  (let [model (db/query "select * from model where id = 1")
+        invoked (invoke-model (first model))]
+    (is (= "name" (:name (:row (:name (invoked :fields))))))))
+
 (deftest model-lifecycle-test
+  (invoke-models)
   (let [model (create-model {:name "yellow"
                              :description "yellowness yellow yellow"
                              :position 3
