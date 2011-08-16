@@ -7,10 +7,7 @@
     :slug "model"
     :description "base model for models"
     :position 1
-    :nested false
-    :locked true
-    :abstract false
-    :ancestor_id 0}))
+    :locked true}))
 
 (defn create-model-fields []
   (let [model-id ((first (db/query "select id from model where name = 'model'")) :id)]
@@ -88,10 +85,7 @@
     :slug "field"
     :description "a model that specifies what fields a model has"
     :position 2
-    :nested false
-    :locked true
-    :abstract false
-    :ancestor_id 0}))
+    :locked true}))
 
 (defn create-field-fields []
   (let [model-id ((first (db/query "select id from model where name = 'field'")) :id)]

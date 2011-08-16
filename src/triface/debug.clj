@@ -3,6 +3,9 @@
 (defmacro debug [x]
   `(let [x# ~x] (println "debug: " '~x " -> " x#) x#))
 
+(defmacro log [x]
+  `(let [x# ~x] (println "log: " x#) x#))
+
 (defmacro local-bindings
   "Produces a map of the names of local bindings to their values."
   []

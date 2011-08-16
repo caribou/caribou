@@ -49,7 +49,7 @@
 
 (def site {:name "site"
            :description "maps to a particular set of pages"
-           :position 4
+           :position 8
            :locked true
            :fields [{:name "name" :type "string"}
                     {:name "slug" :type "string"}
@@ -57,7 +57,7 @@
 
 (def domain {:name "domain"
              :description "each site may have several domain names that direct to its page set"
-             :position 4
+             :position 9
              :locked true
              :fields [{:name "name" :type "string"}
                       {:name "site_id" :type "integer"}

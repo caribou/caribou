@@ -3,5 +3,5 @@
   (require [triface.migration :as mm]))
 
 (defn bootstrap []
-  (db/drop-schema)
+  (db/recreate-database)
   (mm/run-migrations))

@@ -164,7 +164,8 @@
                        (map #(create-base-field (assoc % :model_id (model :id))) base-rows))
         field-map (seq-to-map #(keyword (:name (:row %))) fields)
         full-model (assoc model :fields field-map)]
-    (map additional-processing fields)
+    ;; TODO: ensure linked models are refreshed as well
+    (doall (map additional-processing fields))
     (dosync (alter models assoc (keyword (spec :name)) full-model))
     full-model))
 
