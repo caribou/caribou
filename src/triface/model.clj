@@ -113,12 +113,12 @@
     (concat base-fields (field-table-additions (map #(% (:fields model)) added)))))
 
 (defn model-render [model content]
-  (reduce #(assoc %1 %2 (render %2 content)) content (vals (model :fields))))
-
-(def models (ref {}))
+  (reduce #(assoc %1 (keyword (:name (:row %2))) (render %2 content)) content (vals (model :fields))))
 
 (defn model-by-name [name]
   (first (db/query "select * from model where name = '%1'" name)))
+
+(def models (ref {}))
 
 (defn invoke-model [model]
   (let [fields (db/query "select * from field where model_id = %1" (model :id))

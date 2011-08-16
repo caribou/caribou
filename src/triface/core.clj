@@ -1,5 +1,6 @@
 (ns triface.core
   (:use compojure.core)
+  (:use triface.debug)
   (:require [triface.db :as db]
             [triface.model :as model]
             [compojure.route :as route]
@@ -18,7 +19,8 @@
   ((content-item slug id) field))
 
 (defn render [slug content]
-  (model/model-render (model/models (keyword slug)) content))
+  (let [model (model/models (keyword slug))]
+    (model/model-render model content)))
 
 (defn render-field [slug content field]
   (model/render (((model/models (keyword slug)) :fields) (keyword field)) content))
