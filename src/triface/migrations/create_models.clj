@@ -186,8 +186,8 @@
         field (first (db/fetch :model "name = '%1'" "field"))
         collection (first (db/fetch :field "name = '%1' and model_id = %2" "fields" (model :id)))
         belonging (first (db/fetch :field "name = '%1' and model_id = %2" "model" (field :id)))]
-    (db/update :field {:link_id (collection :id)} "id = %1" (belonging :id))
-    (db/update :field {:link_id (belonging :id)} "id = %1" (collection :id))))
+    (db/update :field {:link_id (collection :id) :target_id (model :id)} "id = %1" (belonging :id))
+    (db/update :field {:link_id (belonging :id) :target_id (field :id)} "id = %1" (collection :id))))
 
 (def migrate (fn []
   (create-model-model)
