@@ -21,14 +21,22 @@
   (set/difference @migration-list (migration-names)))
 
 (defn run-migration [name]
-  (load (str "triface/migrations/" name))
-  (migrate)
-  (db/insert :migration {:name name}))
+  (try
+    (load (str "triface/migrations/" name))
+    (migrate)
+    (db/insert :migration {:name name})
+  (catch Exception e 
+    (println "Caught exception attempting to load migration '%1'" name))
+  (finally 
+    (println "Done."))))
 
 (defn run-migrations []
+  (try
   (if (not (db/table? "migration"))
     (doall (map run-migration premigration-list)))
   (doall (map #(if (not (some #{%} (migration-names))) (run-migration %))
-       @migration-list)))
+       @migration-list))
+  (catch Exception e
+    (println "Caught an exception attempting to run migrations: " (.getMessage e)))))
 
 
