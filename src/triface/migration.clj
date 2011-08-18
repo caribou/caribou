@@ -30,8 +30,9 @@
     (if (not (db/table? "migration"))
       (doall (map run-migration premigration-list)))
     (doall (map #(if (not (some #{%} (migration-names))) (run-migration %))
-       @migration-list))
-  (catch Exception e
-    (println "Caught an exception attempting to run migrations: " (.getMessage e)))))
+                @migration-list))
+    (catch Exception e
+      (println "Caught an exception attempting to run migrations: " (.getMessage e) (.printStackTrace e)))))
+
 
 
