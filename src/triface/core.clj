@@ -8,6 +8,9 @@
             [compojure.handler :as handler]
             [clojure.contrib.json :as json]))
 
+(def error
+  {:message "Unable to process request"
+   :slug nil})
 
 (defn content-list [slug]
   (db/query "select * from %1" slug))
@@ -28,19 +31,39 @@
 ;; actions ------------------------------------------------
 
 (defn home []
-  (json/json-str {:message "welcome to interface"}))
+  (try
+    (json/json-str {:message "welcome to interface"})
+  (catch Exception e
+    (log (str "Error rendering [/]: " e))
+    (json/json-str error))))
 
 (defn list-all [slug]
-  (json/json-str (map #(render slug %) (content-list slug))))
+  (try
+    (json/json-str (map #(render slug %) (content-list slug)))
+  (catch Exception e
+    (log (str "Error rendering [/" slug "]: " e))
+    (json/json-str (assoc error :slug slug)))))
 
 (defn model-spec [slug]
-  (json/json-str (render "model" (first (db/query "select * from model where name = '%1'" slug)))))
+  (try
+    (json/json-str (render "model" (first (db/query "select * from model where name = '%1'" slug))))
+  (catch Exception e
+    (log (str "Error rendering [/" slug "/spec]: " e))
+    (json/json-str (assoc error :slug slug)))))
 
 (defn item-detail [slug id]
-  (json/json-str (render slug (content-item slug id))))
+  (try
+    (json/json-str (render slug (content-item slug id)))
+  (catch Exception e
+    (log (str "Error rendering [/" slug "/" id "]: " e))
+    (json/json-str (conj (assoc error :slug slug) {:id id})))))
 
 (defn field-detail [slug id field]
-  (json/json-str (render-field slug (content-item slug id) field)))
+  (try
+    (json/json-str (render-field slug (content-item slug id) field))
+  (catch Exception e
+    (log (str "Error rendering [/" slug "/" id "/" field "]: " e))
+    (json/json-str (conj (assoc error :slug slug) {:id id :field field})))))
 
 ;; routes --------------------------------------------------
 
