@@ -32,13 +32,16 @@
       [(log (clause q args))]
       (doall res))))
 
+(defn value-map [values]
+  (str-join ", " (map #(str (name %) " = '" (values %) "'") (keys values))))
+
 (defn insert [table values]
-  (log (clause "insert into %1 values %2" [(name table) values]))
+  (log (clause "insert into %1 values %2" [(name table) (value-map values)]))
   (sql/with-connection db
     (sql/insert-record table values)))
 
 (defn update [table values & where]
-  (let [v (str-join ", " (map #(str (name %) " = '" (values %) "'") (keys values)))
+  (let [v (value-map values)
         q (clause "update %1 set %2 where " [(name table) v])
         w (clause (first where) (rest where))
         t (str q w)]
