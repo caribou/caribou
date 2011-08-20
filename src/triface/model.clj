@@ -52,16 +52,16 @@
   (table-additions [this] [])
   (additional-processing [this]
     (let [model (db/choose :model (row :model_id))
-          belonging (create-field {:name (:name model)
-                    :type "belonging"
+          part (create-field {:name (:name model)
+                    :type "part"
                     :model_id (row :target_id)
                     :target_id (row :model_id)
                     :link_id (row :id)})]
-      (db/update :field {:link_id (-> belonging :row :id)} "id = %1" (row :id))))
+      (db/update :field {:link_id (-> part :row :id)} "id = %1" (row :id))))
   (include-by-default? [this] false)
   (render [this content] ""))
 
-(defrecord BelongingField [row]
+(defrecord PartField [row]
   Field
   (table-additions [this] [[(keyword (str (row :name) "_id")) :integer "DEFAULT NULL"]
                            [(keyword (str (row :name) "_position")) :integer "DEFAULT 0"]])
@@ -83,7 +83,7 @@
       :boolean (fn [row] (BooleanField. row))
       :timestamp (fn [row] (TimestampField. row))
       :collection (fn [row] (CollectionField. row))
-      :belonging (fn [row] (BelongingField. row))
+      :part (fn [row] (PartField. row))
       :link (fn [row] (LinkField. row))
       })
 

@@ -70,6 +70,10 @@
   (sql/with-connection db
     (sql/drop-table (name table))))
 
+(defn rebuild-table []
+  (sql/with-connection (assoc db :subname "//localhost/template1")
+    (sql/do-commands "drop database triface" "create database triface")))
+
 (defn add-column [table column opts]
   (let [type (str-join " " (map name opts))]
     (sql/with-connection db
