@@ -33,7 +33,7 @@
       (doall res))))
 
 (defn value-map [values]
-  (str-join ", " (map #(str (name %) " = '" (values %) "'") (keys values))))
+  (str-join ", " (map #(str (name %) " = '" (zap (values %)) "'") (keys values))))
 
 (defn insert [table values]
   (log (clause "insert into %1 values %2" [(name table) (value-map values)]))
@@ -42,7 +42,7 @@
 
 (defn update [table values & where]
   (let [v (value-map values)
-        q (clause "update %1 set %2 where " [(name table) v])
+        q (clause "update %1 set %2 where " [(zap (name table)) v])
         w (clause (first where) (rest where))
         t (str q w)]
     (sql/with-connection db
@@ -58,10 +58,10 @@
                      (concat (rest where) [(name table)]))))
 
 (defn choose [table id]
-  (first (query "select * from %1 where id = %2" (name table) id)))
+  (first (query "select * from %1 where id = %2" (zap (name table)) (zap (str id)))))
 
 (defn table? [table]
-  (< 0 (count (query "select true from pg_class where relname='%1'" (name table)))))
+  (< 0 (count (query "select true from pg_class where relname='%1'" (zap (name table))))))
 
 (defn create-table [table & fields]
   (log (clause "create table %1 %2" [(name table) fields]))
@@ -81,4 +81,4 @@
   (let [type (str-join " " (map name opts))]
     (sql/with-connection db
       (sql/do-commands
-       (log (clause "alter table %1 add column %2 %3" (map name [table column type])))))))
+       (log (clause "alter table %1 add column %2 %3" (map #(zap (name %)) [table column type])))))))
