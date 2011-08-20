@@ -1,5 +1,6 @@
 (ns triface.core
   (:use compojure.core)
+  (:use clojure.contrib.str-utils)
   (:use triface.debug)
   (:require [triface.db :as db]
             [triface.model :as model]
@@ -30,40 +31,37 @@
 
 ;; actions ------------------------------------------------
 
-(defn home []
-  (try
-    (json/json-str {:message "welcome to interface"})
-  (catch Exception e
-    (log (str "Error rendering [/]: " e))
-    (json/json-str error))))
+(defn render-exception [e]
+  (let [cause (.getCause e)]
+    (if cause
+      (let [next (.getNextException cause)]
+        (str next (.printStackTrace next)))
+      (str e))))
 
-(defn list-all [slug]
-  (try
-    (json/json-str (map #(render slug %) (content-list slug)))
-  (catch Exception e
-    (log (str "Error rendering [/" slug "]: " e))
-    (json/json-str (assoc error :slug slug)))))
+(defmacro action [name path-args expr]
+  `(defn ~name ~path-args
+     (try
+       (json/json-str ~expr)
+       (catch Exception e#
+         (log (str "Error rendering /" ~(str-join "/" path-args) ": "
+                   (render-exception e#)))
+         (json/json-str
+          ~(reduce #(assoc %1 (keyword (str %2)) (str %2)) error path-args))))))
 
-(defn model-spec [slug]
-  (try
-    (json/json-str (render "model" (first (db/query "select * from model where name = '%1'" slug))))
-  (catch Exception e
-    (log (str "Error rendering [/" slug "/spec]: " e))
-    (json/json-str (assoc error :slug slug)))))
+(action home []
+  {:message "welcome to interface"})
 
-(defn item-detail [slug id]
-  (try
-    (json/json-str (render slug (content-item slug id)))
-  (catch Exception e
-    (log (str "Error rendering [/" slug "/" id "]: " e))
-    (json/json-str (conj (assoc error :slug slug) {:id id})))))
+(action list-all [slug]
+  (map #(render slug %) (content-list slug)))
 
-(defn field-detail [slug id field]
-  (try
-    (json/json-str (render-field slug (content-item slug id) field))
-  (catch Exception e
-    (log (str "Error rendering [/" slug "/" id "/" field "]: " e))
-    (json/json-str (conj (assoc error :slug slug) {:id id :field field})))))
+(action model-spec [slug]
+  (render "model" (first (db/query "select * from model where name = '%1'" slug))))
+
+(action item-detail [slug id]
+  (render slug (content-item slug id)))
+
+(action field-detail [slug id field]
+  (render-field slug (content-item slug id) field))
 
 ;; routes --------------------------------------------------
 
