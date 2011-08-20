@@ -46,7 +46,7 @@
       (sql/do-commands (log t)))))
 
 (defn delete [table & where]
-  (log (clause "delete from %1 values %2" [(name table) (apply str where)]))
+  (log (clause "delete from %1 values %2" [(name table) (clause (first where) (rest where))]))
   (sql/with-connection db
     (sql/delete-rows table [(if (not (empty? where)) (clause (first where) (rest where)))])))
 
