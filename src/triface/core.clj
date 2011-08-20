@@ -43,10 +43,10 @@
      (try
        (json/json-str ~expr)
        (catch Exception e#
-         (log (str "Error rendering /" ~(str-join "/" path-args) ": "
+         (log (str "error rendering /" ~(str-join "/" path-args) ": "
                    (render-exception e#)))
          (json/json-str
-          ~(reduce #(assoc %1 (keyword (str %2)) (str %2)) error path-args))))))
+          ~(reduce #(assoc %1 (keyword (str %2)) %2) error path-args))))))
 
 (action home []
   {:message "welcome to interface"})
