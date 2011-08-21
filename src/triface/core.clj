@@ -9,6 +9,8 @@
             [compojure.handler :as handler]
             [clojure.contrib.json :as json]))
 
+(import java.sql.SQLException)
+
 (def error
   {:message "Unable to process request"
    :slug nil})
@@ -34,16 +36,18 @@
 (defn render-exception [e]
   (let [cause (.getCause e)]
     (if cause
-      (let [next (.getNextException cause)]
-        (str next (.printStackTrace next)))
-      (str e))))
+      (if (isa? cause SQLException)
+        (let [next (.getNextException cause)]
+          (str next (.printStackTrace next)))
+        (str cause (.printStackTrace cause)))
+      (str e (.printStackTrace e)))))
 
 (defmacro action [name path-args expr]
   `(defn ~name ~path-args
      (try
        (json/json-str ~expr)
        (catch Exception e#
-         (log (str "error rendering /" ~(str-join "/" path-args) ": "
+         (log (str "error rendering /" (str-join "/" ~path-args) ": "
                    (render-exception e#)))
          (json/json-str
           ~(reduce #(assoc %1 (keyword %2) %2) error path-args))))))

@@ -7,6 +7,7 @@
   (table-additions [this] "the set of additions to this db table based on the given name")
   (additional-processing [this] "further processing on creation of field")
   (include-by-default? [this] "whether or not to explicitly include this field in rendered output")
+  (from [this content] "retrieves the value for this field from this content item")
   (render [this content] "renders out a single field from this content item"))
 
 (defrecord IntegerField [row]
@@ -14,38 +15,46 @@
   (table-additions [this] [[(keyword (row :name)) :integer "DEFAULT 0"]])
   (additional-processing [this] nil)
   (include-by-default? [this] true)
-  (render [this content] (content (keyword (row :name)))))
+  (from [this content] (content (keyword (row :name))))
+  (render [this content] (from this content)))
   
 (defrecord StringField [row]
   Field
   (table-additions [this] [[(keyword (row :name)) "varchar(256)"]])
   (additional-processing [this] nil)
   (include-by-default? [this] true)
-  (render [this content] (content (keyword (row :name)))))
+  (from [this content] (content (keyword (row :name))))
+  (render [this content] (from this content)))
 
 (defrecord TextField [row]
   Field
   (table-additions [this] [[(keyword (row :name)) :text]])
   (additional-processing [this] nil)
   (include-by-default? [this] true)
-  (render [this content] (content (keyword (row :name)))))
+  (from [this content] (content (keyword (row :name))))
+  (render [this content] (from this content)))
 
 (defrecord BooleanField [row]
   Field
   (table-additions [this] [[(keyword (row :name)) :boolean]])
   (additional-processing [this] nil)
   (include-by-default? [this] true)
-  (render [this content] (content (keyword (row :name)))))
+  (from [this content] (content (keyword (row :name))))
+  (render [this content] (from this content)))
 
 (defrecord TimestampField [row]
   Field
   (table-additions [this] [[(keyword (row :name)) "timestamp with time zone" "NOT NULL" "DEFAULT current_timestamp"]])
   (additional-processing [this] nil)
   (include-by-default? [this] true)
-  (render [this content] (str (content (keyword (row :name))))))
+  (from [this content] (content (keyword (row :name))))
+  (render [this content] (str (from this content))))
 
 ;; forward reference for collection-field
 (def create-field)
+(def model-render)
+(def invoke-model)
+(def models (ref {}))
 
 (defrecord CollectionField [row]
   Field
@@ -59,7 +68,13 @@
                     :link_id (row :id)})]
       (db/update :field {:link_id (-> part :row :id)} "id = %1" (row :id))))
   (include-by-default? [this] false)
-  (render [this content] ""))
+  (from [this content]
+    (let [link (db/choose :field (row :link_id))
+          target (db/choose :model (row :target_id))]
+      (db/fetch (target :slug) (str (link :name) "_id = %1") (content :id))))
+  (render [this content]
+    (let [target (invoke-model (db/choose :model (row :target_id)))]
+      (map #(model-render target %) (from this content)))))
 
 (defrecord PartField [row]
   Field
@@ -67,7 +82,12 @@
                            [(keyword (str (row :name) "_position")) :integer "DEFAULT 0"]])
   (additional-processing [this] nil)
   (include-by-default? [this] false)
-  (render [this content] ""))
+  (from [this content]
+    (let [target (db/choose :model (row :target_id))]
+      (db/choose (target :slug) (content (keyword (str (row :name) "_id"))))))
+  (render [this content]
+    (let [target (invoke-model (db/choose :model (row :target_id)))]
+      (model-render target (from this content)))))
 
 (defrecord LinkField [row]
   Field
@@ -125,8 +145,6 @@
 
 (defn model-by-name [table]
   (first (db/query "select * from model where name = '%1'" (name table))))
-
-(def models (ref {}))
 
 (defn invoke-model [model]
   (let [fields (db/query "select * from field where model_id = %1" (model :id))
