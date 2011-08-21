@@ -76,10 +76,13 @@
 
 (def app (handler/site main-routes))
 
+(defn init []
+  (model/invoke-models))
+
 (defn start [port]
   (ring/run-jetty (var app) {:port (or port 33333) :join? false}))
 
 (defn -main []
   (let [port (Integer/parseInt (or (System/getenv "PORT") "33333"))]
-    (model/invoke-models)
+    (init)
     (start port)))
