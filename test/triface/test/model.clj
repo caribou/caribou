@@ -1,5 +1,6 @@
 (ns triface.test.model
   (:require [triface.db :as db])
+  (:use [triface.debug])
   (:use [triface.model])
   (:use [clojure.test]))
 
@@ -31,26 +32,34 @@
 
 (deftest model-interaction-test
   (invoke-models)
-  (let [yellow (create-model {:name "yellow"
-                             :description "yellowness yellow yellow"
-                             :position 3
-                             :fields [{:name "gogon" :type "string"}
-                                      {:name "wibib" :type "boolean"}]})
+  (try
+    (let [yellow-row (create-model {:name "yellow"
+                                    :description "yellowness yellow yellow"
+                                    :position 3
+                                    :fields [{:name "gogon" :type "string"}
+                                             {:name "wibib" :type "boolean"}]})
 
-        zap (create-model {:name "zap"
-                           :description "zap zappity zapzap"
-                           :position 3
-                           :fields [{:name "ibibib" :type "string"}
-                                    {:name "yellows" :type "collection" :target_id (yellow :id)}]})
+          zap-row (create-model {:name "zap"
+                                 :description "zap zappity zapzap"
+                                 :position 3
+                                 :fields [{:name "ibibib" :type "string"}
+                                          {:name "yellows" :type "collection" :target_id (yellow-row :id)}]})
 
-        yyy (db/insert :yellow {:gogon "obobo" :wibib true})
-        yyyz (db/insert :yellow {:gogon "igigi" :wibib false})
-        yy (db/insert :yellow {:gogon "lalal" :wibib true})
-        zzzap (db/insert :zap {:ibibib "kkkkkkk"})]
-    (db/update :yellow {:gogon "binbin"} "id = %1" (yyy :id))
-    (is (= ((db/choose :yellow (yyy :id)) :gogon) "binbin"))
-    (delete-model :yellow)
-    (delete-model :zap)))
+          yellow (model-for :yellow)
+          zap (model-for :zap)
+
+          zzzap (db/insert :zap {:ibibib "kkkkkkk"})
+          yyy (db/insert :yellow {:gogon "obobo" :wibib true :zap_id (zzzap :id)})
+          yyyz (db/insert :yellow {:gogon "igigi" :wibib false :zap_id (zzzap :id)})
+          yy (db/insert :yellow {:gogon "lalal" :wibib true :zap_id (zzzap :id)})]
+      (db/update :yellow {:gogon "binbin"} "id = %1" (yyy :id))
+      (is (= ((db/choose :yellow (yyy :id)) :gogon) "binbin"))
+      (is (= "kkkkkkk" ((from zap zzzap {:include {}}) :ibibib)))
+      (is (= 3 (count ((from zap zzzap {:include {:yellows {}}}) :yellows)))))
+    (catch Exception e (throw e))
+    (finally 
+     (delete-model :yellow)
+     (delete-model :zap))))
 
 
 
