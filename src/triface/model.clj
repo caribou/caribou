@@ -192,9 +192,7 @@
                base-fields)))
 
 (defn create-base-field [spec]
-  (db/insert :field (assoc spec :slug (or (spec :slug) (spec :name))))
-  (let [field-row (first (db/query "select * from field where name = '%1' and model_id = %2"
-                                   (spec :name) (spec :model_id)))
+  (let [field-row (db/insert :field (assoc spec :slug (or (spec :slug) (spec :name))))
         field (make-field field-row)]
     field))
 
@@ -216,7 +214,7 @@
   (let [model (model-row-by-slug (spec :name))
         fields (concat
                 (add-fields model (spec :fields))
-                (map #(create-base-field (assoc % :model_id (model :id))) base-rows))
+                (doall (map #(create-base-field (assoc % :model_id (model :id))) base-rows)))
         full-model (model-for (spec :name))]
     (dosync (alter models merge {(keyword (spec :name)) full-model (full-model :id) full-model}))
     full-model))
