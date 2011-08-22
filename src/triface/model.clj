@@ -76,7 +76,7 @@
   (target-for [this] (models (-> this :row :target_id)))
 
   (field-from [this content opts]
-    (let [include ((opts :include) (keyword (row :name)))]
+    (let [include (if (opts :include) ((opts :include) (keyword (row :name))))]
       (if include
         (let [hole (dissoc (opts :include) (keyword (row :name)))
               down (assoc opts :include (merge hole include))
@@ -96,7 +96,7 @@
   (target-for [this] (models (-> this :row :target_id)))
 
   (field-from [this content opts]
-    (let [include ((opts :include) (keyword (row :name)))]
+    (let [include (if (opts :include) ((opts :include) (keyword (row :name))))]
       (if include
         (let [hole (dissoc (opts :include) (keyword (row :name)))
               down (assoc opts :include (merge hole include))

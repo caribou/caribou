@@ -7,6 +7,7 @@
             [compojure.route :as route]
             [ring.adapter.jetty :as ring]
             [compojure.handler :as handler]
+            [clojure.contrib.string :as string]
             [clojure.contrib.json :as json]))
 
 (import java.sql.SQLException)
@@ -43,7 +44,12 @@
       (str e (.printStackTrace e)))))
 
 (defn process-include [include]
-  )
+  (if (and include (not (empty? include)))
+    (let [clauses (debug (string/split #"," include))
+          paths (map #(string/split #"\." %) clauses)
+          maps (reduce #(assoc %1 (keyword (first %2)) (process-include (str-join "." (rest %2)))) {} paths)]
+      maps)
+    {}))
 
 (defmacro action [slug path-args expr]
   `(defn ~slug [~(first path-args)]
@@ -61,41 +67,26 @@
   {:message "welcome to interface"})
 
 (action list-all [params slug]
-  (map #(render slug % {:include {}}) (content-list slug)))
+  (map #(render slug % params) (content-list slug)))
 
 (action model-spec [params slug]
-  (render "model" (first (db/query "select * from model where name = '%1'" slug)) {:include {}}))
+  (render "model" (first (db/query "select * from model where name = '%1'" slug)) {:include {:fields {}}}))
 
 (action item-detail [params slug id]
-  (render slug (content-item slug id) {:include {}}))
+  (let [include (process-include (params :include))]
+    (render slug (content-item slug id) (assoc params :include include))))
 
 (action field-detail [params slug id field]
-  (render-field slug (content-item slug id) field {:include {}}))
-
-;; (action list-all [slug]
-;;   (map #(render slug %) (content-list slug)))
-
-;; (action model-spec [slug]
-;;   (render "model" (first (db/query "select * from model where name = '%1'" slug))))
-
-;; (action item-detail [slug id]
-;;   (render slug (content-item slug id)))
-
-;; (action field-detail [slug id field]
-;;   (render-field slug (content-item slug id) field))
+  (render-field slug (content-item slug id) field params))
 
 ;; routes --------------------------------------------------
 
 (defroutes main-routes
-  (GET "/" [] (home))
+  (GET "/" {params :params} (home params))
   (GET "/:slug" {params :params} (list-all params))
   (GET "/:slug/spec" {params :params} (model-spec params))
   (GET "/:slug/:id" {params :params} (item-detail params))
   (GET "/:slug/:id/:field" {params :params} (field-detail params))
-  ;; (GET "/:slug" [slug] (list-all slug))
-  ;; (GET "/:slug/spec" [slug] (model-spec slug))
-  ;; (GET "/:slug/:id" [slug id] (item-detail slug id))
-  ;; (GET "/:slug/:id/:field" [slug id field] (field-detail slug id field))
   (route/resources "/")
   (route/not-found "NONONONONONON"))
 

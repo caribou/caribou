@@ -19,7 +19,7 @@
 ;; TODO: test timestamp fields
 (deftest render-test
   (model/invoke-models)
-  (let [model (render "model" {:id 1 :name "foo" :description "bar" :position 1 :nested false :locked true :abstract false :ancestor_id 0})]
+  (let [model (render "model" {:id 1 :name "foo" :description "bar" :position 1 :nested false :locked true :abstract false :ancestor_id 0} {})]
     (is (not (model nil)))
     (is (= (model :name) "foo"))
     (is (= (model :description) "bar"))
@@ -30,4 +30,4 @@
 
 (deftest render-field-test
   (model/invoke-models)
-  (is (= "yayay" (render-field "model" {:description "yayay"} "description"))))
+  (is (= "yayay" (render-field "model" {:description "yayay"} "description" {}))))
