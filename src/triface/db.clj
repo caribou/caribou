@@ -29,14 +29,14 @@
 (defn query [q & args]
   (sql/with-connection db
     (sql/with-query-results res
-      [(log (clause q args))]
+      [(log :db (clause q args))]
       (doall res))))
 
 (defn value-map [values]
   (str-join ", " (map #(str (name %) " = '" (zap (values %)) "'") (keys values))))
 
 (defn insert [table values]
-  (log (clause "insert into %1 values %2" [(name table) (value-map values)]))
+  (log :db (clause "insert into %1 values %2" [(name table) (value-map values)]))
   (sql/with-connection db
     (sql/insert-record table values)))
 
@@ -46,10 +46,10 @@
         w (clause (first where) (rest where))
         t (str q w)]
     (sql/with-connection db
-      (sql/do-commands (log t)))))
+      (sql/do-commands (log :db t)))))
 
 (defn delete [table & where]
-  (log (clause "delete from %1 values %2" [(name table) (clause (first where) (rest where))]))
+  (log :db (clause "delete from %1 values %2" [(name table) (clause (first where) (rest where))]))
   (sql/with-connection db
     (sql/delete-rows table [(if (not (empty? where)) (clause (first where) (rest where)))])))
 
@@ -64,12 +64,12 @@
   (< 0 (count (query "select true from pg_class where relname='%1'" (zap (name table))))))
 
 (defn create-table [table & fields]
-  (log (clause "create table %1 %2" [(name table) fields]))
+  (log :db (clause "create table %1 %2" [(name table) fields]))
   (sql/with-connection db
     (apply sql/create-table (cons table fields))))
 
 (defn drop-table [table]
-  (log (clause "drop table %1" [(name table)]))
+  (log :db (clause "drop table %1" [(name table)]))
   (sql/with-connection db
     (sql/drop-table (name table))))
 
@@ -81,4 +81,4 @@
   (let [type (str-join " " (map name opts))]
     (sql/with-connection db
       (sql/do-commands
-       (log (clause "alter table %1 add column %2 %3" (map #(zap (name %)) [table column type])))))))
+       (log :db (clause "alter table %1 add column %2 %3" (map #(zap (name %)) [table column type])))))))

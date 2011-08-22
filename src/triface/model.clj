@@ -158,8 +158,8 @@
   (reduce concat [] (map table-additions fields)))
 
 (defn model-table-additions [model]
-  (let [added (remove (set base-field-names) (keys (:fields model)))]
-    (concat base-fields (field-table-additions (map #(% (:fields model)) added)))))
+  (let [added (remove (set base-field-names) (keys (model :fields)))]
+    (concat base-fields (field-table-additions (map #(% (model :fields)) added)))))
 
 (defn fields-render [fields content opts]
   (reduce #(assoc %1 (keyword (-> %2 :row :name)) (render %2 content opts)) content fields))

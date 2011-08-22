@@ -24,12 +24,12 @@
 (defn content-field [slug id field]
   ((content-item slug id) field))
 
-(defn render [slug content]
+(defn render [slug content opts]
   (let [model (model/models (keyword slug))]
-    (model/model-render model content {:include {:fields {}}})))
+    (model/model-render model content opts)))
 
-(defn render-field [slug content field]
-  (model/render (((model/models (keyword slug)) :fields) (keyword field)) content {:include {}}))
+(defn render-field [slug content field opts]
+  (model/render (((model/models (keyword slug)) :fields) (keyword field)) content opts))
 
 ;; actions ------------------------------------------------
 
@@ -42,39 +42,60 @@
         (str cause (.printStackTrace cause)))
       (str e (.printStackTrace e)))))
 
-(defmacro action [name path-args expr]
-  `(defn ~name ~path-args
-     (try
-       (json/json-str ~expr)
-       (catch Exception e#
-         (log (str "error rendering /" (str-join "/" ~path-args) ": "
-                   (render-exception e#)))
-         (json/json-str
-          ~(reduce #(assoc %1 (keyword %2) %2) error path-args))))))
+(defn process-include [include]
+  )
 
-(action home []
+(defmacro action [slug path-args expr]
+  `(defn ~slug [~(first path-args)]
+     (log :action (str ~(name slug) " - args: " ~(first path-args)))
+     (let ~(vec (apply concat (map (fn [p] [`~p `(~(first path-args) ~(keyword p))]) (rest path-args))))
+       (try
+         (json/json-str ~expr)
+         (catch Exception e#
+           (log :error (str "error rendering /" (str-join "/" ~path-args) ": "
+                     (render-exception e#)))
+           (json/json-str
+            ~(reduce #(assoc %1 (keyword %2) %2) error path-args)))))))
+
+(action home [params]
   {:message "welcome to interface"})
 
-(action list-all [slug]
-  (map #(render slug %) (content-list slug)))
+(action list-all [params slug]
+  (map #(render slug % {:include {}}) (content-list slug)))
 
-(action model-spec [slug]
-  (render "model" (first (db/query "select * from model where name = '%1'" slug))))
+(action model-spec [params slug]
+  (render "model" (first (db/query "select * from model where name = '%1'" slug)) {:include {}}))
 
-(action item-detail [slug id]
-  (render slug (content-item slug id)))
+(action item-detail [params slug id]
+  (render slug (content-item slug id) {:include {}}))
 
-(action field-detail [slug id field]
-  (render-field slug (content-item slug id) field))
+(action field-detail [params slug id field]
+  (render-field slug (content-item slug id) field {:include {}}))
+
+;; (action list-all [slug]
+;;   (map #(render slug %) (content-list slug)))
+
+;; (action model-spec [slug]
+;;   (render "model" (first (db/query "select * from model where name = '%1'" slug))))
+
+;; (action item-detail [slug id]
+;;   (render slug (content-item slug id)))
+
+;; (action field-detail [slug id field]
+;;   (render-field slug (content-item slug id) field))
 
 ;; routes --------------------------------------------------
 
 (defroutes main-routes
   (GET "/" [] (home))
-  (GET "/:slug" [slug] (list-all slug))
-  (GET "/:slug/spec" [slug] (model-spec slug))
-  (GET "/:slug/:id" [slug id] (item-detail slug id))
-  (GET "/:slug/:id/:field" [slug id field] (field-detail slug id field))
+  (GET "/:slug" {params :params} (list-all params))
+  (GET "/:slug/spec" {params :params} (model-spec params))
+  (GET "/:slug/:id" {params :params} (item-detail params))
+  (GET "/:slug/:id/:field" {params :params} (field-detail params))
+  ;; (GET "/:slug" [slug] (list-all slug))
+  ;; (GET "/:slug/spec" [slug] (model-spec slug))
+  ;; (GET "/:slug/:id" [slug id] (item-detail slug id))
+  ;; (GET "/:slug/:id/:field" [slug id field] (field-detail slug id field))
   (route/resources "/")
   (route/not-found "NONONONONONON"))
 
