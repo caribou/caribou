@@ -26,7 +26,7 @@
 
 (defn render [slug content]
   (let [model (model/models (keyword slug))]
-    (model/model-render model content {:include {:fields {}}})))
+    (model/model-render model content {:include {}})))
 
 (defn render-field [slug content field]
   (model/render (((model/models (keyword slug)) :fields) (keyword field)) content {:include {}}))

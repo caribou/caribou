@@ -10,35 +10,35 @@
   (field-from [this content opts] "retrieves the value for this field from this content item")
   (render [this content opts] "renders out a single field from this content item"))
 
-(defrecord IntegerField [row]
+(defrecord IntegerField [row env]
   Field
   (table-additions [this] [[(keyword (row :name)) :integer "DEFAULT 0"]])
   (additional-processing [this] nil)
   (field-from [this content opts] (content (keyword (row :name))))
   (render [this content opts] (field-from this content opts)))
   
-(defrecord StringField [row]
+(defrecord StringField [row env]
   Field
   (table-additions [this] [[(keyword (row :name)) "varchar(256)"]])
   (additional-processing [this] nil)
   (field-from [this content opts] (content (keyword (row :name))))
   (render [this content opts] (field-from this content opts)))
 
-(defrecord TextField [row]
+(defrecord TextField [row env]
   Field
   (table-additions [this] [[(keyword (row :name)) :text]])
   (additional-processing [this] nil)
   (field-from [this content opts] (content (keyword (row :name))))
   (render [this content opts] (field-from this content opts)))
 
-(defrecord BooleanField [row]
+(defrecord BooleanField [row env]
   Field
   (table-additions [this] [[(keyword (row :name)) :boolean]])
   (additional-processing [this] nil)
   (field-from [this content opts] (content (keyword (row :name))))
   (render [this content opts] (field-from this content opts)))
 
-(defrecord TimestampField [row]
+(defrecord TimestampField [row env]
   Field
   (table-additions [this] [[(keyword (row :name)) "timestamp with time zone" "NOT NULL" "DEFAULT current_timestamp"]])
   (additional-processing [this] nil)
@@ -54,7 +54,7 @@
 (defn from [model content opts]
   (reduce #(assoc %1 (keyword (-> %2 :row :name)) (field-from %2 %1 opts)) content (vals (model :fields))))
 
-(defrecord CollectionField [row]
+(defrecord CollectionField [row env]
   Field
   (table-additions [this] [])
 
@@ -82,7 +82,7 @@
     (let [target (invoke-model (db/choose :model (row :target_id)))]
       (map #(model-render target % opts) (field-from this content (assoc opts :target target))))))
 
-(defrecord PartField [row]
+(defrecord PartField [row env]
   Field
   (table-additions [this] [[(keyword (str (row :name) "_id")) :integer "DEFAULT NULL"]
                            [(keyword (str (row :name) "_position")) :integer "DEFAULT 0"]])
@@ -103,7 +103,7 @@
       (if field
         (model-render target field opts)))))
 
-(defrecord LinkField [row]
+(defrecord LinkField [row env]
   Field
   (table-additions [this] [])
   (additional-processing [this] nil)
@@ -111,14 +111,14 @@
   (render [this content opts] ""))
 
 (def field-constructors
-     {:integer (fn [row] (IntegerField. row))
-      :string (fn [row] (StringField. row))
-      :text (fn [row] (TextField. row))
-      :boolean (fn [row] (BooleanField. row))
-      :timestamp (fn [row] (TimestampField. row))
-      :collection (fn [row] (CollectionField. row))
-      :part (fn [row] (PartField. row))
-      :link (fn [row] (LinkField. row))
+     {:integer (fn [row] (IntegerField. row {}))
+      :string (fn [row] (StringField. row {}))
+      :text (fn [row] (TextField. row {}))
+      :boolean (fn [row] (BooleanField. row {}))
+      :timestamp (fn [row] (TimestampField. row {}))
+      :collection (fn [row] (CollectionField. row {}))
+      :part (fn [row] (PartField. row {}))
+      :link (fn [row] (LinkField. row {}))
       })
 
 (def base-fields [[:id "SERIAL" "PRIMARY KEY"]
