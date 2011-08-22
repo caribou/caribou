@@ -53,12 +53,12 @@
 
 (defmacro action [slug path-args expr]
   `(defn ~slug [~(first path-args)]
-     (log :action (str ~(name slug) " - args: " ~(first path-args)))
+     (log :action (str ~(name slug) " => " ~(first path-args)))
      (let ~(vec (apply concat (map (fn [p] [`~p `(~(first path-args) ~(keyword p))]) (rest path-args))))
        (try
          (json/json-str ~expr)
          (catch Exception e#
-           (log :error (str "error rendering /" (str-join "/" ~(rest path-args)) ": "
+           (log :error (str "error rendering /" (str-join "/" ~(vec (rest path-args))) ": "
                      (render-exception e#)))
            (json/json-str
             ~(reduce #(assoc %1 (keyword %2) %2) error path-args)))))))
