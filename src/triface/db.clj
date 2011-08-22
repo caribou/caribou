@@ -82,3 +82,8 @@
     (sql/with-connection db
       (sql/do-commands
        (log :db (clause "alter table %1 add column %2 %3" (map #(zap (name %)) [table column type])))))))
+
+(defn drop-column [table column]
+  (sql/with-connection db
+    (sql/do-commands
+     (log :db (clause "alter table %1 drop column %2" (map #(zap (name %)) [table column]))))))

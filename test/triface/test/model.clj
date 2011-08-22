@@ -58,8 +58,11 @@
       (is (= 3 (count ((from zap zzzap {:include {:yellows {}}}) :yellows)))))
     (catch Exception e (throw e))
     (finally 
-     (delete-model :yellow)
-     (delete-model :zap))))
+     
+     (if (db/table? :yellow) (delete-model :yellow))
+     (if (db/table? :zap) (delete-model :zap))
+
+     )))
 
 
 

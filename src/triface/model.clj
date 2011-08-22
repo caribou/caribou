@@ -7,6 +7,7 @@
   "a protocol for expected behavior of all model fields"
   (table-additions [this] "the set of additions to this db table based on the given name")
   (additional-processing [this] "further processing on creation of field")
+  (cleanup-field [this] "further processing on creation of field")
   (target-for [this] "retrieves the model this field points to, if applicable")
   (field-from [this content opts] "retrieves the value for this field from this content item")
   (render [this content opts] "renders out a single field from this content item"))
@@ -15,6 +16,7 @@
   Field
   (table-additions [this] [[(keyword (row :name)) :integer "DEFAULT 0"]])
   (additional-processing [this] nil)
+  (cleanup-field [this] nil)
   (target-for [this] nil)
   (field-from [this content opts] (content (keyword (row :name))))
   (render [this content opts] (field-from this content opts)))
@@ -23,6 +25,7 @@
   Field
   (table-additions [this] [[(keyword (row :name)) "varchar(256)"]])
   (additional-processing [this] nil)
+  (cleanup-field [this] nil)
   (target-for [this] nil)
   (field-from [this content opts] (content (keyword (row :name))))
   (render [this content opts] (field-from this content opts)))
@@ -31,6 +34,7 @@
   Field
   (table-additions [this] [[(keyword (row :name)) :text]])
   (additional-processing [this] nil)
+  (cleanup-field [this] nil)
   (target-for [this] nil)
   (field-from [this content opts] (content (keyword (row :name))))
   (render [this content opts] (field-from this content opts)))
@@ -39,6 +43,7 @@
   Field
   (table-additions [this] [[(keyword (row :name)) :boolean]])
   (additional-processing [this] nil)
+  (cleanup-field [this] nil)
   (target-for [this] nil)
   (field-from [this content opts] (content (keyword (row :name))))
   (render [this content opts] (field-from this content opts)))
@@ -47,12 +52,15 @@
   Field
   (table-additions [this] [[(keyword (row :name)) "timestamp with time zone" "NOT NULL" "DEFAULT current_timestamp"]])
   (additional-processing [this] nil)
+  (cleanup-field [this] nil)
   (target-for [this] nil)
   (field-from [this content opts] (content (keyword (row :name))))
   (render [this content opts] (str (field-from this content opts))))
 
 ;; forward reference for CollectionField
+(def make-field)
 (def create-field)
+(def destroy-field)
 (def model-render)
 (def invoke-model)
 (def models (ref {}))
@@ -72,6 +80,9 @@
                     :target_id (row :model_id)
                     :link_id (row :id)})]
       (db/update :field {:link_id (-> part :row :id)} "id = %1" (row :id))))
+
+  (cleanup-field [this]
+    (destroy-field (make-field (-> env :link))))
 
   (target-for [this] (models (-> this :row :target_id)))
 
@@ -93,6 +104,9 @@
                            [(keyword (str (row :name) "_position")) :integer "DEFAULT 0"]])
   (additional-processing [this] nil)
 
+  (cleanup-field [this]
+    (destroy-field (make-field (-> env :link))))
+
   (target-for [this] (models (-> this :row :target_id)))
 
   (field-from [this content opts]
@@ -112,6 +126,7 @@
   Field
   (table-additions [this] [])
   (additional-processing [this] nil)
+  (cleanup-field [this] nil)
   (target-for [this] nil)
   (field-from [this content opts])
   (render [this content opts] ""))
@@ -182,7 +197,8 @@
   (let [rows (db/query "select * from model")
         invoked (map invoke-model rows)]
     (dosync
-     (alter models merge
+     (alter models 
+            (fn [in-ref new-models] new-models)
             (merge (seq-to-map #(keyword (% :name)) invoked)
                    (seq-to-map #(% :id) invoked))))))
 
@@ -202,9 +218,16 @@
     (doall (map #(db/add-column (model :name) (name (first %)) (rest %)) (table-additions field)))
     field))
 
+(defn destroy-field [field]
+  (doall (map #(db/drop-column ((models (-> field :row :model_id)) :slug) (first %)) (table-additions field)))
+  (db/delete :field "id = %1" (-> field :row :id)))
+
+(defn remove-fields [fields]
+  (doall (map cleanup-field fields))
+  (doall (map destroy-field fields)))
+
 (defn add-fields [model specs]
   (let [fields (map #(create-field (assoc % :model_id (model :id))) specs)]
-    ;; TODO: ensure linked models are refreshed as well
     (doall (map additional-processing fields))
     fields))
 
@@ -214,20 +237,19 @@
   (let [model (model-row-by-slug (spec :name))
         fields (concat
                 (add-fields model (spec :fields))
-                (doall (map #(create-base-field (assoc % :model_id (model :id))) base-rows)))
-        full-model (model-for (spec :name))]
-    (dosync (alter models merge {(keyword (spec :name)) full-model (full-model :id) full-model}))
-    full-model))
+                (doall (map #(create-base-field (assoc % :model_id (model :id))) base-rows)))]
+    (invoke-models)
+    (models (keyword (model :slug)))))
 
 (defn update-model [spec]
   '())
 
-(defn delete-model [table]
-  (let [model (model-row-by-slug table)]
-    (db/delete :field "model_id = %1" (model :id))
+(defn delete-model [slug]
+  (let [model (model-for (keyword slug))]
+    (remove-fields (vals (model :fields)))
+    (db/drop-table (model :slug))
     (db/delete :model "id = %1" (model :id))
-    (db/drop-table (model :name))
-    (dosync (alter models dissoc (keyword (model :name))))
+    (invoke-models)
     model))
 
 (defn create-item [type spec]
