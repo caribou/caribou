@@ -58,7 +58,7 @@
        (try
          (json/json-str ~expr)
          (catch Exception e#
-           (log :error (str "error rendering /" (str-join "/" ~(vec (rest path-args))) ": "
+           (log :error (str "error rendering /" (str-join "/" [~@(rest path-args)]) ": "
                      (render-exception e#)))
            (json/json-str
             ~(reduce #(assoc %1 (keyword %2) %2) error path-args)))))))
@@ -100,7 +100,10 @@
 (defn start [port]
   (ring/run-jetty (var app) {:port (or port 33333) :join? false}))
 
-(defn -main []
+(defn go []
   (let [port (Integer/parseInt (or (System/getenv "PORT") "33333"))]
     (init)
-    (start port)))
+    (start port)))  
+
+(defn -main []
+  (go))

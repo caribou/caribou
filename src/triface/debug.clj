@@ -1,10 +1,10 @@
 (ns triface.debug)
 
 (defmacro debug [x]
-  `(let [x# ~x] (println "debug: " '~x " -> " x#) x#))
+  `(let [x# ~x] (println "debug:" '~x " -> " x#) x#))
 
 (defmacro log [j x]
-  `(let [x# ~x] (println (str ~(name j) ": ") x#) x#))
+  `(let [x# ~x] (println (str ~(name j) ":") x#) x#))
 
 (defmacro local-bindings
   "Produces a map of the names of local bindings to their values."
@@ -26,5 +26,5 @@
   "Starts a REPL with the local bindings available."
   []
   `(clojure.main/repl
-    :prompt #(print "dr => ")
+    :prompt #(print "debug => ")
     :eval (partial eval-with-locals (local-bindings))))
