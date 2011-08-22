@@ -45,7 +45,7 @@
 
 (defn process-include [include]
   (if (and include (not (empty? include)))
-    (let [clauses (debug (string/split #"," include))
+    (let [clauses (string/split #"," include)
           paths (map #(string/split #"\." %) clauses)
           maps (reduce #(assoc %1 (keyword (first %2)) (process-include (str-join "." (rest %2)))) {} paths)]
       maps)
