@@ -7,6 +7,7 @@
   "a protocol for expected behavior of all model fields"
   (table-additions [this] "the set of additions to this db table based on the given name")
   (additional-processing [this] "further processing on creation of field")
+  (target-for [this] "retrieves the model this field points to, if applicable")
   (field-from [this content opts] "retrieves the value for this field from this content item")
   (render [this content opts] "renders out a single field from this content item"))
 
@@ -14,6 +15,7 @@
   Field
   (table-additions [this] [[(keyword (row :name)) :integer "DEFAULT 0"]])
   (additional-processing [this] nil)
+  (target-for [this] nil)
   (field-from [this content opts] (content (keyword (row :name))))
   (render [this content opts] (field-from this content opts)))
   
@@ -21,6 +23,7 @@
   Field
   (table-additions [this] [[(keyword (row :name)) "varchar(256)"]])
   (additional-processing [this] nil)
+  (target-for [this] nil)
   (field-from [this content opts] (content (keyword (row :name))))
   (render [this content opts] (field-from this content opts)))
 
@@ -28,6 +31,7 @@
   Field
   (table-additions [this] [[(keyword (row :name)) :text]])
   (additional-processing [this] nil)
+  (target-for [this] nil)
   (field-from [this content opts] (content (keyword (row :name))))
   (render [this content opts] (field-from this content opts)))
 
@@ -35,6 +39,7 @@
   Field
   (table-additions [this] [[(keyword (row :name)) :boolean]])
   (additional-processing [this] nil)
+  (target-for [this] nil)
   (field-from [this content opts] (content (keyword (row :name))))
   (render [this content opts] (field-from this content opts)))
 
@@ -42,6 +47,7 @@
   Field
   (table-additions [this] [[(keyword (row :name)) "timestamp with time zone" "NOT NULL" "DEFAULT current_timestamp"]])
   (additional-processing [this] nil)
+  (target-for [this] nil)
   (field-from [this content opts] (content (keyword (row :name))))
   (render [this content opts] (str (field-from this content opts))))
 
@@ -67,20 +73,19 @@
                     :link_id (row :id)})]
       (db/update :field {:link_id (-> part :row :id)} "id = %1" (row :id))))
 
+  (target-for [this] (models (-> this :row :target_id)))
+
   (field-from [this content opts]
     (let [include ((opts :include) (keyword (row :name)))]
       (if include
-        (let [target (or (opts :target) (invoke-model (db/choose :model (row :target_id))))
-              hole (dissoc (opts :include) (keyword (row :name)))
-              down (assoc (dissoc opts :target) :include (merge hole include))
-              link (db/choose :field (row :link_id))
-              parts (db/fetch (target :slug) (str (link :name) "_id = %1") (content :id))]
-          (map #(from target % down) parts))
+        (let [hole (dissoc (opts :include) (keyword (row :name)))
+              down (assoc opts :include (merge hole include))
+              parts (db/fetch (-> (target-for this) :slug) (str (-> this :env :link :slug) "_id = %1") (content :id))]
+          (map #(from (target-for this) % down) parts))
         [])))
 
   (render [this content opts]
-    (let [target (invoke-model (db/choose :model (row :target_id)))]
-      (map #(model-render target % opts) (field-from this content (assoc opts :target target))))))
+    (map #(model-render (target-for this) % opts) (field-from this content opts))))
 
 (defrecord PartField [row env]
   Field
@@ -88,25 +93,26 @@
                            [(keyword (str (row :name) "_position")) :integer "DEFAULT 0"]])
   (additional-processing [this] nil)
 
+  (target-for [this] (models (-> this :row :target_id)))
+
   (field-from [this content opts]
     (let [include ((opts :include) (keyword (row :name)))]
       (if include
-        (let [target (or (opts :target) (invoke-model (db/choose :model (row :target_id))))
-              hole (dissoc (opts :include) (keyword (row :name)))
-              down (assoc (dissoc opts :target) :include (merge hole include))
-              collector (db/choose (target :slug) (content (keyword (str (row :name) "_id"))))]
-          (from target collector down)))))
+        (let [hole (dissoc (opts :include) (keyword (row :name)))
+              down (assoc opts :include (merge hole include))
+              collector (db/choose (-> (target-for this) :slug) (content (keyword (str (row :name) "_id"))))]
+          (from (target-for this) collector down)))))
 
   (render [this content opts]
-    (let [target (invoke-model (db/choose :model (row :target_id)))
-          field (field-from this content (assoc opts :target target))]
+    (let [field (field-from this content opts)]
       (if field
-        (model-render target field opts)))))
+        (model-render (target-for this) field opts)))))
 
 (defrecord LinkField [row env]
   Field
   (table-additions [this] [])
   (additional-processing [this] nil)
+  (target-for [this] nil)
   (field-from [this content opts])
   (render [this content opts] ""))
 
@@ -116,8 +122,12 @@
       :text (fn [row] (TextField. row {}))
       :boolean (fn [row] (BooleanField. row {}))
       :timestamp (fn [row] (TimestampField. row {}))
-      :collection (fn [row] (CollectionField. row {}))
-      :part (fn [row] (PartField. row {}))
+      :collection (fn [row]
+                    (let [link (if (row :link_id) (db/choose :field (row :link_id)))]
+                      (CollectionField. row {:link link})))
+      :part (fn [row]
+              (let [link (db/choose :field (row :link_id))]
+                (PartField. row {:link link})))
       :link (fn [row] (LinkField. row {}))
       })
 
@@ -163,16 +173,18 @@
     (assoc model :fields field-map)))
 
 (defn model-row-by-slug [table]
-  (first (db/query "select * from model where name = '%1'" (name table))))
+  (first (db/query "select * from model where slug = '%1'" (name table))))
 
 (defn model-for [slug]
   (invoke-model (model-row-by-slug slug)))
 
 (defn invoke-models []
-  (let [rows (db/query "select * from model")]
+  (let [rows (db/query "select * from model")
+        invoked (map invoke-model rows)]
     (dosync
      (alter models merge
-            (seq-to-map #(keyword (% :name)) (map invoke-model rows))))))
+            (merge (seq-to-map #(keyword (% :name)) invoked)
+                   (seq-to-map #(% :id) invoked))))))
 
 (defn create-model-table [name]
   (apply db/create-table
@@ -202,11 +214,11 @@
   (db/insert :model (assoc (dissoc spec :fields) :slug (or (spec :slug) (spec :name))))
   (create-model-table (spec :name))
   (let [model (model-row-by-slug (spec :name))
-        fields (concat (add-fields model (spec :fields))
-                       (map #(create-base-field (assoc % :model_id (model :id))) base-rows))
-        field-map (seq-to-map #(keyword (-> % :row :name)) fields)
-        full-model (assoc model :fields field-map)]
-    (dosync (alter models assoc (keyword (spec :name)) full-model))
+        fields (concat
+                (add-fields model (spec :fields))
+                (map #(create-base-field (assoc % :model_id (model :id))) base-rows))
+        full-model (model-for (spec :name))]
+    (dosync (alter models merge {(keyword (spec :name)) full-model (full-model :id) full-model}))
     full-model))
 
 (defn update-model [spec]
