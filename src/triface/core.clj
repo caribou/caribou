@@ -58,7 +58,7 @@
        (try
          (json/json-str ~expr)
          (catch Exception e#
-           (log :error (str "error rendering /" (str-join "/" ~path-args) ": "
+           (log :error (str "error rendering /" (str-join "/" ~(rest path-args)) ": "
                      (render-exception e#)))
            (json/json-str
             ~(reduce #(assoc %1 (keyword %2) %2) error path-args)))))))
@@ -67,7 +67,9 @@
   {:message "welcome to interface"})
 
 (action list-all [params slug]
-  (map #(render slug % params) (content-list slug)))
+  (let [include (process-include (params :include))
+        included (assoc params :include include)]
+    (map #(render slug % included) (content-list slug))))
 
 (action model-spec [params slug]
   (render "model" (first (db/query "select * from model where name = '%1'" slug)) {:include {:fields {}}}))

@@ -6,7 +6,7 @@
 (defprotocol Field
   "a protocol for expected behavior of all model fields"
   (table-additions [this] "the set of additions to this db table based on the given name")
-  (additional-processing [this] "further processing on creation of field")
+  (setup-field [this] "further processing on creation of field")
   (cleanup-field [this] "further processing on creation of field")
   (target-for [this] "retrieves the model this field points to, if applicable")
   (field-from [this content opts] "retrieves the value for this field from this content item")
@@ -15,7 +15,7 @@
 (defrecord IntegerField [row env]
   Field
   (table-additions [this] [[(keyword (row :name)) :integer "DEFAULT 0"]])
-  (additional-processing [this] nil)
+  (setup-field [this] nil)
   (cleanup-field [this] nil)
   (target-for [this] nil)
   (field-from [this content opts] (content (keyword (row :name))))
@@ -24,7 +24,7 @@
 (defrecord StringField [row env]
   Field
   (table-additions [this] [[(keyword (row :name)) "varchar(256)"]])
-  (additional-processing [this] nil)
+  (setup-field [this] nil)
   (cleanup-field [this] nil)
   (target-for [this] nil)
   (field-from [this content opts] (content (keyword (row :name))))
@@ -33,7 +33,7 @@
 (defrecord TextField [row env]
   Field
   (table-additions [this] [[(keyword (row :name)) :text]])
-  (additional-processing [this] nil)
+  (setup-field [this] nil)
   (cleanup-field [this] nil)
   (target-for [this] nil)
   (field-from [this content opts] (content (keyword (row :name))))
@@ -42,7 +42,7 @@
 (defrecord BooleanField [row env]
   Field
   (table-additions [this] [[(keyword (row :name)) :boolean]])
-  (additional-processing [this] nil)
+  (setup-field [this] nil)
   (cleanup-field [this] nil)
   (target-for [this] nil)
   (field-from [this content opts] (content (keyword (row :name))))
@@ -51,7 +51,7 @@
 (defrecord TimestampField [row env]
   Field
   (table-additions [this] [[(keyword (row :name)) "timestamp with time zone" "NOT NULL" "DEFAULT current_timestamp"]])
-  (additional-processing [this] nil)
+  (setup-field [this] nil)
   (cleanup-field [this] nil)
   (target-for [this] nil)
   (field-from [this content opts] (content (keyword (row :name))))
@@ -72,7 +72,7 @@
   Field
   (table-additions [this] [])
 
-  (additional-processing [this]
+  (setup-field [this]
     (let [model (db/choose :model (row :model_id))
           part (create-field {:name (:name model)
                     :type "part"
@@ -102,7 +102,7 @@
   Field
   (table-additions [this] [[(keyword (str (row :name) "_id")) :integer "DEFAULT NULL"]
                            [(keyword (str (row :name) "_position")) :integer "DEFAULT 0"]])
-  (additional-processing [this] nil)
+  (setup-field [this] nil)
 
   (cleanup-field [this]
     (destroy-field (make-field (-> env :link))))
@@ -125,7 +125,7 @@
 (defrecord LinkField [row env]
   Field
   (table-additions [this] [])
-  (additional-processing [this] nil)
+  (setup-field [this] nil)
   (cleanup-field [this] nil)
   (target-for [this] nil)
   (field-from [this content opts])
@@ -218,17 +218,9 @@
     (doall (map #(db/add-column (model :name) (name (first %)) (rest %)) (table-additions field)))
     field))
 
-(defn destroy-field [field]
-  (doall (map #(db/drop-column ((models (-> field :row :model_id)) :slug) (first %)) (table-additions field)))
-  (db/delete :field "id = %1" (-> field :row :id)))
-
-(defn remove-fields [fields]
-  (doall (map cleanup-field fields))
-  (doall (map destroy-field fields)))
-
 (defn add-fields [model specs]
   (let [fields (map #(create-field (assoc % :model_id (model :id))) specs)]
-    (doall (map additional-processing fields))
+    (doall (map setup-field fields))
     fields))
 
 (defn create-model [spec]
@@ -240,6 +232,14 @@
                 (doall (map #(create-base-field (assoc % :model_id (model :id))) base-rows)))]
     (invoke-models)
     (models (keyword (model :slug)))))
+
+(defn destroy-field [field]
+  (doall (map #(db/drop-column ((models (-> field :row :model_id)) :slug) (first %)) (table-additions field)))
+  (db/delete :field "id = %1" (-> field :row :id)))
+
+(defn remove-fields [fields]
+  (doall (map cleanup-field fields))
+  (doall (map destroy-field fields)))
 
 (defn update-model [spec]
   '())
