@@ -9,6 +9,8 @@
   :dev-dependencies [[lein-ring "0.4.5"]
                      [org.clojure/java.jdbc "0.0.3-SNAPSHOT"]
                      [postgresql/postgresql "8.4-702.jdbc4"]]
-  :ring {:handler triface.core/app}
+  :ring {:handler triface.core/app
+         :servlet-name "triface"
+         :init triface.core/init}
   :repositories {"sonatype-oss-public" "https://oss.sonatype.org/content/groups/public/"}
   )
