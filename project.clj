@@ -8,7 +8,10 @@
                  [ring/ring-jetty-adapter "0.3.10"]]
   :dev-dependencies [[lein-ring "0.4.5"]
                      [org.clojure/java.jdbc "0.0.3-SNAPSHOT"]
-                     [postgresql/postgresql "8.4-702.jdbc4"]]
+                     [postgresql/postgresql "8.4-702.jdbc4"]
+                     [swank-clojure "1.4.0-SNAPSHOT"]
+                     [clojure-source "1.2.0"]]
+;;  :jvm-opts ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n"]
   :ring {:handler triface.core/app
          :servlet-name "triface"
          :init triface.core/init}
