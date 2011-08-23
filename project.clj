@@ -11,7 +11,7 @@
                      [postgresql/postgresql "8.4-702.jdbc4"]
                      [swank-clojure "1.4.0-SNAPSHOT"]
                      [clojure-source "1.2.0"]]
-;;  :jvm-opts ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n"]
+  :jvm-opts ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n"]
   :ring {:handler triface.core/app
          :servlet-name "triface"
          :init triface.core/init}
