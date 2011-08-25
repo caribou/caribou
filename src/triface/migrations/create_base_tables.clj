@@ -40,6 +40,7 @@
    [:disjoint :boolean "DEFAULT false"]
    [:singular :boolean "DEFAULT false"]
    [:locked :boolean "DEFAULT false"]
+   [:immutable :boolean "DEFAULT false"]
    [:created_at "timestamp with time zone" "NOT NULL" "DEFAULT current_timestamp"]
    [:updated_at "timestamp with time zone" "NOT NULL" "DEFAULT current_timestamp"]))
 

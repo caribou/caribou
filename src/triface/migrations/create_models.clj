@@ -26,72 +26,87 @@
      {:name "id"
       :slug "id"
       :type "integer"
+      :locked true
+      :immutable true
       :model_id model-id})
     (db/insert
      :field
      {:name "name"
       :slug "name"
       :type "string"
+      :locked true
       :model_id model-id})
     (db/insert
      :field
      {:name "slug"
       :slug "slug"
       :type "string"
+      :locked true
       :model_id model-id})
     (db/insert
      :field
      {:name "description"
       :slug "description"
       :type "text"
+      :locked true
       :model_id model-id})
     (db/insert
      :field
      {:name "position"
       :slug "position"
       :type "integer"
+      :locked true
       :model_id model-id})
     (db/insert
      :field
      {:name "nested"
       :slug "nested"
       :type "boolean"
+      :locked true
       :model_id model-id})
     (db/insert
      :field
      {:name "fields"
       :slug "fields"
       :type "collection"
+      :locked true
       :model_id model-id})
     (db/insert
      :field
      {:name "locked"
       :slug "locked"
       :type "boolean"
+      :locked true
+      :immutable true
       :model_id model-id})
     (db/insert
      :field
      {:name "abstract"
       :slug "abstract"
       :type "boolean"
+      :locked true
       :model_id model-id})
     (db/insert
      :field
      {:name "ancestor_id"
       :slug "ancestor_id"
       :type "integer"
+      :locked true
       :model_id model-id})
     (db/insert
      :field
      {:name "created_at"
       :slug "created_at"
       :type "timestamp"
+      :locked true
+      :immutable true
       :model_id model-id})
     (db/insert
      :field
      {:name "updated_at"
       :slug "updated_at"
       :type "timestamp"
+      :locked true
       :model_id model-id})))
 
 (defn create-field-fields []
@@ -101,84 +116,102 @@
      {:name "id"
       :slug "id"
       :type "integer"
+      :locked true
+      :immutable true
       :model_id model-id})
     (db/insert
      :field
      {:name "link_id"
       :slug "link_id"
       :type "integer"
+      :locked true
       :model_id model-id})
     (db/insert
      :field
      {:name "name"
       :slug "name"
       :type "string"
+      :locked true
       :model_id model-id})
     (db/insert
      :field
      {:name "slug"
       :slug "slug"
       :type "string"
+      :locked true
       :model_id model-id})
     (db/insert
      :field
      {:name "type"
       :slug "type"
       :type "string"
+      :locked true
+      :immutable true
       :model_id model-id})
     (db/insert
      :field
      {:name "description"
       :slug "description"
       :type "text"
+      :locked true
       :model_id model-id})
     (db/insert
      :field
      {:name "position"
       :slug "position"
       :type "integer"
+      :locked true
       :model_id model-id})
     (db/insert
      :field
      {:name "model"
       :slug "model"
       :type "part"
+      :locked true
       :model_id model-id})
     (db/insert
      :field
      {:name "required"
       :slug "required"
       :type "boolean"
+      :locked true
       :model_id model-id})
     (db/insert
      :field
      {:name "disjoint"
       :slug "disjoint"
       :type "boolean"
+      :locked true
       :model_id model-id})
     (db/insert
      :field
      {:name "singular"
       :slug "singular"
       :type "boolean"
+      :locked true
       :model_id model-id})
     (db/insert
      :field
      {:name "locked"
       :slug "locked"
       :type "boolean"
+      :locked true
+      :immutable true
       :model_id model-id})
     (db/insert
      :field
      {:name "created_at"
       :slug "created_at"
       :type "timestamp"
+      :locked true
+      :immutable true
       :model_id model-id})
     (db/insert
      :field
      {:name "updated_at"
       :slug "updated_at"
       :type "timestamp"
+      :locked true
       :model_id model-id})))
 
 (defn forge-link []
