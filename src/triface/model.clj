@@ -155,14 +155,14 @@
                   [:created_at "timestamp with time zone" "NOT NULL" "DEFAULT current_timestamp"]
                   [:updated_at "timestamp with time zone" "NOT NULL" "DEFAULT current_timestamp"]])
 
-(def base-rows [{:name "id" :type "integer" :locked true :immutable true}
+(def base-rows [{:name "id" :type "integer" :locked true :immutable true :editable false}
                 {:name "position" :type "integer" :locked true}
                 {:name "status" :type "integer" :locked true}
-                {:name "locale_id" :type "integer" :locked true}
-                {:name "env_id" :type "integer" :locked true}
-                {:name "locked" :type "boolean" :locked true :immutable true}
-                {:name "created_at" :type "timestamp" :locked true :immutable true}
-                {:name "updated_at" :type "timestamp" :locked true}])
+                {:name "locale_id" :type "integer" :locked true :editable false}
+                {:name "env_id" :type "integer" :locked true :editable false}
+                {:name "locked" :type "boolean" :locked true :immutable true :editable false}
+                {:name "created_at" :type "timestamp" :locked true :immutable true :editable false}
+                {:name "updated_at" :type "timestamp" :locked true :editable false}])
 
 (def base-field-names (map #(first %) base-fields))
 

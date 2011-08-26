@@ -28,6 +28,7 @@
       :type "integer"
       :locked true
       :immutable true
+      :editable false
       :model_id model-id})
     (db/insert
      :field
@@ -42,6 +43,7 @@
       :slug "slug"
       :type "string"
       :locked true
+      :editable false
       :model_id model-id})
     (db/insert
      :field
@@ -78,6 +80,7 @@
       :type "boolean"
       :locked true
       :immutable true
+      :editable false
       :model_id model-id})
     (db/insert
      :field
@@ -92,6 +95,7 @@
       :slug "ancestor_id"
       :type "integer"
       :locked true
+      :editable false
       :model_id model-id})
     (db/insert
      :field
@@ -100,6 +104,7 @@
       :type "timestamp"
       :locked true
       :immutable true
+      :editable false
       :model_id model-id})
     (db/insert
      :field
@@ -107,6 +112,7 @@
       :slug "updated_at"
       :type "timestamp"
       :locked true
+      :editable false
       :model_id model-id})))
 
 (defn create-field-fields []
@@ -118,6 +124,7 @@
       :type "integer"
       :locked true
       :immutable true
+      :editable false
       :model_id model-id})
     (db/insert
      :field
@@ -125,6 +132,7 @@
       :slug "link_id"
       :type "integer"
       :locked true
+      :editable false
       :model_id model-id})
     (db/insert
      :field
@@ -139,6 +147,7 @@
       :slug "slug"
       :type "string"
       :locked true
+      :editable false
       :model_id model-id})
     (db/insert
      :field
@@ -147,6 +156,7 @@
       :type "string"
       :locked true
       :immutable true
+      :editable false
       :model_id model-id})
     (db/insert
      :field
@@ -197,6 +207,7 @@
       :type "boolean"
       :locked true
       :immutable true
+      :editable false
       :model_id model-id})
     (db/insert
      :field
@@ -205,6 +216,7 @@
       :type "timestamp"
       :locked true
       :immutable true
+      :editable false
       :model_id model-id})
     (db/insert
      :field
@@ -212,6 +224,7 @@
       :slug "updated_at"
       :type "timestamp"
       :locked true
+      :editable false
       :model_id model-id})))
 
 (defn forge-link []
@@ -228,4 +241,5 @@
   (create-field-model)
   (create-field-fields)
   (forge-link)))
+
 

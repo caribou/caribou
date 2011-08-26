@@ -81,14 +81,22 @@
 (action field-detail [params slug id field]
   (render-field slug (content-item slug id) field params))
 
+(action create-content [params slug]
+  (log :create params))
+
+(action update-content [params slug id]
+  (log :update params))
+
 ;; routes --------------------------------------------------
 
 (defroutes main-routes
-  (GET "/" {params :params} (home params))
-  (GET "/:slug" {params :params} (list-all params))
-  (GET "/:slug/spec" {params :params} (model-spec params))
-  (GET "/:slug/:id" {params :params} (item-detail params))
-  (GET "/:slug/:id/:field" {params :params} (field-detail params))
+  (GET  "/" {params :params} (home params))
+  (GET  "/:slug" {params :params} (list-all params))
+  (POST "/:slug" {params :params} (create-content params))
+  (GET  "/:slug/spec" {params :params} (model-spec params))
+  (GET  "/:slug/:id" {params :params} (item-detail params))
+  (POST "/:slug/:id" {params :params} (update-content params))
+  (GET  "/:slug/:id/:field" {params :params} (field-detail params))
   (route/resources "/")
   (route/not-found "NONONONONONON"))
 
@@ -103,7 +111,7 @@
 (defn go []
   (let [port (Integer/parseInt (or (System/getenv "PORT") "33333"))]
     (init)
-    (start port)))  
+    (start port)))
 
 (defn -main []
   (go))
