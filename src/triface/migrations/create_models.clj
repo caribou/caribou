@@ -174,6 +174,22 @@
       :model_id model-id})
     (db/insert
      :field
+     {:name "model_id"
+      :slug "model_id"
+      :type "integer"
+      :locked true
+      :editable false
+      :model_id model-id})
+    (db/insert
+     :field
+     {:name "model_position"
+      :slug "model_position"
+      :type "integer"
+      :locked true
+      :editable false
+      :model_id model-id})
+    (db/insert
+     :field
      {:name "model"
       :slug "model"
       :type "part"
@@ -199,6 +215,24 @@
       :slug "singular"
       :type "boolean"
       :locked true
+      :model_id model-id})
+    (db/insert
+     :field
+     {:name "editable"
+      :slug "editable"
+      :type "boolean"
+      :locked true
+      :immutable true
+      :editable false
+      :model_id model-id})
+    (db/insert
+     :field
+     {:name "immutable"
+      :slug "immutable"
+      :type "boolean"
+      :locked true
+      :immutable true
+      :editable false
       :model_id model-id})
     (db/insert
      :field

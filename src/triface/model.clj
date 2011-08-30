@@ -10,6 +10,7 @@
   (cleanup-field [this] "further processing on creation of field")
   (target-for [this] "retrieves the model this field points to, if applicable")
   (field-from [this content opts] "retrieves the value for this field from this content item")
+  (update-values [this content values] "adds to the map of values that will be committed to the db")
   (render [this content opts] "renders out a single field from this content item"))
 
 (defrecord IntegerField [row env]
@@ -19,6 +20,19 @@
   (cleanup-field [this] nil)
   (target-for [this] nil)
   (field-from [this content opts] (content (keyword (row :name))))
+
+  (update-values [this content values]
+    (let [key (keyword (row :name))]
+      (if (contains? content key)
+        (try
+          (let [value (content key)
+                tval (if (isa? (type value) String)
+                       (Integer/parseInt value)
+                       value)]
+            (assoc values key tval))
+          (catch Exception e values))
+        values)))
+
   (render [this content opts] (field-from this content opts)))
   
 (defrecord StringField [row env]
@@ -28,6 +42,11 @@
   (cleanup-field [this] nil)
   (target-for [this] nil)
   (field-from [this content opts] (content (keyword (row :name))))
+  (update-values [this content values]
+    (let [key (keyword (row :name))]
+      (if (contains? content key)
+        (assoc values key (content key))
+        values)))
   (render [this content opts] (field-from this content opts)))
 
 (defrecord TextField [row env]
@@ -37,6 +56,11 @@
   (cleanup-field [this] nil)
   (target-for [this] nil)
   (field-from [this content opts] (content (keyword (row :name))))
+  (update-values [this content values]
+    (let [key (keyword (row :name))]
+      (if (contains? content key)
+        (assoc values key (content key))
+        values)))
   (render [this content opts] (field-from this content opts)))
 
 (defrecord BooleanField [row env]
@@ -46,6 +70,17 @@
   (cleanup-field [this] nil)
   (target-for [this] nil)
   (field-from [this content opts] (content (keyword (row :name))))
+  (update-values [this content values]
+    (let [key (keyword (row :name))]
+      (if (contains? content key)
+        (try
+          (let [value (content key)
+                tval (if (isa? (type value) String)
+                       (Boolean/parseBoolean value)
+                       value)]
+            (assoc values key tval))
+          (catch Exception e values))
+        values)))
   (render [this content opts] (field-from this content opts)))
 
 (defrecord TimestampField [row env]
@@ -55,11 +90,17 @@
   (cleanup-field [this] nil)
   (target-for [this] nil)
   (field-from [this content opts] (content (keyword (row :name))))
+  (update-values [this content values]
+    (let [key (keyword (row :name))]
+      (if (contains? content key)
+        (assoc values key (content key))
+        values)))
   (render [this content opts] (str (field-from this content opts))))
 
 ;; forward reference for CollectionField
 (def make-field)
 (def create-field)
+(def add-fields)
 (def destroy-field)
 (def model-render)
 (def invoke-model)
@@ -73,13 +114,15 @@
   (table-additions [this] [])
 
   (setup-field [this]
-    (let [model (db/choose :model (row :model_id))
-          part (create-field {:name (:name model)
-                    :type "part"
-                    :model_id (row :target_id)
-                    :target_id (row :model_id)
-                    :link_id (row :id)})]
-      (db/update :field {:link_id (-> part :row :id)} "id = %1" (row :id))))
+    (if (or (nil? (row :link_id)) (zero? (row :link_id)))
+      (let [model (db/choose :model (row :model_id))
+            part (create-field {:name (:name model)
+                                :type "part"
+                                :model_id (row :target_id)
+                                :target_id (row :model_id)
+                                :link_id (row :id)})]
+        (setup-field part)
+        (db/update :field {:link_id (-> part :row :id)} "id = %1" (row :id)))))
 
   (cleanup-field [this]
     (destroy-field (make-field (-> env :link))))
@@ -95,14 +138,23 @@
           (map #(from (target-for this) % down) parts))
         [])))
 
+  (update-values [this content values] values)
+
   (render [this content opts]
     (map #(model-render (target-for this) % opts) (field-from this content opts))))
 
 (defrecord PartField [row env]
   Field
-  (table-additions [this] [[(keyword (str (row :name) "_id")) :integer "DEFAULT NULL"]
-                           [(keyword (str (row :name) "_position")) :integer "DEFAULT 0"]])
-  (setup-field [this] nil)
+
+  (table-additions [this] [])
+  ;; (table-additions [this] [[(keyword (str (row :name) "_id")) :integer "DEFAULT NULL"]
+  ;;                          [(keyword (str (row :name) "_position")) :integer "DEFAULT 0"]])
+
+  (setup-field [this]
+    (let [model_id (-> this :row :model_id)
+          model (models model_id)]
+      (add-fields model [{:name (str (row :name) "_id") :type "integer" :editable false :model_id model_id}
+                         {:name (str (row :name) "_position") :type "integer" :editable false :model_id model_id}])))
 
   (cleanup-field [this]
     (destroy-field (make-field (-> env :link))))
@@ -117,6 +169,8 @@
               collector (db/choose (-> (target-for this) :slug) (content (keyword (str (row :name) "_id"))))]
           (from (target-for this) collector down)))))
 
+  (update-values [this content values] values)
+
   (render [this content opts]
     (let [field (field-from this content opts)]
       (if field
@@ -129,6 +183,7 @@
   (cleanup-field [this] nil)
   (target-for [this] nil)
   (field-from [this content opts])
+  (update-values [this content values])
   (render [this content opts] ""))
 
 (def field-constructors
@@ -252,8 +307,15 @@
     (invoke-models)
     model))
 
-(defn create-item [type spec]
-  (db/insert type spec))
+(defn create-content [slug spec]
+  (let [model (models (keyword slug))
+        values (reduce #(update-values %2 spec %1) {} (vals (model :fields)))]
+    (db/insert slug values)))
+
+(defn update-content [slug id spec]
+  (let [model (models (keyword slug))
+        values (reduce #(update-values %2 spec %1) {} (vals (model :fields)))]
+    (db/update slug values "id = %1" id)))
 
 
 

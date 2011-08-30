@@ -48,11 +48,11 @@
           yellow (model-for :yellow)
           zap (model-for :zap)
 
-          zzzap (db/insert :zap {:ibibib "kkkkkkk"})
-          yyy (db/insert :yellow {:gogon "obobo" :wibib true :zap_id (zzzap :id)})
-          yyyz (db/insert :yellow {:gogon "igigi" :wibib false :zap_id (zzzap :id)})
-          yy (db/insert :yellow {:gogon "lalal" :wibib true :zap_id (zzzap :id)})]
-      (db/update :yellow {:gogon "binbin"} "id = %1" (yyy :id))
+          zzzap (create-content :zap {:ibibib "kkkkkkk"})
+          yyy (create-content :yellow {:gogon "obobo" :wibib true :zap_id (zzzap :id)})
+          yyyz (create-content :yellow {:gogon "igigi" :wibib false :zap_id (zzzap :id)})
+          yy (create-content :yellow {:gogon "lalal" :wibib true :zap_id (zzzap :id)})]
+      (update-content :yellow (yyy :id) {:gogon "binbin"})
       (is (= ((db/choose :yellow (yyy :id)) :gogon) "binbin"))
       (is (= "kkkkkkk" ((from zap zzzap {:include {}}) :ibibib)))
       (is (= 3 (count ((from zap zzzap {:include {:yellows {}}}) :yellows)))))

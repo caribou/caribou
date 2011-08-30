@@ -82,10 +82,10 @@
   (render-field slug (content-item slug id) field params))
 
 (action create-content [params slug]
-  (log :create params))
+  (render slug (model/create-content slug (params (keyword slug))) params))
 
 (action update-content [params slug id]
-  (log :update params))
+  (render slug (model/update-content slug id (params (keyword slug))) params))
 
 ;; routes --------------------------------------------------
 
