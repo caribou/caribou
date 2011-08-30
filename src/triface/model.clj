@@ -332,5 +332,6 @@
     (db/update slug values "id = %1" id)
     (assoc spec :id id)))
 
-
+(defn delete-content [slug id]
+  (db/delete slug "id = %1" id))
 

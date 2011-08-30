@@ -88,6 +88,10 @@
   (let [content (model/update-content slug id (params (keyword slug)))]
     (render slug (db/choose slug id) params)))
 
+(action delete-content [params slug id]
+  (let [content (model/delete-content slug id)]
+    (render slug content params)))
+
 ;; routes --------------------------------------------------
 
 (defroutes main-routes
@@ -97,6 +101,7 @@
   (GET  "/:slug/spec" {params :params} (model-spec params))
   (GET  "/:slug/:id" {params :params} (item-detail params))
   (PUT  "/:slug/:id" {params :params} (update-content params))
+  (DELETE  "/:slug/:id" {params :params} (delete-content params))
   (GET  "/:slug/:id/:field" {params :params} (field-detail params))
   (route/resources "/")
   (route/not-found "NONONONONONON"))
