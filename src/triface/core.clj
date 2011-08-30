@@ -95,7 +95,7 @@
   (POST "/:slug" {params :params} (create-content params))
   (GET  "/:slug/spec" {params :params} (model-spec params))
   (GET  "/:slug/:id" {params :params} (item-detail params))
-  (POST "/:slug/:id" {params :params} (update-content params))
+  (PUT  "/:slug/:id" {params :params} (update-content params))
   (GET  "/:slug/:id/:field" {params :params} (field-detail params))
   (route/resources "/")
   (route/not-found "NONONONONONON"))

@@ -87,3 +87,8 @@
   (sql/with-connection db
     (sql/do-commands
      (log :db (clause "alter table %1 drop column %2" (map #(zap (name %)) [table column]))))))
+
+(defn do-sql [commands]
+  (sql/with-connection db
+    (sql/do-commands commands)))
+

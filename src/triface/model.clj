@@ -33,9 +33,23 @@
           (catch Exception e values))
         values)))
 
-  (render [this content opts] (field-from this content opts)))
+  (render [this content opts] (field-from (log :this this) (log :content content) (log :opts opts))))
   
 (defrecord StringField [row env]
+  Field
+  (table-additions [this] [[(keyword (row :name)) "varchar(256)"]])
+  (setup-field [this] nil)
+  (cleanup-field [this] nil)
+  (target-for [this] nil)
+  (field-from [this content opts] (content (keyword (row :name))))
+  (update-values [this content values]
+    (let [key (keyword (row :name))]
+      (if (contains? content key)
+        (assoc values key (content key))
+        values)))
+  (render [this content opts] (field-from this content opts)))
+
+(defrecord SlugField [row env]
   Field
   (table-additions [this] [[(keyword (row :name)) "varchar(256)"]])
   (setup-field [this] nil)
@@ -147,8 +161,6 @@
   Field
 
   (table-additions [this] [])
-  ;; (table-additions [this] [[(keyword (str (row :name) "_id")) :integer "DEFAULT NULL"]
-  ;;                          [(keyword (str (row :name) "_position")) :integer "DEFAULT 0"]])
 
   (setup-field [this]
     (let [model_id (-> this :row :model_id)
@@ -315,7 +327,7 @@
 (defn update-content [slug id spec]
   (let [model (models (keyword slug))
         values (reduce #(update-values %2 spec %1) {} (vals (model :fields)))]
-    (db/update slug values "id = %1" id)))
+    (log :update (db/update slug values "id = %1" id))))
 
 
 
