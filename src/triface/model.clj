@@ -322,8 +322,9 @@
 
 (defn create-content [slug spec]
   (let [model (models (keyword slug))
-        values (reduce #(update-values %2 spec %1) {} (vals (dissoc (model :fields) :updated_at)))]
-    (db/insert slug values)))
+        values (reduce #(update-values %2 spec %1) {} (vals (dissoc (model :fields) :updated_at)))
+        content (db/insert slug values)]
+    content))
 
 (defn update-content [slug id spec]
   (let [model (models (keyword slug))
