@@ -9,8 +9,8 @@
   (setup-field [this] "further processing on creation of field")
   (cleanup-field [this] "further processing on creation of field")
   (target-for [this] "retrieves the model this field points to, if applicable")
-  (field-from [this content opts] "retrieves the value for this field from this content item")
   (update-values [this content values] "adds to the map of values that will be committed to the db")
+  (field-from [this content opts] "retrieves the value for this field from this content item")
   (render [this content opts] "renders out a single field from this content item"))
 
 (defrecord IntegerField [row env]
@@ -19,7 +19,6 @@
   (setup-field [this] nil)
   (cleanup-field [this] nil)
   (target-for [this] nil)
-  (field-from [this content opts] (content (keyword (row :name))))
 
   (update-values [this content values]
     (let [key (keyword (row :name))]
@@ -33,7 +32,8 @@
           (catch Exception e values))
         values)))
 
-  (render [this content opts] (field-from (log :this this) (log :content content) (log :opts opts))))
+  (field-from [this content opts] (content (keyword (row :name))))
+  (render [this content opts] (field-from this content opts)))
   
 (defrecord StringField [row env]
   Field
@@ -106,9 +106,10 @@
   (field-from [this content opts] (content (keyword (row :name))))
   (update-values [this content values]
     (let [key (keyword (row :name))]
-      (if (contains? content key)
-        (assoc values key (content key))
-        values)))
+      (cond
+       (= key :updated_at) (assoc values key :current_timestamp)
+       (contains? content key) (assoc values key (content key))
+       :else values)))
   (render [this content opts] (str (field-from this content opts))))
 
 ;; forward reference for CollectionField
@@ -327,7 +328,8 @@
 (defn update-content [slug id spec]
   (let [model (models (keyword slug))
         values (reduce #(update-values %2 spec %1) {} (vals (model :fields)))]
-    (log :update (db/update slug values "id = %1" id))))
+    (db/update slug values "id = %1" id)
+    (assoc spec :id id)))
 
 
 

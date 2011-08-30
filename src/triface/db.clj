@@ -32,8 +32,16 @@
       [(log :db (clause q args))]
       (doall res))))
 
+(defn sqlize [value]
+  (cond
+   (number? value) value
+   (isa? (type value) Boolean) value
+   (keyword? value) (zap (name value))
+   (string? value) (str "'" (zap value) "'")
+   :else (str "'" (zap (str value)) "'")))
+
 (defn value-map [values]
-  (str-join ", " (map #(str (name %) " = '" (zap (values %)) "'") (keys values))))
+  (str-join ", " (map #(str (name %) " = " (sqlize (values %))) (keys values))))
 
 (defn insert [table values]
   (log :db (clause "insert into %1 values %2" [(name table) (value-map values)]))

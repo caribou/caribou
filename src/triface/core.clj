@@ -37,7 +37,7 @@
 (defn render-exception [e]
   (let [cause (.getCause e)]
     (if cause
-      (if (isa? cause SQLException)
+      (if (isa? (type cause) SQLException)
         (let [next (.getNextException cause)]
           (str next (.printStackTrace next)))
         (str cause (.printStackTrace cause)))
@@ -103,7 +103,8 @@
 (def app (handler/site main-routes))
 
 (defn init []
-  (model/invoke-models))
+  (model/invoke-models)
+  "models invoked")
 
 (defn start [port]
   (ring/run-jetty (var app) {:port (or port 33333) :join? false}))
