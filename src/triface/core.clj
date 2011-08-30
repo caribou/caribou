@@ -37,7 +37,7 @@
 (defn render-exception [e]
   (let [cause (.getCause e)]
     (if cause
-      (if (isa? (type cause) SQLException)
+      (if (isa? cause SQLException)
         (let [next (.getNextException cause)]
           (str next (.printStackTrace next)))
         (str cause (.printStackTrace cause)))
@@ -85,7 +85,8 @@
   (render slug (model/create-content slug (params (keyword slug))) params))
 
 (action update-content [params slug id]
-  (render slug (model/update-content slug id (params (keyword slug))) params))
+  (let [content (model/update-content slug id (params (keyword slug)))]
+    (render slug (db/choose slug id) params)))
 
 ;; routes --------------------------------------------------
 

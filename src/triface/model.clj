@@ -41,12 +41,12 @@
   (setup-field [this] nil)
   (cleanup-field [this] nil)
   (target-for [this] nil)
-  (field-from [this content opts] (content (keyword (row :name))))
   (update-values [this content values]
     (let [key (keyword (row :name))]
       (if (contains? content key)
         (assoc values key (content key))
         values)))
+  (field-from [this content opts] (content (keyword (row :name))))
   (render [this content opts] (field-from this content opts)))
 
 (defrecord SlugField [row env]
@@ -55,12 +55,12 @@
   (setup-field [this] nil)
   (cleanup-field [this] nil)
   (target-for [this] nil)
-  (field-from [this content opts] (content (keyword (row :name))))
   (update-values [this content values]
     (let [key (keyword (row :name))]
       (if (contains? content key)
         (assoc values key (content key))
         values)))
+  (field-from [this content opts] (content (keyword (row :name))))
   (render [this content opts] (field-from this content opts)))
 
 (defrecord TextField [row env]
@@ -69,12 +69,12 @@
   (setup-field [this] nil)
   (cleanup-field [this] nil)
   (target-for [this] nil)
-  (field-from [this content opts] (content (keyword (row :name))))
   (update-values [this content values]
     (let [key (keyword (row :name))]
       (if (contains? content key)
         (assoc values key (content key))
         values)))
+  (field-from [this content opts] (content (keyword (row :name))))
   (render [this content opts] (field-from this content opts)))
 
 (defrecord BooleanField [row env]
@@ -83,7 +83,6 @@
   (setup-field [this] nil)
   (cleanup-field [this] nil)
   (target-for [this] nil)
-  (field-from [this content opts] (content (keyword (row :name))))
   (update-values [this content values]
     (let [key (keyword (row :name))]
       (if (contains? content key)
@@ -95,6 +94,7 @@
             (assoc values key tval))
           (catch Exception e values))
         values)))
+  (field-from [this content opts] (content (keyword (row :name))))
   (render [this content opts] (field-from this content opts)))
 
 (defrecord TimestampField [row env]
@@ -103,13 +103,13 @@
   (setup-field [this] nil)
   (cleanup-field [this] nil)
   (target-for [this] nil)
-  (field-from [this content opts] (content (keyword (row :name))))
   (update-values [this content values]
     (let [key (keyword (row :name))]
       (cond
        (= key :updated_at) (assoc values key :current_timestamp)
        (contains? content key) (assoc values key (content key))
        :else values)))
+  (field-from [this content opts] (content (keyword (row :name))))
   (render [this content opts] (str (field-from this content opts))))
 
 ;; forward reference for CollectionField
@@ -144,6 +144,8 @@
 
   (target-for [this] (models (-> this :row :target_id)))
 
+  (update-values [this content values] values)
+
   (field-from [this content opts]
     (let [include (if (opts :include) ((opts :include) (keyword (row :name))))]
       (if include
@@ -152,8 +154,6 @@
               parts (db/fetch (-> (target-for this) :slug) (str (-> this :env :link :slug) "_id = %1") (content :id))]
           (map #(from (target-for this) % down) parts))
         [])))
-
-  (update-values [this content values] values)
 
   (render [this content opts]
     (map #(model-render (target-for this) % opts) (field-from this content opts))))
@@ -174,6 +174,8 @@
 
   (target-for [this] (models (-> this :row :target_id)))
 
+  (update-values [this content values] values)
+
   (field-from [this content opts]
     (let [include (if (opts :include) ((opts :include) (keyword (row :name))))]
       (if include
@@ -181,8 +183,6 @@
               down (assoc opts :include (merge hole include))
               collector (db/choose (-> (target-for this) :slug) (content (keyword (str (row :name) "_id"))))]
           (from (target-for this) collector down)))))
-
-  (update-values [this content values] values)
 
   (render [this content opts]
     (let [field (field-from this content opts)]
@@ -195,8 +195,8 @@
   (setup-field [this] nil)
   (cleanup-field [this] nil)
   (target-for [this] nil)
-  (field-from [this content opts])
   (update-values [this content values])
+  (field-from [this content opts])
   (render [this content opts] ""))
 
 (def field-constructors
@@ -322,7 +322,7 @@
 
 (defn create-content [slug spec]
   (let [model (models (keyword slug))
-        values (reduce #(update-values %2 spec %1) {} (vals (model :fields)))]
+        values (reduce #(update-values %2 spec %1) {} (vals (dissoc (model :fields) :updated_at)))]
     (db/insert slug values)))
 
 (defn update-content [slug id spec]
