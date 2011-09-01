@@ -13,6 +13,16 @@
   (field-from [this content opts] "retrieves the value for this field from this content item")
   (render [this content opts] "renders out a single field from this content item"))
 
+(defrecord IdField [row env]
+  Field
+  (table-additions [this] [[(keyword (row :name)) "SERIAL" "PRIMARY KEY"]])
+  (setup-field [this] nil)
+  (cleanup-field [this] nil)
+  (target-for [this] nil)
+  (update-values [this content values] values)
+  (field-from [this content opts] (content (keyword (row :name))))
+  (render [this content opts] (field-from this content opts)))
+  
 (defrecord IntegerField [row env]
   Field
   (table-additions [this] [[(keyword (row :name)) :integer "DEFAULT 0"]])
@@ -57,9 +67,10 @@
   (target-for [this] nil)
   (update-values [this content values]
     (let [key (keyword (row :name))]
-      (if (contains? content key)
-        (assoc values key (content key))
-        values)))
+      (cond
+       (contains? content key) (assoc values key (slugify (content key)))
+       (env :link) (assoc values key (slugify (content (keyword (-> env :link :slug)))))
+       :else values)))
   (field-from [this content opts] (content (keyword (row :name))))
   (render [this content opts] (field-from this content opts)))
 
@@ -200,49 +211,44 @@
   (render [this content opts] ""))
 
 (def field-constructors
-     {:integer (fn [row] (IntegerField. row {}))
-      :string (fn [row] (StringField. row {}))
-      :text (fn [row] (TextField. row {}))
-      :boolean (fn [row] (BooleanField. row {}))
-      :timestamp (fn [row] (TimestampField. row {}))
-      :collection (fn [row]
-                    (let [link (if (row :link_id) (db/choose :field (row :link_id)))]
-                      (CollectionField. row {:link link})))
-      :part (fn [row]
-              (let [link (db/choose :field (row :link_id))]
-                (PartField. row {:link link})))
-      :link (fn [row] (LinkField. row {}))
-      })
+  {:id (fn [row] (IdField. row {}))
+   :integer (fn [row] (IntegerField. row {}))
+   :string (fn [row] (StringField. row {}))
+   :slug (fn [row] 
+           (let [link (if (row :link_id) (db/choose :field (row :link_id)))]
+             (SlugField. row {:link link})))
+   :text (fn [row] (TextField. row {}))
+   :boolean (fn [row] (BooleanField. row {}))
+   :timestamp (fn [row] (TimestampField. row {}))
+   :collection (fn [row]
+                 (let [link (if (row :link_id) (db/choose :field (row :link_id)))]
+                   (CollectionField. row {:link link})))
+   :part (fn [row]
+           (let [link (db/choose :field (row :link_id))]
+             (PartField. row {:link link})))
+   :link (fn [row] (LinkField. row {}))
+   })
 
-(def base-fields [[:id "SERIAL" "PRIMARY KEY"]
-                  [:position :integer "DEFAULT 1"]
-                  [:status :integer "DEFAULT 1"]
-                  [:locale_id :integer "DEFAULT 1"]
-                  [:env_id :integer "DEFAULT 1"]
-                  [:locked :boolean "DEFAULT false"]
-                  [:created_at "timestamp with time zone" "NOT NULL" "DEFAULT current_timestamp"]
-                  [:updated_at "timestamp with time zone" "NOT NULL" "DEFAULT current_timestamp"]])
+;; (def base-fields [[:id "SERIAL" "PRIMARY KEY"]
+;;                   [:position :integer "DEFAULT 1"]
+;;                   [:status :integer "DEFAULT 1"]
+;;                   [:locale_id :integer "DEFAULT 1"]
+;;                   [:env_id :integer "DEFAULT 1"]
+;;                   [:locked :boolean "DEFAULT false"]
+;;                   [:created_at "timestamp with time zone" "NOT NULL" "DEFAULT current_timestamp"]
+;;                   [:updated_at "timestamp with time zone" "NOT NULL" "DEFAULT current_timestamp"]])
 
-(def base-rows [{:name "id" :type "integer" :locked true :immutable true :editable false}
-                {:name "position" :type "integer" :locked true}
-                {:name "status" :type "integer" :locked true}
-                {:name "locale_id" :type "integer" :locked true :editable false}
-                {:name "env_id" :type "integer" :locked true :editable false}
-                {:name "locked" :type "boolean" :locked true :immutable true :editable false}
-                {:name "created_at" :type "timestamp" :locked true :immutable true :editable false}
-                {:name "updated_at" :type "timestamp" :locked true :editable false}])
-
-(def base-field-names (map #(first %) base-fields))
+(def base-fields [{:name "id" :type "id" :locked true :immutable true :editable false}
+                  {:name "position" :type "integer" :locked true}
+                  {:name "status" :type "integer" :locked true}
+                  {:name "locale_id" :type "integer" :locked true :editable false}
+                  {:name "env_id" :type "integer" :locked true :editable false}
+                  {:name "locked" :type "boolean" :locked true :immutable true :editable false}
+                  {:name "created_at" :type "timestamp" :locked true :immutable true :editable false}
+                  {:name "updated_at" :type "timestamp" :locked true :editable false}])
 
 (defn make-field [row]
   ((field-constructors (keyword (row :type))) row))
-
-(defn field-table-additions [fields]
-  (reduce concat [] (map table-additions fields)))
-
-(defn model-table-additions [model]
-  (let [added (remove (set base-field-names) (keys (model :fields)))]
-    (concat base-fields (field-table-additions (map #(% (model :fields)) added)))))
 
 (defn fields-render [fields content opts]
   (reduce #(assoc %1 (keyword (-> %2 :row :name)) (render %2 content opts)) content fields))
@@ -271,17 +277,13 @@
                    (seq-to-map #(% :id) invoked))))))
 
 (defn create-model-table [name]
-  (apply db/create-table
-         (cons (keyword name)
-               base-fields)))
-
-(defn create-base-field [spec]
-  (let [field-row (db/insert :field (assoc spec :slug (or (spec :slug) (spec :name))))
-        field (make-field field-row)]
-    field))
+  (db/create-table (keyword name) []))
 
 (defn create-field [spec]
-  (let [field (create-base-field spec)
+  (let [ubermodel (model-for :field)
+        values (reduce #(update-values %2 spec %1) {} (vals (dissoc (ubermodel :fields) :updated_at)))
+        field-row (db/insert :field values)
+        field (make-field field-row)
         model (db/choose :model (spec :model_id))]
     (doall (map #(db/add-column (model :name) (name (first %)) (rest %)) (table-additions field)))
     field))
@@ -292,14 +294,13 @@
     fields))
 
 (defn create-model [spec]
-  (db/insert :model (assoc (dissoc spec :fields) :slug (or (spec :slug) (spec :name))))
   (create-model-table (spec :name))
-  (let [model (model-row-by-slug (spec :name))
-        fields (concat
-                (add-fields model (spec :fields))
-                (doall (map #(create-base-field (assoc % :model_id (model :id))) base-rows)))]
-    (invoke-models)
-    (models (keyword (model :slug)))))
+  (let [ubermodel (model-for :model)
+        values (reduce #(update-values %2 spec %1) {} (vals (dissoc (ubermodel :fields) :updated_at)))
+        model (db/insert :model values)
+        fields (add-fields model (concat (spec :fields) base-fields))]
+      (invoke-models)
+      (models (keyword (model :slug)))))
 
 (defn destroy-field [field]
   (doall (map #(db/drop-column ((models (-> field :row :model_id)) :slug) (first %)) (table-additions field)))

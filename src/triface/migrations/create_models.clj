@@ -30,21 +30,22 @@
       :immutable true
       :editable false
       :model_id model-id})
-    (db/insert
-     :field
-     {:name "name"
-      :slug "name"
-      :type "string"
-      :locked true
-      :model_id model-id})
-    (db/insert
-     :field
-     {:name "slug"
-      :slug "slug"
-      :type "string"
-      :locked true
-      :editable false
-      :model_id model-id})
+    (let [name-field (db/insert
+                      :field
+                      {:name "name"
+                       :slug "name"
+                       :type "string"
+                       :locked true
+                       :model_id model-id})]
+      (db/insert
+       :field
+       {:name "slug"
+        :slug "slug"
+        :type "slug"
+        :locked true
+        :editable false
+        :link_id (name-field :id)
+        :model_id model-id}))
     (db/insert
      :field
      {:name "description"
@@ -134,21 +135,22 @@
       :locked true
       :editable false
       :model_id model-id})
-    (db/insert
-     :field
-     {:name "name"
-      :slug "name"
-      :type "string"
-      :locked true
-      :model_id model-id})
-    (db/insert
-     :field
-     {:name "slug"
-      :slug "slug"
-      :type "string"
-      :locked true
-      :editable false
-      :model_id model-id})
+    (let [name-field (db/insert
+                      :field
+                      {:name "name"
+                       :slug "name"
+                       :type "string"
+                       :locked true
+                       :model_id model-id})]
+      (db/insert
+       :field
+       {:name "slug"
+        :slug "slug"
+        :type "slug"
+        :locked true
+        :editable false
+        :link_id (name-field :id)
+        :model_id model-id}))
     (db/insert
      :field
      {:name "type"
@@ -176,6 +178,14 @@
      :field
      {:name "model_id"
       :slug "model_id"
+      :type "integer"
+      :locked true
+      :editable false
+      :model_id model-id})
+    (db/insert
+     :field
+     {:name "target_id"
+      :slug "target_id"
       :type "integer"
       :locked true
       :editable false
