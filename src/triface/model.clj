@@ -25,7 +25,9 @@
   
 (defrecord IntegerField [row env]
   Field
-  (table-additions [this] [[(keyword (row :name)) :integer "DEFAULT 0"]])
+  (table-additions [this]
+    (let [default (or (env :default) "NULL")]
+      [[(keyword (row :name)) :integer (str "DEFAULT " default)]]))
   (setup-field [this] nil)
   (cleanup-field [this] nil)
   (target-for [this] nil)
@@ -141,8 +143,8 @@
 
   (setup-field [this]
     (if (or (nil? (row :link_id)) (zero? (row :link_id)))
-      (let [model (db/choose :model (row :model_id))
-            part (create-field {:name (:name model)
+      (let [model (models (row :model_id))
+            part (create-field {:name (model :name)
                                 :type "part"
                                 :model_id (row :target_id)
                                 :target_id (row :model_id)
@@ -151,7 +153,9 @@
         (db/update :field {:link_id (-> part :row :id)} "id = %1" (row :id)))))
 
   (cleanup-field [this]
-    (destroy-field (make-field (-> env :link))))
+    (try
+      (destroy-field (make-field (-> env :link)))
+      (catch Exception e (str e))))
 
   (target-for [this] (models (-> this :row :target_id)))
 
@@ -177,8 +181,24 @@
   (setup-field [this]
     (let [model_id (-> this :row :model_id)
           model (models model_id)]
-      (add-fields model [{:name (str (row :name) "_id") :type "integer" :editable false :model_id model_id}
-                         {:name (str (row :name) "_position") :type "integer" :editable false :model_id model_id}])))
+      (if (or (nil? (row :link_id)) (zero? (row :link_id)))
+        (let [collection (create-field {:name (:name model)
+                                        :type "collection"
+                                        :model_id (row :target_id)
+                                        :target_id (row :model_id)
+                                        :link_id (row :id)})]
+          (setup-field collection)
+          (db/update :field {:link_id (-> collection :row :id)} "id = %1" (row :id))))
+
+      (add-fields model
+                  [{:name (str (row :name) "_id")
+                    :type "integer"
+                    :editable false
+                    :model_id model_id}
+                   {:name (str (row :name) "_position")
+                    :type "integer"
+                    :editable false
+                    :model_id model_id}])))
 
   (cleanup-field [this]
     (destroy-field (make-field (-> env :link))))
@@ -251,7 +271,9 @@
   ((field-constructors (keyword (row :type))) row))
 
 (defn fields-render [fields content opts]
-  (reduce #(assoc %1 (keyword (-> %2 :row :name)) (render %2 content opts)) content fields))
+  (reduce #(assoc %1 (keyword (-> %2 :row :name))
+             (render %2 content opts))
+          content fields))
 
 (defn model-render [model content opts]
   (fields-render (vals (model :fields)) content opts))
@@ -260,6 +282,10 @@
   (let [fields (db/query "select * from field where model_id = %1" (model :id))
         field-map (seq-to-map #(keyword (-> % :row :name)) (map make-field fields))]
     (assoc model :fields field-map)))
+
+(defn alter-models [model]
+  (dosync
+   (alter models merge {(model :slug) model (model :id) model})))
 
 (defn model-row-by-slug [table]
   (first (db/query "select * from model where slug = '%1'" (name table))))
@@ -273,16 +299,16 @@
     (dosync
      (alter models 
             (fn [in-ref new-models] new-models)
-            (merge (seq-to-map #(keyword (% :name)) invoked)
+            (merge (seq-to-map #(keyword (% :slug)) invoked)
                    (seq-to-map #(% :id) invoked))))))
 
 (defn create-model-table [name]
   (db/create-table (keyword name) []))
 
 (defn create-field [spec]
-  (let [ubermodel (model-for :field)
-        values (reduce #(update-values %2 spec %1) {} (vals (dissoc (ubermodel :fields) :updated_at)))
-        field-row (db/insert :field values)
+  (let [ubermodel (models :field)
+        values (reduce #(update-values %2 spec %1) {} (vals (ubermodel :fields)))
+        field-row (db/insert :field (dissoc values :updated_at))
         field (make-field field-row)
         model (db/choose :model (spec :model_id))]
     (doall (map #(db/add-column (model :name) (name (first %)) (rest %)) (table-additions field)))
@@ -295,9 +321,10 @@
 
 (defn create-model [spec]
   (create-model-table (spec :name))
-  (let [ubermodel (model-for :model)
-        values (reduce #(update-values %2 spec %1) {} (vals (dissoc (ubermodel :fields) :updated_at)))
-        model (db/insert :model values)
+  (let [ubermodel (models :model)
+        values (reduce #(update-values %2 spec %1) {} (vals (ubermodel :fields)))
+        model (db/insert :model (dissoc values :updated_at))
+        invoked (alter-models model)
         fields (add-fields model (concat (spec :fields) base-fields))]
       (invoke-models)
       (models (keyword (model :slug)))))
@@ -314,7 +341,7 @@
   '())
 
 (defn delete-model [slug]
-  (let [model (model-for (keyword slug))]
+  (let [model (models (keyword slug))]
     (remove-fields (vals (model :fields)))
     (db/drop-table (model :slug))
     (db/delete :model "id = %1" (model :id))
@@ -324,7 +351,7 @@
 (defn create-content [slug spec]
   (let [model (models (keyword slug))
         values (reduce #(update-values %2 spec %1) {} (vals (dissoc (model :fields) :updated_at)))
-        content (db/insert slug values)]
+        content (db/insert slug (dissoc values :updated_at))]
     content))
 
 (defn update-content [slug id spec]

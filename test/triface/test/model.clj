@@ -38,7 +38,6 @@
                                     :position 3
                                     :fields [{:name "gogon" :type "string"}
                                              {:name "wibib" :type "boolean"}]})
-
           zap-row (create-model {:name "zap"
                                  :description "zap zappity zapzap"
                                  :position 3

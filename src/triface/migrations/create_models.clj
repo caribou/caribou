@@ -284,6 +284,7 @@
   (create-model-fields)
   (create-field-model)
   (create-field-fields)
-  (forge-link)))
+  (forge-link)
+  (invoke-models)))
 
 
