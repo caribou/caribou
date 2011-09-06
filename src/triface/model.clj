@@ -171,10 +171,10 @@
   (update-values [this content values] values)
 
   (post-update [this content]
-    (let [collection ((debug content) (keyword (row :slug)))]
-      (if (log :collection collection)
-        (let [part (debug (env :link))
-              part-key (debug (keyword (str (part :slug) "_id")))
+    (let [collection (content (keyword (row :slug)))]
+      (if collection
+        (let [part (env :link)
+              part-key (keyword (str (part :slug) "_id"))
               model (models (part :model_id))
               updated (doall
                        (map
