@@ -188,14 +188,13 @@
   (field-from [this content opts]
     (let [include (if (opts :include) ((opts :include) (keyword (row :name))))]
       (if include
-        (let [hole (dissoc (opts :include) (keyword (row :name)))
-              down (assoc opts :include (merge hole include))
+        (let [down (assoc opts :include include)
               parts (db/fetch (-> (target-for this) :slug) (str (-> this :env :link :slug) "_id = %1") (content :id))]
           (map #(from (target-for this) % down) parts))
         [])))
 
   (render [this content opts]
-    (map #(model-render (target-for this) % opts) (field-from this content opts))))
+    (map #(model-render (target-for this) % (assoc opts :include ((opts :include) (keyword (row :name))))) (field-from this content opts))))
 
 (defrecord PartField [row env]
   Field
@@ -236,15 +235,14 @@
   (field-from [this content opts]
     (let [include (if (opts :include) ((opts :include) (keyword (row :name))))]
       (if include
-        (let [hole (dissoc (opts :include) (keyword (row :name)))
-              down (assoc opts :include (merge hole include))
+        (let [down (assoc opts :include include)
               collector (db/choose (-> (target-for this) :slug) (content (keyword (str (row :name) "_id"))))]
           (from (target-for this) collector down)))))
 
   (render [this content opts]
     (let [field (field-from this content opts)]
       (if field
-        (model-render (target-for this) field opts)))))
+        (model-render (target-for this) field (assoc opts :include ((opts :include) (keyword (row :name)))))))))
 
 (defrecord LinkField [row env]
   Field

@@ -27,10 +27,10 @@
 
 (defn render [slug content opts]
   (let [model (model/models (keyword slug))]
-    (model/model-render model content opts)))
+    (model/model-render model content (debug opts))))
 
 (defn render-field [slug content field opts]
-  (model/render (((model/models (keyword slug)) :fields) (keyword field)) content opts))
+  (model/render (((model/models (keyword slug)) :fields) (keyword field)) content (debug opts)))
 
 ;; actions ------------------------------------------------
 
@@ -79,7 +79,8 @@
     (render slug (content-item slug id) (assoc params :include include))))
 
 (action field-detail [params slug id field]
-  (render-field slug (content-item slug id) field params))
+  (let [include {(keyword field) (process-include (params :include))}]
+    (render-field slug (content-item slug id) field (assoc params :include include))))
 
 (action create-content [params slug]
   (render slug (model/create-content slug (params (keyword slug))) params))
