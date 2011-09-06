@@ -303,9 +303,36 @@
 (defn model-render [model content opts]
   (fields-render (vals (model :fields)) content opts))
 
+(def lifecycle-hooks (ref {}))
+
+(defn make-lifecycle-hooks [slug]
+  (let [hooks {(keyword slug)
+               {:before_create  (ref {})
+                :after_create   (ref {})
+                :before_update  (ref {})
+                :after_update   (ref {})
+                :before_save    (ref {})
+                :after_save     (ref {})
+                :before_destroy (ref {})
+                :after_destroy  (ref {})}}]
+    (dosync
+     (alter lifecycle-hooks merge hooks))))
+
+(defn run-hook [slug timing env]
+  (let [kind (lifecycle-hooks (keyword slug))]
+    (if kind
+      (let [hook (kind (keyword timing))]
+        (map #((hook %) env) (keys @hook))))))
+
+(defn add-hook [slug timing id hook]
+  (dosync
+   (alter (-> lifecycle-hooks (keyword slug) (keyword timing))
+          merge {id hook})))
+
 (defn invoke-model [model]
   (let [fields (db/query "select * from field where model_id = %1" (model :id))
         field-map (seq-to-map #(keyword (-> % :row :name)) (map make-field fields))]
+    (make-lifecycle-hooks (model :slug))
     (assoc model :fields field-map)))
 
 (defn alter-models [model]
@@ -379,8 +406,13 @@
 (defn update-content [slug id spec]
   (let [model (models (keyword slug))
         values (reduce #(update-values %2 spec %1) {} (vals (model :fields)))
+        env {:model model :values values :spec spec}
+        _save (run-hook slug :before_save env)
+        _update (run-hook slug :before_update env)
         success (db/update slug values "id = %1" id)
         post (reduce #(post-update %2 %1) (assoc spec :id id) (vals (model :fields)))]
+    (run-hook slug :after_update (merge env {:content post}))
+    (run-hook slug :after_save (merge env {:content post}))
     post))
 
 (defn create-content [slug spec]
@@ -388,10 +420,20 @@
     (update-content slug (spec :id) spec)
     (let [model (models (keyword slug))
           values (reduce #(update-values %2 spec %1) {} (vals (dissoc (model :fields) :updated_at)))
+          env {:model model :values values :spec spec}
+          _save (run-hook slug :before_save env)
+          _create (run-hook slug :before_create env)
           content (db/insert slug (dissoc values :updated_at))
-          merged (merge spec content)]
-      (reduce #(post-update %2 %1) merged (vals (model :fields))))))
+          merged (merge spec content)
+          post (reduce #(post-update %2 %1) merged (vals (model :fields)))]
+      (run-hook slug :after_create (merge env {:content post}))
+      (run-hook slug :after_save (merge env {:content post}))
+      post)))
 
 (defn delete-content [slug id]
-  (db/delete slug "id = %1" id))
+  (let [content (db/choose slug id)
+        env {:content content :slug slug}]
+    (run-hook slug :before_destroy env)
+    (db/delete slug "id = %1" id)
+    (run-hook slug :after_destroy env)))
 
