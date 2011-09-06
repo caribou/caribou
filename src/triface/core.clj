@@ -27,10 +27,10 @@
 
 (defn render [slug content opts]
   (let [model (model/models (keyword slug))]
-    (model/model-render model content (debug opts))))
+    (model/model-render model content opts)))
 
 (defn render-field [slug content field opts]
-  (model/render (((model/models (keyword slug)) :fields) (keyword field)) content (debug opts)))
+  (model/render (((model/models (keyword slug)) :fields) (keyword field)) content opts))
 
 ;; actions ------------------------------------------------
 
