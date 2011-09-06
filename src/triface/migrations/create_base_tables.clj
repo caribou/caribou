@@ -18,6 +18,7 @@
    [:nested :boolean "DEFAULT false"]
    [:locked :boolean "DEFAULT false"]
    [:abstract :boolean "DEFAULT false"]
+   [:searchable :boolean "DEFAULT false"]
    [:ancestor_id :integer "DEFAULT NULL"]
    [:created_at "timestamp with time zone" "NOT NULL" "DEFAULT current_timestamp"]
    [:updated_at "timestamp with time zone" "NOT NULL" "DEFAULT current_timestamp"]))
@@ -42,6 +43,8 @@
    [:locked :boolean "DEFAULT false"]
    [:immutable :boolean "DEFAULT false"]
    [:editable :boolean "DEFAULT true"]
+   [:searchable :boolean "DEFAULT false"]
+   [:dependent :boolean "DEFAULT false"]
    [:created_at "timestamp with time zone" "NOT NULL" "DEFAULT current_timestamp"]
    [:updated_at "timestamp with time zone" "NOT NULL" "DEFAULT current_timestamp"]))
 

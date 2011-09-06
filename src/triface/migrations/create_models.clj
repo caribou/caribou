@@ -92,6 +92,13 @@
       :model_id model-id})
     (db/insert
      :field
+     {:name "searchable"
+      :slug "searchable"
+      :type "boolean"
+      :locked true
+      :model_id model-id})
+    (db/insert
+     :field
      {:name "ancestor_id"
       :slug "ancestor_id"
       :type "integer"
@@ -252,6 +259,20 @@
       :locked true
       :immutable true
       :editable false
+      :model_id model-id})
+    (db/insert
+     :field
+     {:name "searchable"
+      :slug "searchable"
+      :type "boolean"
+      :locked true
+      :model_id model-id})
+    (db/insert
+     :field
+     {:name "dependent"
+      :slug "dependent"
+      :type "boolean"
+      :locked true
       :model_id model-id})
     (db/insert
      :field

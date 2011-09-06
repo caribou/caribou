@@ -6,7 +6,7 @@
            :locked true
            :nested true
            :fields [{:name "name" :type "string"}
-                    {:name "slug" :type "string"}
+                    {:name "slug" :type "slug" :link_slug "name"}
                     {:name "action" :type "string"}
                     {:name "parent_id" :type "integer"}]})
 
@@ -41,7 +41,7 @@
            :position 8
            :locked true
            :fields [{:name "name" :type "string"}
-                    {:name "slug" :type "string"}
+                    {:name "slug" :type "slug" :link_slug "name"}
                     {:name "description" :type "text"}]})
 
 (def domain {:name "domain"

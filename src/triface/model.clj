@@ -9,7 +9,8 @@
   (setup-field [this] "further processing on creation of field")
   (cleanup-field [this] "further processing on creation of field")
   (target-for [this] "retrieves the model this field points to, if applicable")
-  (update-values [this content values] "adds to the map of values that will be committed to the db")
+  (update-values [this content values] "adds to the map of values that will be committed to the db for this row")
+  (post-update [this content] "any processing that is required after the content is created/updated")
   (field-from [this content opts] "retrieves the value for this field from this content item")
   (render [this content opts] "renders out a single field from this content item"))
 
@@ -20,6 +21,7 @@
   (cleanup-field [this] nil)
   (target-for [this] nil)
   (update-values [this content values] values)
+  (post-update [this content] content)
   (field-from [this content opts] (content (keyword (row :name))))
   (render [this content opts] (field-from this content opts)))
   
@@ -44,6 +46,7 @@
           (catch Exception e values))
         values)))
 
+  (post-update [this content] content)
   (field-from [this content opts] (content (keyword (row :name))))
   (render [this content opts] (field-from this content opts)))
   
@@ -58,6 +61,7 @@
       (if (contains? content key)
         (assoc values key (content key))
         values)))
+  (post-update [this content] content)
   (field-from [this content opts] (content (keyword (row :name))))
   (render [this content opts] (field-from this content opts)))
 
@@ -73,6 +77,7 @@
        (contains? content key) (assoc values key (slugify (content key)))
        (env :link) (assoc values key (slugify (content (keyword (-> env :link :slug)))))
        :else values)))
+  (post-update [this content] content)
   (field-from [this content opts] (content (keyword (row :name))))
   (render [this content opts] (field-from this content opts)))
 
@@ -87,6 +92,7 @@
       (if (contains? content key)
         (assoc values key (content key))
         values)))
+  (post-update [this content] content)
   (field-from [this content opts] (content (keyword (row :name))))
   (render [this content opts] (field-from this content opts)))
 
@@ -107,6 +113,7 @@
             (assoc values key tval))
           (catch Exception e values))
         values)))
+  (post-update [this content] content)
   (field-from [this content opts] (content (keyword (row :name))))
   (render [this content opts] (field-from this content opts)))
 
@@ -122,6 +129,7 @@
        (= key :updated_at) (assoc values key :current_timestamp)
        (contains? content key) (assoc values key (content key))
        :else values)))
+  (post-update [this content] content)
   (field-from [this content opts] (content (keyword (row :name))))
   (render [this content opts] (str (field-from this content opts))))
 
@@ -132,6 +140,7 @@
 (def destroy-field)
 (def model-render)
 (def invoke-model)
+(def create-content)
 (def models (ref {}))
 
 (defn from [model content opts]
@@ -160,6 +169,21 @@
   (target-for [this] (models (-> this :row :target_id)))
 
   (update-values [this content values] values)
+
+  (post-update [this content]
+    (let [collection ((debug content) (keyword (row :slug)))]
+      (if (log :collection collection)
+        (let [part (debug (env :link))
+              part-key (debug (keyword (str (part :slug) "_id")))
+              model (models (part :model_id))
+              updated (doall
+                       (map
+                        #(create-content
+                          (model :slug)
+                          (assoc % part-key (content :id)))
+                        collection))]
+          (assoc content (keyword (row :slug)) updated))
+        content)))
 
   (field-from [this content opts]
     (let [include (if (opts :include) ((opts :include) (keyword (row :name))))]
@@ -207,6 +231,8 @@
 
   (update-values [this content values] values)
 
+  (post-update [this content] content)
+
   (field-from [this content opts]
     (let [include (if (opts :include) ((opts :include) (keyword (row :name))))]
       (if include
@@ -227,6 +253,7 @@
   (cleanup-field [this] nil)
   (target-for [this] nil)
   (update-values [this content values])
+  (post-update [this content] content)
   (field-from [this content opts])
   (render [this content opts] ""))
 
@@ -235,8 +262,8 @@
    :integer (fn [row] (IntegerField. row {}))
    :string (fn [row] (StringField. row {}))
    :slug (fn [row] 
-           (let [link (if (row :link_id) (db/choose :field (row :link_id)))]
-             (SlugField. row {:link link})))
+           (let [link (db/choose :field (row :link_id))]
+             (SlugField. (assoc row :link_id (link :id)) {:link link})))
    :text (fn [row] (TextField. row {}))
    :boolean (fn [row] (BooleanField. row {}))
    :timestamp (fn [row] (TimestampField. row {}))
@@ -308,9 +335,12 @@
 (defn create-field [spec]
   (let [ubermodel (models :field)
         values (reduce #(update-values %2 spec %1) {} (vals (ubermodel :fields)))
-        field-row (db/insert :field (dissoc values :updated_at))
+        linked (if (spec :link_slug)
+                 (assoc values :link_id ((first (db/fetch :field "model_id = %1 and slug = '%2'" (spec :model_id) (spec :link_slug))) :id))
+                 values)
+        field-row (db/insert :field (dissoc linked :updated_at))
         field (make-field field-row)
-        model (db/choose :model (spec :model_id))]
+        model (models (spec :model_id))]
     (doall (map #(db/add-column (model :name) (name (first %)) (rest %)) (table-additions field)))
     field))
 
@@ -348,17 +378,21 @@
     (invoke-models)
     model))
 
-(defn create-content [slug spec]
-  (let [model (models (keyword slug))
-        values (reduce #(update-values %2 spec %1) {} (vals (dissoc (model :fields) :updated_at)))
-        content (db/insert slug (dissoc values :updated_at))]
-    content))
-
 (defn update-content [slug id spec]
   (let [model (models (keyword slug))
-        values (reduce #(update-values %2 spec %1) {} (vals (model :fields)))]
-    (db/update slug values "id = %1" id)
-    (assoc spec :id id)))
+        values (reduce #(update-values %2 spec %1) {} (vals (model :fields)))
+        success (db/update slug values "id = %1" id)
+        post (reduce #(post-update %2 %1) (assoc spec :id id) (vals (model :fields)))]
+    post))
+
+(defn create-content [slug spec]
+  (if (spec :id)
+    (update-content slug (spec :id) spec)
+    (let [model (models (keyword slug))
+          values (reduce #(update-values %2 spec %1) {} (vals (dissoc (model :fields) :updated_at)))
+          content (db/insert slug (dissoc values :updated_at))
+          merged (merge spec content)]
+      (reduce #(post-update %2 %1) merged (vals (model :fields))))))
 
 (defn delete-content [slug id]
   (db/delete slug "id = %1" id))

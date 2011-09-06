@@ -5,6 +5,7 @@
                  [org.clojure/java.jdbc "0.0.3-SNAPSHOT"]
                  [postgresql/postgresql "8.4-702.jdbc4"]
                  [compojure "0.6.4"]
+                 [clojure-solr "0.2.0"]
                  [ring/ring-jetty-adapter "0.3.10"]]
   :dev-dependencies [[lein-ring "0.4.5"]
                      [org.clojure/java.jdbc "0.0.3-SNAPSHOT"]
