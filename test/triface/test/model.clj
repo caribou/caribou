@@ -1,5 +1,6 @@
 (ns triface.test.model
-  (:require [triface.db :as db])
+  (:require [triface.db :as db]
+            [triface.util :as util])
   (:use [triface.debug])
   (:use [triface.model])
   (:use [clojure.test]))
@@ -64,12 +65,10 @@
         (is (= (zap-reload :yobob) "oooooo_mmmmm_zzzzzzzzzz"))
         (is (= "OOOOOO mmmmm   ZZZZZZZZZZ" ((from zap zap-reload {:include {}}) :ibibib)))
         (is (= 4 (count ((from zap zap-reload {:include {:yellows {}}}) :yellows))))))
-    (catch Exception e (throw e))
-    (finally 
-     
+    (catch Exception e (util/render-exception e))
+    (finally      
      (if (db/table? :yellow) (delete-model :yellow))
      (if (db/table? :zap) (delete-model :zap))
-
      )))
 
 
