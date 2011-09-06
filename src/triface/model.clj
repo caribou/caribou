@@ -9,7 +9,8 @@
   (setup-field [this] "further processing on creation of field")
   (cleanup-field [this] "further processing on creation of field")
   (target-for [this] "retrieves the model this field points to, if applicable")
-  (update-values [this content values] "adds to the map of values that will be committed to the db")
+  (update-values [this content values] "adds to the map of values that will be committed to the db for this row")
+  (post-update [this content] "any processing that is required after the content is created/updated")
   (field-from [this content opts] "retrieves the value for this field from this content item")
   (render [this content opts] "renders out a single field from this content item"))
 
@@ -20,12 +21,15 @@
   (cleanup-field [this] nil)
   (target-for [this] nil)
   (update-values [this content values] values)
+  (post-update [this content] content)
   (field-from [this content opts] (content (keyword (row :name))))
   (render [this content opts] (field-from this content opts)))
   
 (defrecord IntegerField [row env]
   Field
-  (table-additions [this] [[(keyword (row :name)) :integer "DEFAULT 0"]])
+  (table-additions [this]
+    (let [default (or (env :default) "NULL")]
+      [[(keyword (row :name)) :integer (str "DEFAULT " default)]]))
   (setup-field [this] nil)
   (cleanup-field [this] nil)
   (target-for [this] nil)
@@ -42,6 +46,7 @@
           (catch Exception e values))
         values)))
 
+  (post-update [this content] content)
   (field-from [this content opts] (content (keyword (row :name))))
   (render [this content opts] (field-from this content opts)))
   
@@ -56,6 +61,7 @@
       (if (contains? content key)
         (assoc values key (content key))
         values)))
+  (post-update [this content] content)
   (field-from [this content opts] (content (keyword (row :name))))
   (render [this content opts] (field-from this content opts)))
 
@@ -71,6 +77,7 @@
        (contains? content key) (assoc values key (slugify (content key)))
        (env :link) (assoc values key (slugify (content (keyword (-> env :link :slug)))))
        :else values)))
+  (post-update [this content] content)
   (field-from [this content opts] (content (keyword (row :name))))
   (render [this content opts] (field-from this content opts)))
 
@@ -85,6 +92,7 @@
       (if (contains? content key)
         (assoc values key (content key))
         values)))
+  (post-update [this content] content)
   (field-from [this content opts] (content (keyword (row :name))))
   (render [this content opts] (field-from this content opts)))
 
@@ -105,6 +113,7 @@
             (assoc values key tval))
           (catch Exception e values))
         values)))
+  (post-update [this content] content)
   (field-from [this content opts] (content (keyword (row :name))))
   (render [this content opts] (field-from this content opts)))
 
@@ -120,6 +129,7 @@
        (= key :updated_at) (assoc values key :current_timestamp)
        (contains? content key) (assoc values key (content key))
        :else values)))
+  (post-update [this content] content)
   (field-from [this content opts] (content (keyword (row :name))))
   (render [this content opts] (str (field-from this content opts))))
 
@@ -130,6 +140,7 @@
 (def destroy-field)
 (def model-render)
 (def invoke-model)
+(def create-content)
 (def models (ref {}))
 
 (defn from [model content opts]
@@ -141,8 +152,8 @@
 
   (setup-field [this]
     (if (or (nil? (row :link_id)) (zero? (row :link_id)))
-      (let [model (db/choose :model (row :model_id))
-            part (create-field {:name (:name model)
+      (let [model (models (row :model_id))
+            part (create-field {:name (model :name)
                                 :type "part"
                                 :model_id (row :target_id)
                                 :target_id (row :model_id)
@@ -151,23 +162,39 @@
         (db/update :field {:link_id (-> part :row :id)} "id = %1" (row :id)))))
 
   (cleanup-field [this]
-    (destroy-field (make-field (-> env :link))))
+    (try
+      (destroy-field (make-field (-> env :link)))
+      (catch Exception e (str e))))
 
   (target-for [this] (models (-> this :row :target_id)))
 
   (update-values [this content values] values)
 
+  (post-update [this content]
+    (let [collection (content (keyword (row :slug)))]
+      (if collection
+        (let [part (env :link)
+              part-key (keyword (str (part :slug) "_id"))
+              model (models (part :model_id))
+              updated (doall
+                       (map
+                        #(create-content
+                          (model :slug)
+                          (assoc % part-key (content :id)))
+                        collection))]
+          (assoc content (keyword (row :slug)) updated))
+        content)))
+
   (field-from [this content opts]
     (let [include (if (opts :include) ((opts :include) (keyword (row :name))))]
       (if include
-        (let [hole (dissoc (opts :include) (keyword (row :name)))
-              down (assoc opts :include (merge hole include))
+        (let [down (assoc opts :include include)
               parts (db/fetch (-> (target-for this) :slug) (str (-> this :env :link :slug) "_id = %1") (content :id))]
           (map #(from (target-for this) % down) parts))
         [])))
 
   (render [this content opts]
-    (map #(model-render (target-for this) % opts) (field-from this content opts))))
+    (map #(model-render (target-for this) % (assoc opts :include ((opts :include) (keyword (row :name))))) (field-from this content opts))))
 
 (defrecord PartField [row env]
   Field
@@ -177,8 +204,24 @@
   (setup-field [this]
     (let [model_id (-> this :row :model_id)
           model (models model_id)]
-      (add-fields model [{:name (str (row :name) "_id") :type "integer" :editable false :model_id model_id}
-                         {:name (str (row :name) "_position") :type "integer" :editable false :model_id model_id}])))
+      (if (or (nil? (row :link_id)) (zero? (row :link_id)))
+        (let [collection (create-field {:name (:name model)
+                                        :type "collection"
+                                        :model_id (row :target_id)
+                                        :target_id (row :model_id)
+                                        :link_id (row :id)})]
+          (setup-field collection)
+          (db/update :field {:link_id (-> collection :row :id)} "id = %1" (row :id))))
+
+      (add-fields model
+                  [{:name (str (row :name) "_id")
+                    :type "integer"
+                    :editable false
+                    :model_id model_id}
+                   {:name (str (row :name) "_position")
+                    :type "integer"
+                    :editable false
+                    :model_id model_id}])))
 
   (cleanup-field [this]
     (destroy-field (make-field (-> env :link))))
@@ -187,18 +230,19 @@
 
   (update-values [this content values] values)
 
+  (post-update [this content] content)
+
   (field-from [this content opts]
     (let [include (if (opts :include) ((opts :include) (keyword (row :name))))]
       (if include
-        (let [hole (dissoc (opts :include) (keyword (row :name)))
-              down (assoc opts :include (merge hole include))
+        (let [down (assoc opts :include include)
               collector (db/choose (-> (target-for this) :slug) (content (keyword (str (row :name) "_id"))))]
           (from (target-for this) collector down)))))
 
   (render [this content opts]
     (let [field (field-from this content opts)]
       (if field
-        (model-render (target-for this) field opts)))))
+        (model-render (target-for this) field (assoc opts :include ((opts :include) (keyword (row :name)))))))))
 
 (defrecord LinkField [row env]
   Field
@@ -207,6 +251,7 @@
   (cleanup-field [this] nil)
   (target-for [this] nil)
   (update-values [this content values])
+  (post-update [this content] content)
   (field-from [this content opts])
   (render [this content opts] ""))
 
@@ -215,8 +260,8 @@
    :integer (fn [row] (IntegerField. row {}))
    :string (fn [row] (StringField. row {}))
    :slug (fn [row] 
-           (let [link (if (row :link_id) (db/choose :field (row :link_id)))]
-             (SlugField. row {:link link})))
+           (let [link (db/choose :field (row :link_id))]
+             (SlugField. (assoc row :link_id (link :id)) {:link link})))
    :text (fn [row] (TextField. row {}))
    :boolean (fn [row] (BooleanField. row {}))
    :timestamp (fn [row] (TimestampField. row {}))
@@ -251,15 +296,48 @@
   ((field-constructors (keyword (row :type))) row))
 
 (defn fields-render [fields content opts]
-  (reduce #(assoc %1 (keyword (-> %2 :row :name)) (render %2 content opts)) content fields))
+  (reduce #(assoc %1 (keyword (-> %2 :row :name))
+             (render %2 content opts))
+          content fields))
 
 (defn model-render [model content opts]
   (fields-render (vals (model :fields)) content opts))
 
+(def lifecycle-hooks (ref {}))
+
+(defn make-lifecycle-hooks [slug]
+  (let [hooks {(keyword slug)
+               {:before_create  (ref {})
+                :after_create   (ref {})
+                :before_update  (ref {})
+                :after_update   (ref {})
+                :before_save    (ref {})
+                :after_save     (ref {})
+                :before_destroy (ref {})
+                :after_destroy  (ref {})}}]
+    (dosync
+     (alter lifecycle-hooks merge hooks))))
+
+(defn run-hook [slug timing env]
+  (let [kind (lifecycle-hooks (keyword slug))]
+    (if kind
+      (let [hook (kind (keyword timing))]
+        (map #((hook %) env) (keys @hook))))))
+
+(defn add-hook [slug timing id hook]
+  (dosync
+   (alter (-> lifecycle-hooks (keyword slug) (keyword timing))
+          merge {id hook})))
+
 (defn invoke-model [model]
   (let [fields (db/query "select * from field where model_id = %1" (model :id))
         field-map (seq-to-map #(keyword (-> % :row :name)) (map make-field fields))]
+    (make-lifecycle-hooks (model :slug))
     (assoc model :fields field-map)))
+
+(defn alter-models [model]
+  (dosync
+   (alter models merge {(model :slug) model (model :id) model})))
 
 (defn model-row-by-slug [table]
   (first (db/query "select * from model where slug = '%1'" (name table))))
@@ -273,18 +351,21 @@
     (dosync
      (alter models 
             (fn [in-ref new-models] new-models)
-            (merge (seq-to-map #(keyword (% :name)) invoked)
+            (merge (seq-to-map #(keyword (% :slug)) invoked)
                    (seq-to-map #(% :id) invoked))))))
 
 (defn create-model-table [name]
   (db/create-table (keyword name) []))
 
 (defn create-field [spec]
-  (let [ubermodel (model-for :field)
-        values (reduce #(update-values %2 spec %1) {} (vals (dissoc (ubermodel :fields) :updated_at)))
-        field-row (db/insert :field values)
+  (let [ubermodel (models :field)
+        values (reduce #(update-values %2 spec %1) {} (vals (ubermodel :fields)))
+        linked (if (spec :link_slug)
+                 (assoc values :link_id ((first (db/fetch :field "model_id = %1 and slug = '%2'" (spec :model_id) (spec :link_slug))) :id))
+                 values)
+        field-row (db/insert :field (dissoc linked :updated_at))
         field (make-field field-row)
-        model (db/choose :model (spec :model_id))]
+        model (models (spec :model_id))]
     (doall (map #(db/add-column (model :name) (name (first %)) (rest %)) (table-additions field)))
     field))
 
@@ -295,9 +376,10 @@
 
 (defn create-model [spec]
   (create-model-table (spec :name))
-  (let [ubermodel (model-for :model)
-        values (reduce #(update-values %2 spec %1) {} (vals (dissoc (ubermodel :fields) :updated_at)))
-        model (db/insert :model values)
+  (let [ubermodel (models :model)
+        values (reduce #(update-values %2 spec %1) {} (vals (ubermodel :fields)))
+        model (db/insert :model (dissoc values :updated_at))
+        invoked (alter-models model)
         fields (add-fields model (concat (spec :fields) base-fields))]
       (invoke-models)
       (models (keyword (model :slug)))))
@@ -314,25 +396,44 @@
   '())
 
 (defn delete-model [slug]
-  (let [model (model-for (keyword slug))]
+  (let [model (models (keyword slug))]
     (remove-fields (vals (model :fields)))
     (db/drop-table (model :slug))
     (db/delete :model "id = %1" (model :id))
     (invoke-models)
     model))
 
-(defn create-content [slug spec]
-  (let [model (models (keyword slug))
-        values (reduce #(update-values %2 spec %1) {} (vals (dissoc (model :fields) :updated_at)))
-        content (db/insert slug values)]
-    content))
-
 (defn update-content [slug id spec]
   (let [model (models (keyword slug))
-        values (reduce #(update-values %2 spec %1) {} (vals (model :fields)))]
-    (db/update slug values "id = %1" id)
-    (assoc spec :id id)))
+        values (reduce #(update-values %2 spec %1) {} (vals (model :fields)))
+        env {:model model :values values :spec spec}
+        _save (run-hook slug :before_save env)
+        _update (run-hook slug :before_update env)
+        success (db/update slug values "id = %1" id)
+        post (reduce #(post-update %2 %1) (assoc spec :id id) (vals (model :fields)))]
+    (run-hook slug :after_update (merge env {:content post}))
+    (run-hook slug :after_save (merge env {:content post}))
+    post))
+
+(defn create-content [slug spec]
+  (if (spec :id)
+    (update-content slug (spec :id) spec)
+    (let [model (models (keyword slug))
+          values (reduce #(update-values %2 spec %1) {} (vals (dissoc (model :fields) :updated_at)))
+          env {:model model :values values :spec spec}
+          _save (run-hook slug :before_save env)
+          _create (run-hook slug :before_create env)
+          content (db/insert slug (dissoc values :updated_at))
+          merged (merge spec content)
+          post (reduce #(post-update %2 %1) merged (vals (model :fields)))]
+      (run-hook slug :after_create (merge env {:content post}))
+      (run-hook slug :after_save (merge env {:content post}))
+      post)))
 
 (defn delete-content [slug id]
-  (db/delete slug "id = %1" id))
+  (let [content (db/choose slug id)
+        env {:content content :slug slug}]
+    (run-hook slug :before_destroy env)
+    (db/delete slug "id = %1" id)
+    (run-hook slug :after_destroy env)))
 

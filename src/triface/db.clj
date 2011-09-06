@@ -1,6 +1,7 @@
 (ns triface.db
   (:use [triface.debug])
   (:use [clojure.contrib.str-utils])
+  (:require [clojure.contrib.generic.functor :as fun])
   (:require [clojure.java.jdbc :as sql]))
 
 (def db
@@ -10,7 +11,10 @@
    :user "postgres"})
 
 (defn zap [s]
-  (.replaceAll (re-matcher #"[\\\";#%]" (.replaceAll (str s) "'" "''")) ""))
+  (cond
+   (string? s) (.replaceAll (re-matcher #"[\\\";#%]" (.replaceAll (str s) "'" "''")) "")
+   (keyword? s) (zap (name s))
+   :else s))
 
 (defn clause [pred args]
   (letfn [(rep [s i] (.replaceAll s (str "%" (inc i))
@@ -44,6 +48,13 @@
   (str-join ", " (map #(str (name %) " = " (sqlize (values %))) (keys values))))
 
 (defn insert [table values]
+  ;; (let [keys (str-join "," (map sqlize (keys mapping)))
+  ;;       values (str-join "," (map sqlize (vals mapping)))
+  ;;       q (clause "insert into %1 (%2) values (%3)" [(zap (name table)) keys values])]
+  ;;   (sql/with-connection db
+  ;;     (sql/do-commands
+  ;;       (log :db q)))))
+
   (log :db (clause "insert into %1 values %2" [(name table) (value-map values)]))
   (sql/with-connection db
     (sql/insert-record table values)))

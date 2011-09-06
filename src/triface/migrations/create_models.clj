@@ -92,6 +92,13 @@
       :model_id model-id})
     (db/insert
      :field
+     {:name "searchable"
+      :slug "searchable"
+      :type "boolean"
+      :locked true
+      :model_id model-id})
+    (db/insert
+     :field
      {:name "ancestor_id"
       :slug "ancestor_id"
       :type "integer"
@@ -255,6 +262,20 @@
       :model_id model-id})
     (db/insert
      :field
+     {:name "searchable"
+      :slug "searchable"
+      :type "boolean"
+      :locked true
+      :model_id model-id})
+    (db/insert
+     :field
+     {:name "dependent"
+      :slug "dependent"
+      :type "boolean"
+      :locked true
+      :model_id model-id})
+    (db/insert
+     :field
      {:name "created_at"
       :slug "created_at"
       :type "timestamp"
@@ -284,6 +305,7 @@
   (create-model-fields)
   (create-field-model)
   (create-field-fields)
-  (forge-link)))
+  (forge-link)
+  (invoke-models)))
 
 

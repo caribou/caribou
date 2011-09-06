@@ -69,7 +69,8 @@
     (render slug (content-item slug id) (assoc params :include include))))
 
 (action field-detail [params slug id field]
-  (render-field slug (content-item slug id) field params))
+  (let [include {(keyword field) (process-include (params :include))}]
+    (render-field slug (content-item slug id) field (assoc params :include include))))
 
 (action create-content [params slug]
   (render slug (model/create-content slug (params (keyword slug))) params))

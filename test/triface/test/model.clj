@@ -38,11 +38,11 @@
                                     :position 3
                                     :fields [{:name "gogon" :type "string"}
                                              {:name "wibib" :type "boolean"}]})
-
           zap-row (create-model {:name "zap"
                                  :description "zap zappity zapzap"
                                  :position 3
                                  :fields [{:name "ibibib" :type "string"}
+                                          {:name "yobob" :type "slug" :link_slug "ibibib"}
                                           {:name "yellows" :type "collection" :target_id (yellow-row :id)}]})
 
           yellow (model-for :yellow)
@@ -53,9 +53,17 @@
           yyyz (create-content :yellow {:gogon "igigi" :wibib false :zap_id (zzzap :id)})
           yy (create-content :yellow {:gogon "lalal" :wibib true :zap_id (zzzap :id)})]
       (update-content :yellow (yyy :id) {:gogon "binbin"})
-      (is (= ((db/choose :yellow (yyy :id)) :gogon) "binbin"))
-      (is (= "kkkkkkk" ((from zap zzzap {:include {}}) :ibibib)))
-      (is (= 3 (count ((from zap zzzap {:include {:yellows {}}}) :yellows)))))
+      (update-content :zap (zzzap :id)
+                      {:ibibib "OOOOOO mmmmm   ZZZZZZZZZZ"
+                       :yellows [{:id (yyyz :id) :gogon "IIbbiiIIIbbibib"}
+                                 {:gogon "nonononononon"}]})
+      
+      (let [zap-reload (db/choose :zap (zzzap :id))]
+        (is (= ((db/choose :yellow (yyyz :id)) :gogon) "IIbbiiIIIbbibib"))
+        (is (= ((db/choose :yellow (yyy :id)) :gogon) "binbin"))
+        (is (= (zap-reload :yobob) "oooooo_mmmmm_zzzzzzzzzz"))
+        (is (= "OOOOOO mmmmm   ZZZZZZZZZZ" ((from zap zap-reload {:include {}}) :ibibib)))
+        (is (= 4 (count ((from zap zap-reload {:include {:yellows {}}}) :yellows))))))
     (catch Exception e (throw e))
     (finally 
      
