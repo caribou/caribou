@@ -4,13 +4,12 @@
   (:use triface.debug)
   (:require [triface.db :as db]
             [triface.model :as model]
+            [triface.util :as util]
             [compojure.route :as route]
             [ring.adapter.jetty :as ring]
             [compojure.handler :as handler]
             [clojure.contrib.string :as string]
             [clojure.contrib.json :as json]))
-
-(import java.sql.SQLException)
 
 (def error
   {:message "Unable to process request"
@@ -34,15 +33,6 @@
 
 ;; actions ------------------------------------------------
 
-(defn render-exception [e]
-  (let [cause (.getCause e)]
-    (if cause
-      (if (isa? cause SQLException)
-        (let [next (.getNextException cause)]
-          (str next (.printStackTrace next)))
-        (str cause (.printStackTrace cause)))
-      (str e (.printStackTrace e)))))
-
 (defn process-include [include]
   (if (and include (not (empty? include)))
     (let [clauses (string/split #"," include)
@@ -59,7 +49,7 @@
          (json/json-str ~expr)
          (catch Exception e#
            (log :error (str "error rendering /" (str-join "/" [~@(rest path-args)]) ": "
-                     (render-exception e#)))
+                     (util/render-exception e#)))
            (json/json-str
             ~(reduce #(assoc %1 (keyword %2) %2) error path-args)))))))
 
