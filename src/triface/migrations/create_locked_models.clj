@@ -1,5 +1,7 @@
 (in-ns 'triface.migration)
 
+(invoke-models)
+
 (defn lock [fields]
   (map #(assoc % :locked true) fields))
 
@@ -58,7 +60,7 @@
   [page view locale asset site domain])
 
 (defn spawn-models []
-  (doall (map model/create-model incubating)))
+  (doall (map #(model/create :model %) incubating)))
 
 (def migrate
   (fn []

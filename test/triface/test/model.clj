@@ -12,12 +12,13 @@
 
 (deftest model-lifecycle-test
   (invoke-models)
-  (let [model (create-model {:name "yellow"
-                             :description "yellowness yellow yellow"
-                             :position 3
-                             :fields [{:name "gogon" :type "string"}
-                                      {:name "wibib" :type "boolean"}]})
-        yellow (db/insert :yellow {:gogon "obobo" :wibib true})]
+  (let [model (create :model
+         {:name "yellow"
+          :description "yellowness yellow yellow"
+          :position 3
+          :fields [{:name "gogon" :type "string"}
+                   {:name "wibib" :type "boolean"}]})
+        yellow (create :yellow {:gogon "obobo" :wibib true})]
 
     (is (<= 8 (count (model :fields))))
     (is (= (model :name) "yellow"))
@@ -34,27 +35,30 @@
 (deftest model-interaction-test
   (invoke-models)
   (try
-    (let [yellow-row (create-model {:name "yellow"
-                                    :description "yellowness yellow yellow"
-                                    :position 3
-                                    :fields [{:name "gogon" :type "string"}
-                                             {:name "wibib" :type "boolean"}]})
-          zap-row (create-model {:name "zap"
-                                 :description "zap zappity zapzap"
-                                 :position 3
-                                 :fields [{:name "ibibib" :type "string"}
-                                          {:name "yobob" :type "slug" :link_slug "ibibib"}
-                                          {:name "yellows" :type "collection" :target_id (yellow-row :id)}]})
+    (let [yellow-row (create :model
+           {:name "yellow"
+            :description "yellowness yellow yellow"
+            :position 3
+            :fields [{:name "gogon" :type "string"}
+                     {:name "wibib" :type "boolean"}]})
 
-          yellow (model-for :yellow)
-          zap (model-for :zap)
+          zap-row (create :model
+            {:name "zap"
+             :description "zap zappity zapzap"
+             :position 3
+             :fields [{:name "ibibib" :type "string"}
+                      {:name "yobob" :type "slug" :link_slug "ibibib"}
+                      {:name "yellows" :type "collection" :target_id (yellow-row :id)}]})
 
-          zzzap (create-content :zap {:ibibib "kkkkkkk"})
-          yyy (create-content :yellow {:gogon "obobo" :wibib true :zap_id (zzzap :id)})
-          yyyz (create-content :yellow {:gogon "igigi" :wibib false :zap_id (zzzap :id)})
-          yy (create-content :yellow {:gogon "lalal" :wibib true :zap_id (zzzap :id)})]
-      (update-content :yellow (yyy :id) {:gogon "binbin"})
-      (update-content :zap (zzzap :id)
+          yellow (models :yellow)
+          zap (models :zap)
+
+          zzzap (create :zap {:ibibib "kkkkkkk"})
+          yyy (create :yellow {:gogon "obobo" :wibib true :zap_id (zzzap :id)})
+          yyyz (create :yellow {:gogon "igigi" :wibib false :zap_id (zzzap :id)})
+          yy (create :yellow {:gogon "lalal" :wibib true :zap_id (zzzap :id)})]
+      (update :yellow (yyy :id) {:gogon "binbin"})
+      (update :zap (zzzap :id)
                       {:ibibib "OOOOOO mmmmm   ZZZZZZZZZZ"
                        :yellows [{:id (yyyz :id) :gogon "IIbbiiIIIbbibib"}
                                  {:gogon "nonononononon"}]})

@@ -75,7 +75,11 @@
     (let [key (keyword (row :name))]
       (cond
        (contains? content key) (assoc values key (slugify (content key)))
-       (env :link) (assoc values key (slugify (content (keyword (-> env :link :slug)))))
+       (env :link) 
+         (let [icon (content (keyword (-> env :link :slug)))]
+           (if icon
+             (assoc values key (slugify icon))
+             values))
        :else values)))
   (post-update [this content] content)
   (field-from [this content opts] (content (keyword (row :name))))
@@ -135,12 +139,13 @@
 
 ;; forward reference for CollectionField
 (def make-field)
-(def create-field)
-(def add-fields)
+;; (def create-field)
+;; (def add-fields)
 (def destroy-field)
 (def model-render)
 (def invoke-model)
-(def create-content)
+(def create)
+(def update)
 (def models (ref {}))
 
 (defn from [model content opts]
@@ -153,12 +158,14 @@
   (setup-field [this]
     (if (or (nil? (row :link_id)) (zero? (row :link_id)))
       (let [model (models (row :model_id))
-            part (create-field {:name (model :name)
-                                :type "part"
-                                :model_id (row :target_id)
-                                :target_id (row :model_id)
-                                :link_id (row :id)})]
-        (setup-field part)
+            target (models (row :target_id))
+            part (create :field
+                   {:name (model :name)
+                    :type "part"
+                    :model_id (row :target_id)
+                    :target_id (row :model_id)
+                    :link_id (row :id)
+                    :_parent target})]
         (db/update :field {:link_id (-> part :row :id)} "id = %1" (row :id)))))
 
   (cleanup-field [this]
@@ -178,9 +185,10 @@
               model (models (part :model_id))
               updated (doall
                        (map
-                        #(create-content
+                        #(create
                           (model :slug)
-                          (assoc % part-key (content :id)))
+                          (merge % {part-key (content :id)
+                                    :_parent content}))
                         collection))]
           (assoc content (keyword (row :slug)) updated))
         content)))
@@ -202,26 +210,27 @@
   (table-additions [this] [])
 
   (setup-field [this]
-    (let [model_id (-> this :row :model_id)
-          model (models model_id)]
+    (let [model_id (row :model_id)
+          model (models model_id)
+          target (models (row :target_id))]
       (if (or (nil? (row :link_id)) (zero? (row :link_id)))
-        (let [collection (create-field {:name (:name model)
-                                        :type "collection"
-                                        :model_id (row :target_id)
-                                        :target_id (row :model_id)
-                                        :link_id (row :id)})]
-          (setup-field collection)
+        (let [collection (create :field
+                           {:name (:name model)
+                            :type "collection"
+                            :model_id (row :target_id)
+                            :target_id model_id
+                            :link_id (row :id)
+                            :_parent target})]
           (db/update :field {:link_id (-> collection :row :id)} "id = %1" (row :id))))
 
-      (add-fields model
-                  [{:name (str (row :name) "_id")
-                    :type "integer"
-                    :editable false
-                    :model_id model_id}
-                   {:name (str (row :name) "_position")
-                    :type "integer"
-                    :editable false
-                    :model_id model_id}])))
+      (update :model model_id
+        {:fields
+         [{:name (str (row :name) "_id")
+           :type "integer"
+           :editable false}
+          {:name (str (row :name) "_position")
+           :type "integer"
+           :editable false}]})))
 
   (cleanup-field [this]
     (destroy-field (make-field (-> env :link))))
@@ -322,11 +331,11 @@
   (let [kind (lifecycle-hooks (keyword slug))]
     (if kind
       (let [hook (kind (keyword timing))]
-        (map #((hook %) env) (keys @hook))))))
+        (reduce #((hook %2) %1) env (keys @hook))))))
 
 (defn add-hook [slug timing id hook]
   (dosync
-   (alter (-> lifecycle-hooks (keyword slug) (keyword timing))
+   (alter ((lifecycle-hooks (keyword slug)) (keyword timing))
           merge {id hook})))
 
 (defn invoke-model [model]
@@ -342,20 +351,57 @@
 (defn model-row-by-slug [table]
   (first (db/query "select * from model where slug = '%1'" (name table))))
 
-(defn model-for [slug]
-  (invoke-model (model-row-by-slug slug)))
+(defn create-model-table [name]
+  (db/create-table (keyword name) []))
+
+(def invoke-models (debug "WTF"))
+
+(defn add-model-hooks []
+  (add-hook :model :before_create :build_table (fn [env]
+    (create-model-table (-> env :spec :name))
+    env))
+  
+  (add-hook :model :before_create :add_base_fields (fn [env]
+    (assoc-in env [:spec :fields] (concat (-> env :spec :fields) base-fields))))
+
+  (add-hook :model :after_create :invoke (fn [env]
+    (alter-models (-> env :content))
+    env))
+  
+  (add-hook :model :after_save :invoke_all (fn [env]
+    (invoke-models)
+    env)))
+  
+(defn add-field-hooks []
+  (add-hook :field :before_save :check_link_slug (fn [env]
+    (assoc env :values 
+      (if (-> env :spec :link_slug)
+        (let [model_id (-> env :spec :model_id)
+              link_slug (-> env :spec :link_slug)
+              fetch (db/fetch :field "model_id = %1 and slug = '%2'" model_id link_slug)
+              linked (first fetch)]
+          (assoc (env :values) :link_id (linked :id)))
+        (env :values)))))
+  
+  (add-hook :field :after_create :add_columns (fn [env]
+    (let [field (make-field (env :content))]
+      (doall (map #(db/add-column (-> env :spec :_parent :slug) (name (first %)) (rest %)) (table-additions field)))
+      (setup-field field)
+      (assoc env :content field))))
+  
+  (add-hook :field :after_update :reify_field (fn [env]
+    (assoc env :content (make-field (env :content))))))
 
 (defn invoke-models []
   (let [rows (db/query "select * from model")
-        invoked (map invoke-model rows)]
-    (dosync
-     (alter models 
-            (fn [in-ref new-models] new-models)
-            (merge (seq-to-map #(keyword (% :slug)) invoked)
-                   (seq-to-map #(% :id) invoked))))))
-
-(defn create-model-table [name]
-  (db/create-table (keyword name) []))
+        invoked (doall (map invoke-model rows))]
+     (add-model-hooks)
+     (add-field-hooks)
+     (dosync
+      (alter models 
+             (fn [in-ref new-models] new-models)
+             (merge (seq-to-map #(keyword (% :slug)) invoked)
+                    (seq-to-map #(% :id) invoked))))))
 
 (defn create-field [spec]
   (let [ubermodel (models :field)
@@ -374,6 +420,14 @@
     (doall (map setup-field fields))
     fields))
 
+(defn destroy-field [field]
+  (doall (map #(db/drop-column ((models (-> field :row :model_id)) :slug) (first %)) (table-additions field)))
+  (db/delete :field "id = %1" (-> field :row :id)))
+
+(defn remove-fields [fields]
+  (doall (map cleanup-field fields))
+  (doall (map destroy-field fields)))
+
 (defn create-model [spec]
   (create-model-table (spec :name))
   (let [ubermodel (models :model)
@@ -384,16 +438,8 @@
       (invoke-models)
       (models (keyword (model :slug)))))
 
-(defn destroy-field [field]
-  (doall (map #(db/drop-column ((models (-> field :row :model_id)) :slug) (first %)) (table-additions field)))
-  (db/delete :field "id = %1" (-> field :row :id)))
-
-(defn remove-fields [fields]
-  (doall (map cleanup-field fields))
-  (doall (map destroy-field fields)))
-
 (defn update-model [spec]
-  '())
+  )
 
 (defn delete-model [slug]
   (let [model (models (keyword slug))]
@@ -403,37 +449,49 @@
     (invoke-models)
     model))
 
-(defn update-content [slug id spec]
-  (let [model (models (keyword slug))
-        values (reduce #(update-values %2 spec %1) {} (vals (model :fields)))
-        env {:model model :values values :spec spec}
-        _save (run-hook slug :before_save env)
-        _update (run-hook slug :before_update env)
-        success (db/update slug values "id = %1" id)
-        post (reduce #(post-update %2 %1) (assoc spec :id id) (vals (model :fields)))]
-    (run-hook slug :after_update (merge env {:content post}))
-    (run-hook slug :after_save (merge env {:content post}))
-    post))
+(def update)
 
-(defn create-content [slug spec]
+(defn create [slug spec]
   (if (spec :id)
-    (update-content slug (spec :id) spec)
+    (update slug (spec :id) spec)
     (let [model (models (keyword slug))
           values (reduce #(update-values %2 spec %1) {} (vals (dissoc (model :fields) :updated_at)))
           env {:model model :values values :spec spec}
           _save (run-hook slug :before_save env)
-          _create (run-hook slug :before_create env)
-          content (db/insert slug (dissoc values :updated_at))
-          merged (merge spec content)
-          post (reduce #(post-update %2 %1) merged (vals (model :fields)))]
-      (run-hook slug :after_create (merge env {:content post}))
-      (run-hook slug :after_save (merge env {:content post}))
-      post)))
+          _create (run-hook slug :before_create _save)
+          content (db/insert slug (dissoc (_create :values) :updated_at))
+          merged (merge (_create :spec) content)
+          _after (run-hook slug :after_create (merge _create {:content merged}))
+          post (reduce #(post-update %2 %1) (_after :content) (vals (model :fields)))
+          _final (run-hook slug :after_save (merge _after {:content post}))]
+      (_final :content))))
 
-(defn delete-content [slug id]
+(defn update [slug id spec]
+  (let [model (models (keyword slug))
+        values (reduce #(update-values %2 spec %1) {} (vals (model :fields)))
+        env {:model model :values values :spec spec}
+        _save (run-hook slug :before_save env)
+        _update (run-hook slug :before_update _save)
+        success (db/update slug (_update :values) "id = %1" id)
+        content (db/choose slug id)
+        merged (merge (_update :spec) content)
+        _after (run-hook slug :after_update (merge _update {:content merged}))
+        post (reduce #(post-update %2 %1) (_after :content) (vals (model :fields)))
+        _final (run-hook slug :after_save (merge _after {:content post}))]
+    (_final :content)))
+
+(defn destroy [slug id]
   (let [content (db/choose slug id)
-        env {:content content :slug slug}]
-    (run-hook slug :before_destroy env)
-    (db/delete slug "id = %1" id)
-    (run-hook slug :after_destroy env)))
+        env {:content content :slug slug}
+        _before (run-hook slug :before_destroy env)
+        deleted (db/delete slug "id = %1" id)
+        _after (run-hook slug :after_destroy _before)]
+    (_after :content)))
+
+(defn init []
+  (invoke-models)
+  ;; (add-model-hooks)
+  ;; (add-field-hooks)
+  (log :model "models-invoked"))
+
 
