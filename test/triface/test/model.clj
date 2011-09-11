@@ -27,7 +27,7 @@
     (is (yellow :wibib))
     (is (= 1 (count (db/query "select * from yellow"))))
     
-    (delete-model :yellow)
+    (destroy :model (model :id))
 
     (is (not (db/table? :yellow)))
     (is (not (models :yellow)))))
@@ -48,7 +48,7 @@
              :position 3
              :fields [{:name "ibibib" :type "string"}
                       {:name "yobob" :type "slug" :link_slug "ibibib"}
-                      {:name "yellows" :type "collection" :target_id (yellow-row :id)}]})
+                      {:name "yellows" :type "collection" :dependent true :target_id (yellow-row :id)}]})
 
           yellow (models :yellow)
           zap (models :zap)
@@ -68,11 +68,25 @@
         (is (= ((db/choose :yellow (yyy :id)) :gogon) "binbin"))
         (is (= (zap-reload :yobob) "oooooo_mmmmm_zzzzzzzzzz"))
         (is (= "OOOOOO mmmmm   ZZZZZZZZZZ" ((from zap zap-reload {:include {}}) :ibibib)))
-        (is (= 4 (count ((from zap zap-reload {:include {:yellows {}}}) :yellows))))))
+        (is (= 4 (count ((from zap zap-reload {:include {:yellows {}}}) :yellows))))
+
+        (destroy :zap (zap-reload :id))
+
+        (let [yellows (db/query "SELECT * FROM yellow")]
+          (is (empty? yellows))))
+
+      (destroy :model (zap :id))
+
+      (is (empty? (-> models :yellow :fields :zap_id)))
+
+      (destroy :model (yellow :id))
+
+      (is (and (not (db/table? :yellow)) (not (db/table? :zap)))))
+
     (catch Exception e (util/render-exception e))
     (finally      
-     (if (db/table? :yellow) (delete-model :yellow))
-     (if (db/table? :zap) (delete-model :zap))
+     (if (db/table? :yellow) (db/drop-table :yellow))
+     (if (db/table? :zap) (db/drop-table :zap))
      )))
 
 

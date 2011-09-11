@@ -72,6 +72,7 @@
      {:name "fields"
       :slug "fields"
       :type "collection"
+      :dependent true
       :locked true
       :model_id model-id})
     (db/insert
@@ -211,6 +212,7 @@
       :slug "model"
       :type "part"
       :locked true
+      :dependent true
       :model_id model-id})
     (db/insert
      :field
