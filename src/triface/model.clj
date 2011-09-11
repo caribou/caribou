@@ -403,23 +403,6 @@
              (merge (seq-to-map #(keyword (% :slug)) invoked)
                     (seq-to-map #(% :id) invoked))))))
 
-(defn create-field [spec]
-  (let [ubermodel (models :field)
-        values (reduce #(update-values %2 spec %1) {} (vals (ubermodel :fields)))
-        linked (if (spec :link_slug)
-                 (assoc values :link_id ((first (db/fetch :field "model_id = %1 and slug = '%2'" (spec :model_id) (spec :link_slug))) :id))
-                 values)
-        field-row (db/insert :field (dissoc linked :updated_at))
-        field (make-field field-row)
-        model (models (spec :model_id))]
-    (doall (map #(db/add-column (model :name) (name (first %)) (rest %)) (table-additions field)))
-    field))
-
-(defn add-fields [model specs]
-  (let [fields (map #(create-field (assoc % :model_id (model :id))) specs)]
-    (doall (map setup-field fields))
-    fields))
-
 (defn destroy-field [field]
   (doall (map #(db/drop-column ((models (-> field :row :model_id)) :slug) (first %)) (table-additions field)))
   (db/delete :field "id = %1" (-> field :row :id)))
@@ -427,19 +410,6 @@
 (defn remove-fields [fields]
   (doall (map cleanup-field fields))
   (doall (map destroy-field fields)))
-
-(defn create-model [spec]
-  (create-model-table (spec :name))
-  (let [ubermodel (models :model)
-        values (reduce #(update-values %2 spec %1) {} (vals (ubermodel :fields)))
-        model (db/insert :model (dissoc values :updated_at))
-        invoked (alter-models model)
-        fields (add-fields model (concat (spec :fields) base-fields))]
-      (invoke-models)
-      (models (keyword (model :slug)))))
-
-(defn update-model [spec]
-  )
 
 (defn delete-model [slug]
   (let [model (models (keyword slug))]
@@ -490,8 +460,6 @@
 
 (defn init []
   (invoke-models)
-  ;; (add-model-hooks)
-  ;; (add-field-hooks)
   (log :model "models-invoked"))
 
 
