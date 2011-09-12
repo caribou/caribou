@@ -313,6 +313,7 @@
    :text (fn [row] (TextField. row {}))
    :boolean (fn [row] (BooleanField. row {}))
    :timestamp (fn [row] (TimestampField. row {}))
+   :image (fn [row] (ImageField. row {}))
    :collection (fn [row]
                  (let [link (if (row :link_id) (db/choose :field (row :link_id)))]
                    (CollectionField. row {:link link})))
@@ -450,25 +451,9 @@
      (add-field-hooks)
      (dosync
       (alter models 
-             (fn [in-ref new-models] new-models)
-             (merge (seq-to-map #(keyword (% :slug)) invoked)
-                    (seq-to-map #(% :id) invoked))))))
-
-;; (defn destroy-field [field]
-;;   (doall (map #(db/drop-column ((models (-> field :row :model_id)) :slug) (first %)) (table-additions field)))
-;;   (db/delete :field "id = %1" (-> field :row :id)))
-
-;; (defn remove-fields [fields]
-;;   (doall (map cleanup-field fields))
-;;   (doall (map destroy-field fields)))
-
-;; (defn delete-model [slug]
-;;   (let [model (models (keyword slug))]
-;;     (remove-fields (vals (model :fields)))
-;;     (db/delete :model "id = %1" (model :id))
-;;     (db/drop-table (model :slug))
-;;     (invoke-models)
-;;     model))
+        (fn [in-ref new-models] new-models)
+        (merge (seq-to-map #(keyword (% :slug)) invoked)
+               (seq-to-map #(% :id) invoked))))))
 
 (defn create [slug spec]
   (if (spec :id)
