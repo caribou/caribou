@@ -6,7 +6,7 @@
 (defprotocol Field
   "a protocol for expected behavior of all model fields"
   (table-additions [this field] "the set of additions to this db table based on the given name")
-  (subfield-names [this field] "the names of the columns contributed to the table by this field type given this name")
+  (subfield-names [this field] "the names of any additional fields added to the model by this field given this name")
   (setup-field [this] "further processing on creation of field")
   (cleanup-field [this] "further processing on creation of field")
   (target-for [this] "retrieves the model this field points to, if applicable")

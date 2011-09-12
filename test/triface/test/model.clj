@@ -92,14 +92,15 @@
 
       (destroy :model (debug (-> @models :purple :id)))
 
-      (is (and (not (db/table? :purple)) (not (db/table? :yellow)) (not (db/table? :zap)))))
+      (is (and (not (db/table? :purple))
+               (not (db/table? :yellow))
+               (not (db/table? :zap)))))
 
     (catch Exception e (util/render-exception e))
     (finally      
      (if (db/table? :yellow) (destroy :model (-> @models :yellow :id)))
      (if (db/table? :purple) (destroy :model (-> @models :purple :id)))
-     (if (db/table? :zap) (destroy :model (-> @models :zap :id)))
-     )))
+     (if (db/table? :zap) (destroy :model (-> @models :zap :id))))))
 
 
 
