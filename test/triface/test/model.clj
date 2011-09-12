@@ -70,23 +70,35 @@
         (is (= "OOOOOO mmmmm   ZZZZZZZZZZ" ((from zap zap-reload {:include {}}) :ibibib)))
         (is (= 4 (count ((from zap zap-reload {:include {:yellows {}}}) :yellows))))
 
-        (destroy :zap (zap-reload :id))
+        (update :model (zap :id) {:fields [{:id (-> zap :fields :ibibib :row :id)
+                                            :name "okokok"}]})
 
-        (let [yellows (db/query "SELECT * FROM yellow")]
-          (is (empty? yellows))))
+        (update :model (yellow :id) {:name "purple"
+                                     :fields [{:id (-> yellow :fields :zap :row :id)
+                                               :name "green"}]})
+
+        (let [zappo (db/choose :zap (zzzap :id))
+              purple (db/choose :purple (yyy :id))]
+          (is (= (zappo :okokok) "OOOOOO mmmmm   ZZZZZZZZZZ"))
+          (is (= (purple :green_id) (zappo :id))))
+
+        (destroy :zap (zap-reload :id))
+        (let [purples (db/query "select * from purple")]
+          (is (empty? purples))))
 
       (destroy :model (zap :id))
 
-      (is (empty? (-> models :yellow :fields :zap_id)))
+      (is (empty? (-> @models :purple :fields :green_id)))
 
-      (destroy :model (yellow :id))
+      (destroy :model (debug (-> @models :purple :id)))
 
-      (is (and (not (db/table? :yellow)) (not (db/table? :zap)))))
+      (is (and (not (db/table? :purple)) (not (db/table? :yellow)) (not (db/table? :zap)))))
 
     (catch Exception e (util/render-exception e))
     (finally      
-     (if (db/table? :yellow) (db/drop-table :yellow))
-     (if (db/table? :zap) (db/drop-table :zap))
+     (if (db/table? :yellow) (destroy :model (-> @models :yellow :id)))
+     (if (db/table? :purple) (destroy :model (-> @models :purple :id)))
+     (if (db/table? :zap) (destroy :model (-> @models :zap :id)))
      )))
 
 
