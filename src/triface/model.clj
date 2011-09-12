@@ -78,12 +78,12 @@
   (update-values [this content values]
     (let [key (keyword (row :name))]
       (cond
-       (contains? content key) (assoc values key (slugify (content key)))
        (env :link) 
          (let [icon (content (keyword (-> env :link :slug)))]
            (if icon
              (assoc values key (slugify icon))
              values))
+       (contains? content key) (assoc values key (slugify (content key)))
        :else values)))
   (post-update [this content] content)
   (pre-destroy [this content] content)
@@ -159,9 +159,6 @@
 
 ;; forward reference for CollectionField
 (def make-field)
-;; (def create-field)
-;; (def add-fields)
-(def destroy-field)
 (def model-render)
 (def invoke-model)
 (def create)
@@ -388,9 +385,6 @@
   (dosync
    (alter models merge {(model :slug) model (model :id) model})))
 
-(defn model-row-by-slug [table]
-  (first (db/query "select * from model where slug = '%1'" (name table))))
-
 (defn create-model-table [name]
   (db/create-table (keyword name) []))
 
@@ -435,6 +429,10 @@
       (assoc env :content field))))
   
   (add-hook :field :after_update :reify_field (fn [env]
+    (let [field (make-field (env :content))
+          original (-> env :original :slug)]
+      (if (not (= original (-> env :content :slug)))
+        (doall (map #(db/rename-column (-> models (keyword (row :model_id)) :slug) original (first %)) (table-additions field)))))
     (assoc env :content (make-field (env :content)))))
 
   (add-hook :field :after_destroy :drop_columns (fn [env]
@@ -472,8 +470,9 @@
 
 (defn update [slug id spec]
   (let [model (models (keyword slug))
+        original (db/choose slug id)
         values (reduce #(update-values %2 spec %1) {} (vals (model :fields)))
-        env {:model model :values values :spec spec}
+        env {:model model :values values :spec spec :original original}
         _save (run-hook slug :before_save env)
         _update (run-hook slug :before_update _save)
         success (db/update slug (_update :values) "id = %1" id)

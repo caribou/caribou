@@ -87,6 +87,11 @@
   (sql/with-connection db
     (apply sql/create-table (cons table fields))))
 
+(defn rename-table [table new-name]
+  (let [rename (log :db (clause "alter table %1 rename to %2" [(name table) (name new-name)]))]
+    (sql/with-connection db
+      (sql/do-commands rename))))
+
 (defn drop-table [table]
   (log :db (clause "drop table %1" [(name table)]))
   (sql/with-connection db
@@ -101,6 +106,11 @@
     (sql/with-connection db
       (sql/do-commands
        (log :db (clause "alter table %1 add column %2 %3" (map #(zap (name %)) [table column type])))))))
+
+(defn rename-column [table column new-name]
+  (let [rename (log :db (clause "alter table %1 rename column %2 to %3" (map name [table column new-name])))]
+    (sql/with-connection db
+      (sql/do-commands rename))))
 
 (defn drop-column [table column]
   (sql/with-connection db
