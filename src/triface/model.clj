@@ -411,6 +411,8 @@
     (assoc-in env [:spec :fields] (concat (-> env :spec :fields) base-fields))))
 
   (add-hook :model :after_create :invoke (fn [env]
+    (if (-> env :content :nested)
+      (create :field {:name "parent_id" :model_id (-> env :content :id) :type "integer" :_parent (-> env :content)}))
     (alter-models (-> env :content))
     env))
   
@@ -443,8 +445,12 @@
         (env :values)))))
   
   (add-hook :field :after_create :add_columns (fn [env]
-    (let [field (make-field (env :content))]
-      (doall (map #(db/add-column (-> env :spec :_parent :slug) (name (first %)) (rest %)) (table-additions field (-> env :content :slug))))
+    (let [field (make-field (env :content))
+          slug (-> env :spec :_parent :slug)]
+          ;; slug (if (-> env :spec :_parent)
+          ;;        (-> env :spec :_parent :slug)
+          ;;        ((models (-> env :spec :model_id)) :slug))]
+      (doall (map #(db/add-column slug (name (first %)) (rest %)) (table-additions field (-> env :content :slug))))
       (setup-field field)
       (assoc env :content field))))
   
