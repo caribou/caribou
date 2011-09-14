@@ -73,14 +73,14 @@
     (render-field slug (content-item slug id) field (assoc params :include include))))
 
 (action create-content [params slug]
-  (render slug (model/create-content slug (params (keyword slug))) params))
+  (render slug (model/create slug (params (keyword slug))) params))
 
 (action update-content [params slug id]
-  (let [content (model/update-content slug id (params (keyword slug)))]
+  (let [content (model/update slug id (params (keyword slug)))]
     (render slug (db/choose slug id) params)))
 
 (action delete-content [params slug id]
-  (let [content (model/delete-content slug id)]
+  (let [content (model/destroy slug id)]
     (render slug content params)))
 
 ;; routes --------------------------------------------------
@@ -99,16 +99,12 @@
 
 (def app (handler/site main-routes))
 
-(defn init []
-  (model/invoke-models)
-  "models invoked")
-
 (defn start [port]
   (ring/run-jetty (var app) {:port (or port 33333) :join? false}))
 
 (defn go []
   (let [port (Integer/parseInt (or (System/getenv "PORT") "33333"))]
-    (init)
+    (model/init)
     (start port)))
 
 (defn -main []

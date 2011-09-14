@@ -12,12 +12,13 @@
 
 (deftest model-lifecycle-test
   (invoke-models)
-  (let [model (create-model {:name "yellow"
-                             :description "yellowness yellow yellow"
-                             :position 3
-                             :fields [{:name "gogon" :type "string"}
-                                      {:name "wibib" :type "boolean"}]})
-        yellow (db/insert :yellow {:gogon "obobo" :wibib true})]
+  (let [model (create :model
+         {:name "yellow"
+          :description "yellowness yellow yellow"
+          :position 3
+          :fields [{:name "gogon" :type "string"}
+                   {:name "wibib" :type "boolean"}]})
+        yellow (create :yellow {:gogon "obobo" :wibib true})]
 
     (is (<= 8 (count (model :fields))))
     (is (= (model :name) "yellow"))
@@ -26,7 +27,7 @@
     (is (yellow :wibib))
     (is (= 1 (count (db/query "select * from yellow"))))
     
-    (delete-model :yellow)
+    (destroy :model (model :id))
 
     (is (not (db/table? :yellow)))
     (is (not (models :yellow)))))
@@ -34,27 +35,30 @@
 (deftest model-interaction-test
   (invoke-models)
   (try
-    (let [yellow-row (create-model {:name "yellow"
-                                    :description "yellowness yellow yellow"
-                                    :position 3
-                                    :fields [{:name "gogon" :type "string"}
-                                             {:name "wibib" :type "boolean"}]})
-          zap-row (create-model {:name "zap"
-                                 :description "zap zappity zapzap"
-                                 :position 3
-                                 :fields [{:name "ibibib" :type "string"}
-                                          {:name "yobob" :type "slug" :link_slug "ibibib"}
-                                          {:name "yellows" :type "collection" :target_id (yellow-row :id)}]})
+    (let [yellow-row (create :model
+           {:name "yellow"
+            :description "yellowness yellow yellow"
+            :position 3
+            :fields [{:name "gogon" :type "string"}
+                     {:name "wibib" :type "boolean"}]})
 
-          yellow (model-for :yellow)
-          zap (model-for :zap)
+          zap-row (create :model
+            {:name "zap"
+             :description "zap zappity zapzap"
+             :position 3
+             :fields [{:name "ibibib" :type "string"}
+                      {:name "yobob" :type "slug" :link_slug "ibibib"}
+                      {:name "yellows" :type "collection" :dependent true :target_id (yellow-row :id)}]})
 
-          zzzap (create-content :zap {:ibibib "kkkkkkk"})
-          yyy (create-content :yellow {:gogon "obobo" :wibib true :zap_id (zzzap :id)})
-          yyyz (create-content :yellow {:gogon "igigi" :wibib false :zap_id (zzzap :id)})
-          yy (create-content :yellow {:gogon "lalal" :wibib true :zap_id (zzzap :id)})]
-      (update-content :yellow (yyy :id) {:gogon "binbin"})
-      (update-content :zap (zzzap :id)
+          yellow (models :yellow)
+          zap (models :zap)
+
+          zzzap (create :zap {:ibibib "kkkkkkk"})
+          yyy (create :yellow {:gogon "obobo" :wibib true :zap_id (zzzap :id)})
+          yyyz (create :yellow {:gogon "igigi" :wibib false :zap_id (zzzap :id)})
+          yy (create :yellow {:gogon "lalal" :wibib true :zap_id (zzzap :id)})]
+      (update :yellow (yyy :id) {:gogon "binbin"})
+      (update :zap (zzzap :id)
                       {:ibibib "OOOOOO mmmmm   ZZZZZZZZZZ"
                        :yellows [{:id (yyyz :id) :gogon "IIbbiiIIIbbibib"}
                                  {:gogon "nonononononon"}]})
@@ -64,12 +68,39 @@
         (is (= ((db/choose :yellow (yyy :id)) :gogon) "binbin"))
         (is (= (zap-reload :yobob) "oooooo_mmmmm_zzzzzzzzzz"))
         (is (= "OOOOOO mmmmm   ZZZZZZZZZZ" ((from zap zap-reload {:include {}}) :ibibib)))
-        (is (= 4 (count ((from zap zap-reload {:include {:yellows {}}}) :yellows))))))
+        (is (= 4 (count ((from zap zap-reload {:include {:yellows {}}}) :yellows))))
+
+        (update :model (zap :id) {:fields [{:id (-> zap :fields :ibibib :row :id)
+                                            :name "okokok"}]})
+
+        (update :model (yellow :id) {:name "purple"
+                                     :fields [{:id (-> yellow :fields :zap :row :id)
+                                               :name "green"}]})
+
+        (let [zappo (db/choose :zap (zzzap :id))
+              purple (db/choose :purple (yyy :id))]
+          (is (= (zappo :okokok) "OOOOOO mmmmm   ZZZZZZZZZZ"))
+          (is (= (purple :green_id) (zappo :id))))
+
+        (destroy :zap (zap-reload :id))
+        (let [purples (db/query "select * from purple")]
+          (is (empty? purples))))
+
+      (destroy :model (zap :id))
+
+      (is (empty? (-> @models :purple :fields :green_id)))
+
+      (destroy :model (debug (-> @models :purple :id)))
+
+      (is (and (not (db/table? :purple))
+               (not (db/table? :yellow))
+               (not (db/table? :zap)))))
+
     (catch Exception e (util/render-exception e))
     (finally      
-     (if (db/table? :yellow) (delete-model :yellow))
-     (if (db/table? :zap) (delete-model :zap))
-     )))
+     (if (db/table? :yellow) (destroy :model (-> @models :yellow :id)))
+     (if (db/table? :purple) (destroy :model (-> @models :purple :id)))
+     (if (db/table? :zap) (destroy :model (-> @models :zap :id))))))
 
 
 

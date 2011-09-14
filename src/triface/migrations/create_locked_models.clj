@@ -1,5 +1,7 @@
 (in-ns 'triface.migration)
 
+(invoke-models)
+
 (defn lock [fields]
   (map #(assoc % :locked true) fields))
 
@@ -10,8 +12,7 @@
            :nested true
            :fields (lock [{:name "name" :type "string"}
                           {:name "slug" :type "slug" :link_slug "name"}
-                          {:name "action" :type "string"}
-                          {:name "parent_id" :type "integer"}])})
+                          {:name "action" :type "string"}])})
 
 (def view {:name "view"
            :description "a composition of content facets"
@@ -58,7 +59,7 @@
   [page view locale asset site domain])
 
 (defn spawn-models []
-  (doall (map model/create-model incubating)))
+  (doall (map #(model/create :model %) incubating)))
 
 (def migrate
   (fn []
