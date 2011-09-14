@@ -105,6 +105,7 @@
 
 
 (deftest nested-model-test
+  (invoke-models)
   (try
     (let [white (create :model {:name "white" :nested true :fields [{:name "grey" :type "string"}]})
           aaa (create :white {:grey "obobob"})
@@ -114,7 +115,7 @@
           eee (create :white {:grey "omomom" :parent_id (ddd :id)})
           fff (create :white {:grey "mnomno" :parent_id (ddd :id)})
           ggg (create :white {:grey "jjijji" :parent_id (ccc :id)})
-          fff_path (db/query "with recursive white_tree(id,grey,parent_id) as (select id,grey,parent_id from page where id = %1 union select page.id,page.grey,page.parent_id from page,page_tree where page_tree.parent_id = page.id) select * from page_tree" (fff :id))]
+          fff_path (db/query "with recursive %1_tree(id,grey,parent_id) as (select id,grey,parent_id from %1 where id = %2 union select %1.id,%1.grey,%1.parent_id from %1,%1_tree where %1_tree.parent_id = %1.id) select * from %1_tree" (white :slug) (fff :id))]
       (is (= 3 (count fff_path))))
     (catch Exception e (util/render-exception e))
     (finally (if (db/table? :white) (destroy :model (-> @models :white :id))))))
