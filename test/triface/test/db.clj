@@ -82,3 +82,4 @@
   (catch Exception e(
         (log "add column test" "something went wrong")))
   (finally (db/drop-table tmp-table)))))
+

@@ -32,6 +32,7 @@
     (is (not (db/table? :yellow)))
     (is (not (models :yellow)))))
 
+
 (deftest model-interaction-test
   (invoke-models)
   (try
@@ -103,4 +104,21 @@
      (if (db/table? :zap) (destroy :model (-> @models :zap :id))))))
 
 
+(deftest nested-model-test
+  (invoke-models)
+  (try
+    (let [white (create :model {:name "white" :nested true :fields [{:name "grey" :type "string"}]})
+          aaa (create :white {:grey "obobob"})
+          bbb (create :white {:grey "ininin" :parent_id (aaa :id)})
+          ccc (create :white {:grey "kkukku" :parent_id (aaa :id)})
+          ddd (create :white {:grey "zezeze" :parent_id (bbb :id)})
+          eee (create :white {:grey "omomom" :parent_id (ddd :id)})
+          fff (create :white {:grey "mnomno" :parent_id (ddd :id)})
+          ggg (create :white {:grey "jjijji" :parent_id (ccc :id)})
+          fff_path (db/query "with recursive %1_tree(id,grey,parent_id) as (select id,grey,parent_id from %1 where id = %2 union select %1.id,%1.grey,%1.parent_id from %1,%1_tree where %1_tree.parent_id = %1.id) select * from %1_tree" (white :slug) (fff :id))]
+      (is (= 3 (count fff_path))))
+    (catch Exception e (util/render-exception e))
+    (finally (if (db/table? :white) (destroy :model (-> @models :white :id))))))
 
+
+          
