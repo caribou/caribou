@@ -524,6 +524,14 @@
         _after (run-hook slug :after_destroy (merge _before {:content pre}))]
     (_after :content)))
 
+(defn rally [slug opts]
+  (let [model (models (keyword slug))
+        order (or (opts :order) "asc")
+        order-by (or (opts :order_by) "position")
+        limit (str (or (opts :limit) 30))
+        offset (str (or (opts :offset) 0))]
+    (doall (map #(from model % opts) (db/query "select * from %1 order by %2 %3 limit %4 offset %5" slug order-by order limit offset)))))
+
 (defn init []
   (invoke-models)
   (log :model "models-invoked"))

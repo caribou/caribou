@@ -19,8 +19,8 @@
    :response {}
    :slug nil})
 
-(defn content-list [slug]
-  (db/query "select * from %1" slug))
+(defn content-list [slug params]
+  (model/rally slug params))
 
 (defn content-item [slug id]
   (db/choose slug id))
@@ -119,7 +119,7 @@
   (if (model/models (keyword slug))
     (let [include (process-include (params :include))
           included (assoc params :include include)
-          response (map #(render slug % included) (content-list slug))
+          response (map #(render slug % included) (model/rally slug included))
           total (count response)]
       (wrap-response response {:type slug :count total}))
     (merge error {:meta {:msg "no model by that name"}})))
