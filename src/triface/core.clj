@@ -48,8 +48,14 @@
 (defn wrap-jsonp [callback result]
   (str callback "(" result ")"))
 
+(defn to-csv-column [bulk key]
+  (let [morph (bulk (keyword key))]
+    (cond
+     (or (seq? morph) (vector? morph) (list? morph)) (str-join "|" (map #(str (last (first %))) morph))
+     :else (str morph))))
+                                                   
 (defn to-csv [headings bulk]
-  (csv/write-csv [(filter identity (map #(str (bulk (keyword %))) headings))]))
+  (csv/write-csv [(filter identity (map #(to-csv-column bulk %) headings))]))
 
 (def prep-xml)
 
