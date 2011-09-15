@@ -7,6 +7,7 @@
                  [compojure "0.6.4"]
                  [clojure-solr "0.2.0"]
                  [ring/ring-jetty-adapter "0.3.10"]
+                 [clojure-csv/clojure-csv "1.3.2"]
                  ;;[com.instrument/triface-jython-object-factory "1.0-SNAPSHOT"]
                  ]
   :dev-dependencies [[lein-ring "0.4.5"]

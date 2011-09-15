@@ -400,7 +400,7 @@
 (defn create-model-table [name]
   (db/create-table (keyword name) []))
 
-(def invoke-models (debug "WTF"))
+(def invoke-models)
 
 (defn add-model-hooks []
   (add-hook :model :before_create :build_table (fn [env]
