@@ -118,10 +118,26 @@
 (action list-all [params slug]
   (if (model/models (keyword slug))
     (let [include (process-include (params :include))
-          included (assoc params :include include)
+          order (or (params :order) "asc")
+          order-by (or (params :order_by) "position")
+          page_size (or (params :page_size) "30")
+          page (Integer/parseInt (or (params :page) "1"))
+          limit (Integer/parseInt (or (params :limit) page_size))
+          offset (or (params :offset) (* limit (dec page)))
+          included (merge params {:include include :limit limit :offset offset :order order :order_by order-by})
           response (map #(render slug % included) (model/rally slug included))
-          total (count response)]
-      (wrap-response response {:type slug :count total}))
+          showing (count response)
+          total (db/count slug)
+          extra (if (> (rem total limit) 0) 1 0)
+          total_pages (+ extra (quot total limit))]
+      (wrap-response response {:type slug
+                               :count showing
+                               :total_items total
+                               :total_pages total_pages
+                               :page page
+                               :page_size limit
+                               :order order
+                               :order_by order-by}))
     (merge error {:meta {:msg "no model by that name"}})))
 
 (action model-spec [params slug]

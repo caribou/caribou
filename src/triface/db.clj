@@ -121,3 +121,6 @@
   (sql/with-connection db
     (sql/do-commands commands)))
 
+(defn count [table]
+  ((first (query "select count(id) from %1" (name table))) :count))
+
