@@ -1,6 +1,7 @@
 (ns triface.model
   (:use triface.debug)
   (:use triface.util)
+  (:use [clojure.contrib.str-utils])
   (:require [triface.db :as db]))
 
 (defprotocol Field
@@ -524,13 +525,48 @@
         _after (run-hook slug :after_destroy (merge _before {:content pre}))]
     (_after :content)))
 
-(defn rally [slug opts]
-  (let [model (models (keyword slug))
-        order (or (opts :order) "asc")
-        order-by (or (opts :order_by) "position")
-        limit (str (or (opts :limit) 30))
-        offset (str (or (opts :offset) 0))]
-    (doall (map #(from model % opts) (db/query "select * from %1 order by %2 %3 limit %4 offset %5" slug order-by order limit offset)))))
+(defn rally
+  "pull a set of content up through the model system with the given options"
+  ([slug] (rally slug {}))
+  ([slug opts]
+     (let [model (models (keyword slug))
+           order (or (opts :order) "asc")
+           order-by (or (opts :order_by) "position")
+           limit (str (or (opts :limit) 30))
+           offset (str (or (opts :offset) 0))]
+       (doall (map #(from model % opts) (db/query "select * from %1 order by %2 %3 limit %4 offset %5" slug order-by order limit offset))))))
+
+(defn table-columns
+  "return a list of all columns for the table corresponding to this model"
+  [slug]
+  (let [model (models (keyword slug))]
+    (apply concat (map (fn [field] (map #(name (first %)) (table-additions field (-> field :row :slug)))) (vals (model :fields))))))
+
+(defn progenitors
+  "if the model is nested, return a list of it along with all of its ancestors"
+  ([slug id] (progenitors slug id {}))
+  ([slug id opts]
+     (let [model (models (keyword slug))]
+       (if (model :nested)
+         (let [field-names (table-columns slug)
+               base-where (db/clause "id = %1" [id])
+               recur-where (db/clause "%1_tree.parent_id = %1.id" [slug])
+               before (db/recursive-query slug field-names base-where recur-where)]
+           (doall (map #(from model % opts) before)))
+         [(from model (db/choose slug id) opts)]))))
+
+(defn descendents
+  "pull up all the descendents of the given nested model"
+  ([slug id] (descendents slug id {}))
+  ([slug id opts]
+     (let [model (models (keyword slug))]
+       (if (model :nested)
+         (let [field-names (table-columns slug)
+               base-where (db/clause "id = %1" [id])
+               recur-where (db/clause "%1_tree.id = %1.parent_id" [slug])
+               before (db/recursive-query slug field-names base-where recur-where)]
+           (doall (map #(from model % opts) before)))
+         [(from model (db/choose slug id) opts)]))))
 
 (defn init []
   (invoke-models)

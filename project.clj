@@ -16,6 +16,8 @@
                      [clojure-source "1.2.0"]
                      [com.instrument.triface/triface-action-adapter "1.0-SNAPSHOT"]
                      [lein-eclipse "1.0.0"]]
+  :java-source-path [["src/java"]
+                     ["test/java" :debug true]]
   :jvm-opts ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n"]
   :ring {:handler triface.core/app
          :servlet-name "triface"

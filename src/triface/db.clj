@@ -36,6 +36,16 @@
       [(log :db (clause q args))]
       (doall res))))
 
+(defn recursive-query [table fields base-where recur-where]
+  (let [field-names (distinct (map name (concat [:id :parent_id] fields)))
+        field-list (str-join "," field-names)]
+    (query (str "with recursive %1_tree(" field-list
+                ") as (select " field-list
+                " from %1 where %2 union select "
+                (str-join "," (map #(str "%1." %) field-names))
+                " from %1,%1_tree where %3)"
+                " select * from %1_tree") (name table) base-where recur-where)))
+
 (defn sqlize [value]
   (cond
    (number? value) value

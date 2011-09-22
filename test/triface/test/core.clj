@@ -16,7 +16,7 @@
 
 (deftest content-field-test
   (binding [db/query (fn [query & args] (vector (array-map :id 1 :name "model")))]
-    (is (="model" (content-field "model" 1 :name)))))
+    (is (= "model" (content-field "model" 1 :name)))))
 
 ;; TODO: test timestamp fields
 (deftest render-test
@@ -59,7 +59,7 @@
   (model/invoke-models)
   (let [response (json/read-json (model-spec {:slug "model"}))]
     (is (> (count response) 0))
-    (is (not (= (error :message)(response :message))))))
+    (is (not (= (error :message) (response :message))))))
 
 ;; GET item-detail
 (deftest item-detail-action-test
