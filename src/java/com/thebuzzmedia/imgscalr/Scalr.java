@@ -261,8 +261,16 @@ public class Scalr {
 	 * be saved out as a PNG to maintain the transparency.
 	 */
 	public static final ConvolveOp OP_ANTIALIAS = new ConvolveOp(
-			new Kernel(3, 3, new float[] { .0f, .08f, .0f, .08f, .68f, .08f,
-					.0f, .08f, .0f }), ConvolveOp.EDGE_NO_OP, null);
+			// new Kernel(3, 3, new float[] { .1f, .1f, .1f, .1f, .2f, .1f,
+			// 		.1f, .1f, .1f }), ConvolveOp.EDGE_NO_OP, null);
+			new Kernel(3, 3, new float[] { .04f, .10f, .04f, .10f, .44f, .10f,
+					.04f, .10f, .04f }), ConvolveOp.EDGE_NO_OP, null);
+			// new Kernel(3, 3, new float[] { .04f, .10f, .04f, .10f, .44f, .10f,
+			// 		.04f, .10f, .04f }), ConvolveOp.EDGE_NO_OP, null);
+			// new Kernel(3, 3, new float[] { .04f, .10f, .04f, .10f, .44f, .10f,
+			// 		.04f, .10f, .04f }), ConvolveOp.EDGE_NO_OP, null);
+			// new Kernel(3, 3, new float[] { .0f, .08f, .0f, .08f, .68f, .08f,
+			// 		.0f, .08f, .0f }), ConvolveOp.EDGE_NO_OP, null);
 
 	/**
 	 * Static initializer used to prepare some of the variables used by this
@@ -2067,7 +2075,9 @@ public class Scalr {
 
 		// Scale the image to the new buffer using the specified rendering hint.
 		resultGraphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-				interpolationHintValue);
+                                        interpolationHintValue);
+        // resultGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+        //                                 RenderingHints.VALUE_ANTIALIAS_ON);
 		resultGraphics.drawImage(src, 0, 0, targetWidth, targetHeight, null);
 
 		// Just to be clean, explicitly dispose our temporary graphics object
