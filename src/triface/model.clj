@@ -1,6 +1,7 @@
 (ns triface.model
   (:use triface.debug)
   (:use triface.util)
+  (:use [clojure.contrib.str-utils])
   (:require [triface.db :as db]))
 
 (defprotocol Field
@@ -531,6 +532,19 @@
         limit (str (or (opts :limit) 30))
         offset (str (or (opts :offset) 0))]
     (doall (map #(from model % opts) (db/query "select * from %1 order by %2 %3 limit %4 offset %5" slug order-by order limit offset)))))
+
+(defn progenitors [slug id opts]
+  (let [model (models (keyword slug))]
+    (if (model :nested)
+      (let [field-names (apply concat (map (fn [field] (map #(name (first %)) (table-additions field (-> field :row :slug)))) (vals (model :fields))))
+            field-list (str-join "," field-names)
+            query (str "with recursive %1_tree(" field-list
+                       ") as (select " field-list
+                       " from %1 where id = %2 union select "
+                       (str-join "," (map #(str "%1." %) field-names))
+                       " from %1,%1_tree where %1_tree.parent_id = %1.id) select * from %1_tree")]
+        (db/query query slug id))
+      [(db/choose slug id)])))
 
 (defn init []
   (invoke-models)

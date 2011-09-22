@@ -116,7 +116,7 @@
           fff (create :white {:grey "mnomno" :parent_id (ddd :id)})
           ggg (create :white {:grey "jjijji" :parent_id (ccc :id)})
           fff_path (db/query "with recursive %1_tree(id,grey,parent_id) as (select id,grey,parent_id from %1 where id = %2 union select %1.id,%1.grey,%1.parent_id from %1,%1_tree where %1_tree.parent_id = %1.id) select * from %1_tree" (white :slug) (fff :id))]
-      (is (= 3 (count fff_path))))
+      (is (= 4 (count (debug fff_path)))))
     (catch Exception e (util/render-exception e))
     (finally (if (db/table? :white) (destroy :model (-> @models :white :id))))))
 
