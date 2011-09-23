@@ -39,7 +39,7 @@
             wrapper (fn [params]
                       (let [env (action (merge params {:template (page :template) :page page}))]
                         (log :action (str (page :action) " - path: " path " - params: " (str params) " - rendering template: " (page :template)))
-                        (render-template (page :template) env)))]
+                        (render-template (env :template) env)))]
         (dosync
          (alter actions merge {(keyword (page :action)) wrapper}))
         (controller/reset-action)))
