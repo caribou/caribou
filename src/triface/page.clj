@@ -48,12 +48,12 @@
 (defn generate-routes
   "given a tree of pages construct and return a list of corresponding routes."
   [pages]
-  (debug (apply
+  (apply
    concat
    (doall
     (map
      #(make-route % "" (str (triface-properties "applicationPath") "/app/controller"))
-     pages)))))
+     pages))))
 
 (defn invoke-pages
   "call up the pages and arrange them into a tree."
