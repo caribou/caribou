@@ -18,9 +18,8 @@
     (.getContextClassLoader)
     (.getResourceAsStream "triface.properties"))))))
 
-(defn default-execute [params]
-  (debug params)
-  (str params))
+(defn default-action [params]
+  (assoc params :result (str (debug params))))
 
 (defn render-template [template env]
   (env :result))
@@ -31,22 +30,18 @@
   [page above-path above-action]
   (let [path (str above-path "/" (name (page :path)))
         action-path (str above-action "/" (page :action))
-        route `(GET ~path {~(symbol "params") :params} ((or (actions ~(keyword (page :action))) default-execute) ~(symbol "params")))]
-    (try 
-      (do
+        route `(GET ~path {~(symbol "params") :params} ((actions ~(keyword (page :action))) ~(symbol "params")))]
+    (do
+      (try
         (load-file (str action-path ".clj"))
-        (let [action controller/action
-              wrapper (fn [params]
-                       (let [env (action
-                                  (merge
-                                   params
-                                   {:template (page :template)
-                                    :page page}))]
-                         (render-template (page :template) env)))]
-          (dosync
-           (alter actions merge {(keyword (page :action)) wrapper}))
-          (controller/reset-action)))
-      (catch Exception e)) ;; controller file does not exist
+        (catch Exception e)) ;; controller file does not exist
+      (let [action (or controller/action default-action)
+            wrapper (fn [params]
+                      (let [env (action (merge params {:template (page :template) :page page}))]
+                        (render-template (page :template) env)))]
+        (dosync
+         (alter actions merge {(keyword (page :action)) wrapper}))
+        (controller/reset-action)))
     (concat (list route) (apply concat (map #(make-route % path action-path) (page :children))))))
 
 (defn generate-routes
