@@ -22,27 +22,42 @@
   (debug params)
   (str params))
 
+(defn render-template [template env]
+  (env :result))
+
 (defn make-route
   "make a single route for a single page, given its overarching path (above-path)
   and action directory on disk (above-action)."
   [page above-path above-action]
   (let [path (str above-path "/" (name (page :path)))
         action-path (str above-action "/" (page :action))
-        route `(GET ~path {~(symbol "params") :params} ((or (actions ~(keyword (page :template))) default-execute) ~(symbol "params")))]
+        route `(GET ~path {~(symbol "params") :params} ((or (actions ~(keyword (page :action))) default-execute) ~(symbol "params")))]
     (try 
       (do
         (load-file (str action-path ".clj"))
-        (dosync
-         (alter actions merge {(keyword (page :action)) controller/action}))
-        (controller/reset-action))
-      (catch Exception e))
+        (let [action controller/action
+              wrapper (fn [params]
+                       (let [env (action
+                                  (merge
+                                   params
+                                   {:template (page :template)
+                                    :page page}))]
+                         (render-template (page :template) env)))]
+          (dosync
+           (alter actions merge {(keyword (page :action)) wrapper}))
+          (controller/reset-action)))
+      (catch Exception e)) ;; controller file does not exist
     (concat (list route) (apply concat (map #(make-route % path action-path) (page :children))))))
 
 (defn generate-routes
   "given a tree of pages construct and return a list of corresponding routes."
   [pages]
-  (apply concat
-         (doall (map #(make-route % "" (str (triface-properties "applicationPath") "/app/controller")) pages))))
+  (debug (apply
+   concat
+   (doall
+    (map
+     #(make-route % "" (str (triface-properties "applicationPath") "/app/controller"))
+     pages)))))
 
 (defn invoke-pages
   "call up the pages and arrange them into a tree."
@@ -63,10 +78,10 @@
   "initialize page related activities"
   []
   (model/init)
-  (invoke-routes))
+  (invoke-routes)
+  (def app (handler/site all-routes)))
 
 (defn start [port]
   (init)
-  (def app (handler/site all-routes))
   (ring/run-jetty (var app) {:port (or port 22212) :join? false}))
 
