@@ -19,7 +19,7 @@
     (.getResourceAsStream "triface.properties"))))))
 
 (defn default-action [params]
-  (assoc params :result (str (debug params))))
+  (assoc params :result (str params)))
 
 (defn render-template [template env]
   (env :result))
@@ -38,6 +38,7 @@
       (let [action (or controller/action default-action)
             wrapper (fn [params]
                       (let [env (action (merge params {:template (page :template) :page page}))]
+                        (log :action (str (page :action) " - path: " path " - params: " (str params) " - rendering template: " (page :template)))
                         (render-template (page :template) env)))]
         (dosync
          (alter actions merge {(keyword (page :action)) wrapper}))
