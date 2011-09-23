@@ -12,7 +12,9 @@
            :nested true
            :fields (lock [{:name "name" :type "string"}
                           {:name "slug" :type "slug" :link_slug "name"}
-                          {:name "action" :type "string"}])})
+                          {:name "path" :type "string"}
+                          {:name "action" :type "string"}
+                          {:name "template" :type "string"}])})
 
 (def view {:name "view"
            :description "a composition of content facets"

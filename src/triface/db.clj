@@ -1,7 +1,6 @@
 (ns triface.db
   (:use [triface.debug])
   (:use [clojure.contrib.str-utils])
-  (:require [clojure.contrib.generic.functor :as fun])
   (:require [clojure.java.jdbc :as sql]))
 
 (def db
@@ -10,13 +9,17 @@
    :subname "//localhost/triface"
    :user "postgres"})
 
-(defn zap [s]
+(defn zap
+  "quickly sanitize a potentially dirty string in preparation for a sql query"
+  [s]
   (cond
    (string? s) (.replaceAll (re-matcher #"[\\\";#%]" (.replaceAll (str s) "'" "''")) "")
    (keyword? s) (zap (name s))
    :else s))
 
-(defn clause [pred args]
+(defn clause
+  "substitute values into a string template based on numbered % parameters"
+  [pred args]
   (letfn [(rep [s i] (.replaceAll s (str "%" (inc i))
                                   (let [item (nth args i)]
                                     (cond
@@ -30,7 +33,9 @@
           (rep retr i)
           (recur (inc i) (rep retr i)))))))
 
-(defn query [q & args]
+(defn query
+  "make an arbitrary query, substituting in extra args as % parameters"
+  [q & args]
   (sql/with-connection db
     (sql/with-query-results res
       [(log :db (clause q args))]
@@ -46,7 +51,9 @@
                 " from %1,%1_tree where %3)"
                 " select * from %1_tree") (name table) base-where recur-where)))
 
-(defn sqlize [value]
+(defn sqlize
+  "process a raw value into a sql appropriate string"
+  [value]
   (cond
    (number? value) value
    (isa? (type value) Boolean) value
@@ -54,10 +61,14 @@
    (string? value) (str "'" (zap value) "'")
    :else (str "'" (zap (str value)) "'")))
 
-(defn value-map [values]
+(defn value-map
+  "build a string of values fit for an insert or update statement"
+  [values]
   (str-join ", " (map #(str (name %) " = " (sqlize (values %))) (keys values))))
 
-(defn insert [table values]
+(defn insert
+  "insert a row into the given table with the given values"
+  [table values]
   ;; (let [keys (str-join "," (map sqlize (keys mapping)))
   ;;       values (str-join "," (map sqlize (vals mapping)))
   ;;       q (clause "insert into %1 (%2) values (%3)" [(zap (name table)) keys values])]
@@ -69,7 +80,9 @@
   (sql/with-connection db
     (sql/insert-record table values)))
 
-(defn update [table values & where]
+(defn update
+  "update the given row with the given values"
+  [table values & where]
   (let [v (value-map values)
         q (clause "update %1 set %2 where " [(zap (name table)) v])
         w (clause (first where) (rest where))
@@ -77,60 +90,90 @@
     (sql/with-connection db
       (sql/do-commands (log :db t)))))
 
-(defn delete [table & where]
+(defn delete
+  "delete out of the given table according to the supplied where clause"
+  [table & where]
   (log :db (clause "delete from %1 values %2" [(name table) (clause (first where) (rest where))]))
   (sql/with-connection db
     (sql/delete-rows table [(if (not (empty? where)) (clause (first where) (rest where)))])))
 
-(defn fetch [table & where]
+(defn fetch
+  "pull all items from a table according to the given conditions"
+  [table & where]
   (apply query (cons (str "select * from %" (count where) " where " (first where))
                      (concat (rest where) [(name table)]))))
 
-(defn choose [table id]
+(defn choose
+  "pull just the record with the given id from the given table"
+  [table id]
   (first (query "select * from %1 where id = %2" (zap (name table)) (zap (str id)))))
 
-(defn table? [table]
+;; table operations -------------------------------------------
+
+(defn table?
+  "check to see if a table by the given name exists"
+  [table]
   (< 0 (count (query "select true from pg_class where relname='%1'" (zap (name table))))))
 
-(defn create-table [table & fields]
+(defn create-table
+  "create a table with the given columns, of the format
+  [:column_name :type & :extra]"
+  [table & fields]
   (log :db (clause "create table %1 %2" [(name table) fields]))
   (sql/with-connection db
     (apply sql/create-table (cons table fields))))
 
-(defn rename-table [table new-name]
+(defn rename-table
+  "change the name of a table to new-name."
+  [table new-name]
   (let [rename (log :db (clause "alter table %1 rename to %2" [(name table) (name new-name)]))]
     (sql/with-connection db
       (sql/do-commands rename))))
 
-(defn drop-table [table]
+(defn drop-table
+  "remove the given table from the database."
+  [table]
   (log :db (clause "drop table %1" [(name table)]))
   (sql/with-connection db
     (sql/drop-table (name table))))
 
-(defn rebuild-table []
+(defn rebuild-database
+  "this function currently fails, as you cannot drop or
+  create databases in a transaction."
+  []
   (sql/with-connection (assoc db :subname "//localhost/template1")
     (sql/do-commands "drop database triface" "create database triface")))
 
-(defn add-column [table column opts]
+(defn add-column
+  "add the given column to the table."
+  [table column opts]
   (let [type (str-join " " (map name opts))]
     (sql/with-connection db
       (sql/do-commands
        (log :db (clause "alter table %1 add column %2 %3" (map #(zap (name %)) [table column type])))))))
 
-(defn rename-column [table column new-name]
+(defn rename-column
+  "rename a column in the given table to new-name."
+  [table column new-name]
   (let [rename (log :db (clause "alter table %1 rename column %2 to %3" (map name [table column new-name])))]
     (sql/with-connection db
       (sql/do-commands rename))))
 
-(defn drop-column [table column]
+(defn drop-column
+  "remove the given column from the table."
+  [table column]
   (sql/with-connection db
     (sql/do-commands
      (log :db (clause "alter table %1 drop column %2" (map #(zap (name %)) [table column]))))))
 
-(defn do-sql [commands]
+(defn do-sql
+  "execute arbitrary sql.  direct proxy to sql/do-commands."
+  [commands]
   (sql/with-connection db
     (sql/do-commands commands)))
 
-(defn count [table]
+(defn count
+  "this aliases clojure.core$count so I keep it here at the bottom"
+  [table]
   ((first (query "select count(id) from %1" (name table))) :count))
 
