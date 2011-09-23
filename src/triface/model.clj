@@ -515,7 +515,9 @@
         _final (run-hook slug :after_save (merge _after {:content post}))]
     (_final :content)))
 
-(defn destroy [slug id]
+(defn destroy
+  "destroy the item of the given model with the given id"
+  [slug id]
   (let [model (models (keyword slug))
         content (db/choose slug id)
         env {:model model :content content :slug slug}
@@ -543,7 +545,8 @@
     (apply concat (map (fn [field] (map #(name (first %)) (table-additions field (-> field :row :slug)))) (vals (model :fields))))))
 
 (defn progenitors
-  "if the model is nested, return a list of it along with all of its ancestors"
+  "if the model given by slug is nested,
+  return a list of the item given by this id along with all of its ancestors"
   ([slug id] (progenitors slug id {}))
   ([slug id opts]
      (let [model (models (keyword slug))]
@@ -556,7 +559,8 @@
          [(from model (db/choose slug id) opts)]))))
 
 (defn descendents
-  "pull up all the descendents of the given nested model"
+  "pull up all the descendents of the item given by id
+  in the nested model given by slug"
   ([slug id] (descendents slug id {}))
   ([slug id opts]
      (let [model (models (keyword slug))]
@@ -567,6 +571,19 @@
                before (db/recursive-query slug field-names base-where recur-where)]
            (doall (map #(from model % opts) before)))
          [(from model (db/choose slug id) opts)]))))
+
+(defn reconstruct
+  "mapping is between parent_ids and collections which share a parent_id.
+  node is the item whose descendent tree is to be reconstructed"
+  [mapping node]
+  (assoc node :children (map #(reconstruct mapping %) (mapping (node :id)))))
+
+(defn arrange-tree
+  "given a set of nested items, arrange them into a tree based on id/parent_id relationships"
+  [items]
+  (let [by-parent (group-by #(% :parent_id) items)
+        roots (by-parent nil)]
+    (doall (map #(reconstruct by-parent %) roots))))
 
 (defn init []
   (invoke-models)
