@@ -1,7 +1,6 @@
 (ns triface.db
   (:use [triface.debug])
   (:use [clojure.contrib.str-utils])
-  (:require [clojure.contrib.generic.functor :as fun])
   (:require [clojure.java.jdbc :as sql]))
 
 (def db
@@ -53,7 +52,7 @@
                 " select * from %1_tree") (name table) base-where recur-where)))
 
 (defn sqlize
-  "process raw values into sql appropriate strings"
+  "process a raw value into a sql appropriate string"
   [value]
   (cond
    (number? value) value
@@ -109,47 +108,67 @@
   [table id]
   (first (query "select * from %1 where id = %2" (zap (name table)) (zap (str id)))))
 
+;; table operations -------------------------------------------
+
 (defn table?
   "check to see if a table by the given name exists"
   [table]
   (< 0 (count (query "select true from pg_class where relname='%1'" (zap (name table))))))
 
-(defn create-table [table & fields]
+(defn create-table
+  "create a table with the given columns, of the format
+  [:column_name :type & :extra]"
+  [table & fields]
   (log :db (clause "create table %1 %2" [(name table) fields]))
   (sql/with-connection db
     (apply sql/create-table (cons table fields))))
 
-(defn rename-table [table new-name]
+(defn rename-table
+  "change the name of a table to new-name."
+  [table new-name]
   (let [rename (log :db (clause "alter table %1 rename to %2" [(name table) (name new-name)]))]
     (sql/with-connection db
       (sql/do-commands rename))))
 
-(defn drop-table [table]
+(defn drop-table
+  "remove the given table from the database."
+  [table]
   (log :db (clause "drop table %1" [(name table)]))
   (sql/with-connection db
     (sql/drop-table (name table))))
 
-(defn rebuild-table []
+(defn rebuild-database
+  "this function currently fails, as you cannot drop or
+  create databases in a transaction."
+  []
   (sql/with-connection (assoc db :subname "//localhost/template1")
     (sql/do-commands "drop database triface" "create database triface")))
 
-(defn add-column [table column opts]
+(defn add-column
+  "add the given column to the table."
+  [table column opts]
   (let [type (str-join " " (map name opts))]
     (sql/with-connection db
       (sql/do-commands
        (log :db (clause "alter table %1 add column %2 %3" (map #(zap (name %)) [table column type])))))))
 
-(defn rename-column [table column new-name]
+(defn rename-column
+  "rename a column in the given table to new-name."
+  [table column new-name]
   (let [rename (log :db (clause "alter table %1 rename column %2 to %3" (map name [table column new-name])))]
     (sql/with-connection db
       (sql/do-commands rename))))
 
-(defn drop-column [table column]
+(defn drop-column
+  "remove the given column from the table."
+  [table column]
   (sql/with-connection db
     (sql/do-commands
      (log :db (clause "alter table %1 drop column %2" (map #(zap (name %)) [table column]))))))
 
-(defn do-sql [commands]
+(defn do-sql
+  "execute arbitrary sql.  direct proxy to sql/do-commands."
+  [commands]
   (sql/with-connection db
     (sql/do-commands commands)))
 

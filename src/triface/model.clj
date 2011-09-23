@@ -6,15 +6,22 @@
 
 (defprotocol Field
   "a protocol for expected behavior of all model fields"
-  (table-additions [this field] "the set of additions to this db table based on the given name")
-  (subfield-names [this field] "the names of any additional fields added to the model by this field given this name")
+  (table-additions [this field]
+    "the set of additions to this db table based on the given name")
+  (subfield-names [this field]
+    "the names of any additional fields added to the model
+    by this field given this name")
   (setup-field [this] "further processing on creation of field")
   (cleanup-field [this] "further processing on creation of field")
   (target-for [this] "retrieves the model this field points to, if applicable")
-  (update-values [this content values] "adds to the map of values that will be committed to the db for this row")
-  (post-update [this content] "any processing that is required after the content is created/updated")
-  (pre-destroy [this content] "prepare this content item for destruction")
-  (field-from [this content opts] "retrieves the value for this field from this content item")
+  (update-values [this content values]
+    "adds to the map of values that will be committed to the db for this row")
+  (post-update [this content]
+    "any processing that is required after the content is created/updated")
+  (pre-destroy [this content]
+    "prepare this content item for destruction")
+  (field-from [this content opts]
+    "retrieves the value for this field from this content item")
   (render [this content opts] "renders out a single field from this content item"))
 
 (defrecord IdField [row env]
@@ -176,7 +183,14 @@
 (def destroy)
 (def models (ref {}))
 
-(defn from [model content opts]
+(defn from
+  "takes a model and a raw db row and converts it into a full
+  content representation as specified by the supplied opts.
+  some opts that are supported:
+    include - a nested hash of association includes.  if a key matches
+    the name of an association any content associated to this item through
+    that association will be inserted under that key."
+  [model content opts]
   (reduce #(assoc %1 (keyword (-> %2 :row :name)) (field-from %2 %1 opts)) content (vals (model :fields))))
 
 (defrecord CollectionField [row env]
@@ -351,20 +365,38 @@
                   {:name "created_at" :type "timestamp" :locked true :immutable true :editable false}
                   {:name "updated_at" :type "timestamp" :locked true :editable false}])
 
-(defn make-field [row]
+(defn make-field
+  "turn a row from the field table into a full fledged Field record"
+  [row]
   ((field-constructors (keyword (row :type))) row))
 
-(defn fields-render [fields content opts]
+(defn fields-render
+  "render all fields out to a string friendly format"
+  [fields content opts]
   (reduce #(assoc %1 (keyword (-> %2 :row :name))
              (render %2 content opts))
           content fields))
 
-(defn model-render [model content opts]
+(defn model-render
+  "render a piece of content according to the fields contained in the model
+  and given by the supplied opts"
+  [model content opts]
   (fields-render (vals (model :fields)) content opts))
 
 (def lifecycle-hooks (ref {}))
 
-(defn make-lifecycle-hooks [slug]
+(defn make-lifecycle-hooks
+  "establish the set of functions which are called throughout the lifecycle
+  of all rows for a given model (slug).  the possible hook points are:
+    :before_create     -- called for create only, before the record is made
+    :after_create      -- called for create only, now the record has an id
+    :before_update     -- called for update only, before any changes are made
+    :after_update      -- called for update only, now the changes have been committed
+    :before_save       -- called for create and update
+    :after_save        -- called for create and update
+    :before_destroy    -- only called on destruction, record has not yet been removed
+    :after_destroy     -- only called on destruction, now the db has no record of it"
+  [slug]
   (let [hooks {(keyword slug)
                {:before_create  (ref {})
                 :after_create   (ref {})
@@ -377,28 +409,42 @@
     (dosync
      (alter lifecycle-hooks merge hooks))))
 
-(defn run-hook [slug timing env]
+(defn run-hook
+  "run the hooks for the given model slug given by timing.
+  env contains any necessary additional information for the running of the hook"
+  [slug timing env]
   (let [kind (lifecycle-hooks (keyword slug))]
     (if kind
       (let [hook (kind (keyword timing))]
         (reduce #((hook %2) %1) env (keys @hook))))))
 
-(defn add-hook [slug timing id hook]
+(defn add-hook
+  "add a hook for the given model slug for the given timing.
+  each hook must have a unique id, or it overwrites the previous hook at that id."
+  [slug timing id hook]
   (dosync
    (alter ((lifecycle-hooks (keyword slug)) (keyword timing))
           merge {id hook})))
 
-(defn invoke-model [model]
+(defn invoke-model
+  "translates a row from the model table into a nested hash with references
+  to its fields in a hash with keys being the field slugs
+  and vals being the field invoked as a Field protocol record."
+  [model]
   (let [fields (db/query "select * from field where model_id = %1" (model :id))
         field-map (seq-to-map #(keyword (-> % :row :name)) (map make-field fields))]
     (make-lifecycle-hooks (model :slug))
     (assoc model :fields field-map)))
 
-(defn alter-models [model]
+(defn alter-models
+  "inserts a single model into the hash of cached model records."
+  [model]
   (dosync
    (alter models merge {(model :slug) model (model :id) model})))
 
-(defn create-model-table [name]
+(defn create-model-table
+  "create an table with the given name."
+  [name]
   (db/create-table (keyword name) []))
 
 (def invoke-models)
@@ -474,7 +520,12 @@
       (doall (map #(db/drop-column ((models (-> field :row :model_id)) :slug) (first %)) (table-additions field (-> env :content :slug))))
       env))))
 
-(defn invoke-models []
+(defn invoke-models
+  "call to populate the application model cache in model/models.
+  (otherwise we hit the db all the time with model and field selects)
+  this also means if a model or field is changed in any way that model will
+  have to be reinvoked to reflect the current state."
+  []
   (let [rows (db/query "select * from model")
         invoked (doall (map invoke-model rows))]
      (add-model-hooks)
@@ -485,7 +536,15 @@
         (merge (seq-to-map #(keyword (% :slug)) invoked)
                (seq-to-map #(% :id) invoked))))))
 
-(defn create [slug spec]
+(defn create
+  "slug represents the model to be updated.
+  the spec contains all information about how to update this row,
+  including nested specs which update across associations.
+  the only difference between a create and an update is if an id is supplied,
+  hence this will automatically forward to update if it finds an id in the spec.
+  this means you can use this create method to create or update something,
+  using the presence or absence of an id to signal which operation gets triggered."
+  [slug spec]
   (if (spec :id)
     (update slug (spec :id) spec)
     (let [model (models (keyword slug))
@@ -500,7 +559,12 @@
           _final (run-hook slug :after_save (merge _after {:content post}))]
       (_final :content))))
 
-(defn update [slug id spec]
+(defn update
+  "slug represents the model to be updated.
+  id is the specific row to update.
+  the spec contains all information about how to update this row,
+  including nested specs which update across associations."
+  [slug id spec]
   (let [model (models (keyword slug))
         original (db/choose slug id)
         values (reduce #(update-values %2 spec %1) {} (vals (model :fields)))
@@ -516,7 +580,7 @@
     (_final :content)))
 
 (defn destroy
-  "destroy the item of the given model with the given id"
+  "destroy the item of the given model with the given id."
   [slug id]
   (let [model (models (keyword slug))
         content (db/choose slug id)
@@ -528,7 +592,7 @@
     (_after :content)))
 
 (defn rally
-  "pull a set of content up through the model system with the given options"
+  "pull a set of content up through the model system with the given options."
   ([slug] (rally slug {}))
   ([slug opts]
      (let [model (models (keyword slug))
@@ -539,14 +603,14 @@
        (doall (map #(from model % opts) (db/query "select * from %1 order by %2 %3 limit %4 offset %5" slug order-by order limit offset))))))
 
 (defn table-columns
-  "return a list of all columns for the table corresponding to this model"
+  "return a list of all columns for the table corresponding to this model."
   [slug]
   (let [model (models (keyword slug))]
     (apply concat (map (fn [field] (map #(name (first %)) (table-additions field (-> field :row :slug)))) (vals (model :fields))))))
 
 (defn progenitors
   "if the model given by slug is nested,
-  return a list of the item given by this id along with all of its ancestors"
+  return a list of the item given by this id along with all of its ancestors."
   ([slug id] (progenitors slug id {}))
   ([slug id opts]
      (let [model (models (keyword slug))]
@@ -560,7 +624,7 @@
 
 (defn descendents
   "pull up all the descendents of the item given by id
-  in the nested model given by slug"
+  in the nested model given by slug."
   ([slug id] (descendents slug id {}))
   ([slug id opts]
      (let [model (models (keyword slug))]
@@ -574,18 +638,21 @@
 
 (defn reconstruct
   "mapping is between parent_ids and collections which share a parent_id.
-  node is the item whose descendent tree is to be reconstructed"
+  node is the item whose descendent tree is to be reconstructed."
   [mapping node]
   (assoc node :children (map #(reconstruct mapping %) (mapping (node :id)))))
 
 (defn arrange-tree
-  "given a set of nested items, arrange them into a tree based on id/parent_id relationships"
+  "given a set of nested items, arrange them into a tree
+  based on id/parent_id relationships."
   [items]
   (let [by-parent (group-by #(% :parent_id) items)
         roots (by-parent nil)]
     (doall (map #(reconstruct by-parent %) roots))))
 
-(defn init []
+(defn init
+  "run any necessary initialization for the model environment."
+  []
   (invoke-models)
   (log :model "models-invoked"))
 
