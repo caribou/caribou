@@ -1,6 +1,5 @@
 (ns triface.util
-  (:require [clojure.contrib.json :as json])
-  (:use clojure.contrib.str-utils))
+  (:use [clojure.string :only (join)]))
 
 (import java.sql.SQLException)
 
@@ -8,7 +7,7 @@
   (reduce #(assoc %1 (f %2) %2) {} q))
 
 (defn slugify [s]
-  (.toLowerCase (str-join "_" (re-seq #"[a-zA-Z]+" s))))
+  (.toLowerCase (join "_" (re-seq #"[a-zA-Z]+" s))))
 
 (defn render-exception [e]
   (let [cause (.getCause e)]

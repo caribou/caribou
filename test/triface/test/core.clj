@@ -4,7 +4,7 @@
   (:use [triface.debug])
   (:require [triface.db :as db])
   (:require [triface.model :as model])
-  (:require [clojure.contrib.json :as json]))
+  (:require [clojure.data.json :as json]))
 
 (deftest content-list-test
   (binding [db/query (fn [query & args] (array-map :id 1 :name "model"))]

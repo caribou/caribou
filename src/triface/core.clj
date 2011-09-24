@@ -1,6 +1,7 @@
 (ns triface.core
   (:use compojure.core)
-  (:use clojure.contrib.str-utils)
+  (:use [clojure.string :only (join split)])
+  (:use [clojure.data.json :only (json-str write-json read-json)])
   (:use triface.debug)
   (:require [triface.db :as db]
             [triface.model :as model]
@@ -8,10 +9,8 @@
             [compojure.route :as route]
             [ring.adapter.jetty :as ring]
             [compojure.handler :as handler]
-            [clojure.contrib.string :as string]
             [clojure-csv.core :as csv]
-            [clojure.contrib.prxml :as pr]
-            [clojure.contrib.json :as json]))
+            [clojure.data.xml :as xml]))
 
 (def error
   {:meta {:status "500"
@@ -37,9 +36,9 @@
 
 (defn process-include [include]
   (if (and include (not (empty? include)))
-    (let [clauses (string/split #"," include)
-          paths (map #(string/split #"\." %) clauses)
-          maps (reduce #(assoc %1 (keyword (first %2)) (process-include (str-join "." (rest %2)))) {} paths)]
+    (let [clauses (split #"," include)
+          paths (map #(split #"\." %) clauses)
+          maps (reduce #(assoc %1 (keyword (first %2)) (process-include (join "." (rest %2)))) {} paths)]
       maps)
     {}))
 
@@ -51,7 +50,7 @@
 (defn to-csv-column [bulk key]
   (let [morph (bulk (keyword key))]
     (cond
-     (or (seq? morph) (vector? morph) (list? morph)) (str-join "|" (map #(str (last (first %))) morph))
+     (or (seq? morph) (vector? morph) (list? morph)) (join "|" (map #(str (last (first %))) morph))
      :else (str morph))))
                                                    
 (defn to-csv [headings bulk]
@@ -72,7 +71,7 @@
 
 (def format-handlers
   {:json (fn [result params]
-           (let [jsonify (json/json-str result)
+           (let [jsonify (json-str result)
                  jsonp (params :jsonp)]
              (if jsonp
                (wrap-jsonp jsonp jsonify)
@@ -80,8 +79,7 @@
    :xml  (fn [result params]
            (let [xmlify (prep-xml result)]
              (with-out-str
-               (apply pr/prxml
-                      (cons [:decl! {:version "1.0"}] xmlify)))))
+               (xml/emit (xml/sexp-as-element [:api xmlify])))))
    :csv  (fn [result params]
            (let [bulk (result :response)
                  what (-> result :meta :type)
@@ -101,9 +99,9 @@
                handler# (or (format-handlers (keyword format#)) (format-handlers :json))]
            (handler# result# ~(first path-args)))
          (catch Exception e#
-           (log :error (str "error rendering /" (str-join "/" [~@(rest path-args)]) ": "
+           (log :error (str "error rendering /" (join "/" [~@(rest path-args)]) ": "
                      (util/render-exception e#)))
-           (json/json-str
+           (json-str
             ~(reduce #(assoc %1 (keyword %2) %2) error path-args)))))))
 
 (defn wrap-response [response meta]
