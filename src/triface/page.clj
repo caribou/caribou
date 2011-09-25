@@ -41,9 +41,6 @@
         action-path (str above-action "/" (page :action))
         route `(GET ~path {~(symbol "params") :params} ((actions ~(keyword (page :action))) ~(symbol "params")))]
     (do
-      (try
-        (load-file (str action-path ".clj"))
-        (catch Exception e)) ;; controller file does not exist
       (let [action-file (str action-path ".clj")
             action (if (.exists (new File action-file))
                      (do (load-file action-file) controller/action)
