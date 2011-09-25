@@ -1,7 +1,8 @@
 (ns triface.page
-  (:use triface.debug)
-  (:use clojure.contrib.str-utils)
-  (:use compojure.core)
+  (:use triface.debug
+        clojure.contrib.str-utils
+        compojure.core
+        [ring.middleware file file-info stacktrace reload])
   (:require [triface.model :as model]
             [triface.db :as db]
             [triface.app.controller :as controller]
@@ -65,14 +66,14 @@
         (let [filename (.toString (first fseq))]
           (if (.isFile (first fseq))
             (do
-              (load-file (debug filename))
+              (load-file filename)
               (let [template view/template
                     template-key (keyword
                                   (string/replace 
                                    (string/replace filename (str base "/") "")
                                    ".clj" ""))]
                 (dosync
-                 (alter templates merge {(debug template-key) template})))))
+                 (alter templates merge {template-key template})))))
           (recur (next fseq)))))))
 
 (defn generate-routes
@@ -102,12 +103,24 @@
         generated (generate-routes @pages app-path)]
     `(defroutes all-routes ~@generated)))
 
+(def all-routes)
+
+(defn define-app
+  ""
+  []
+  (def app
+    (-> all-routes
+        (wrap-file (str (triface-properties "applicationPath") "/public"))
+        (wrap-file-info)
+        (wrap-stacktrace)
+        (handler/site))))
+
 (defn init
   "initialize page related activities"
   []
   (model/init)
   (invoke-routes)
-  (def app (handler/site all-routes)))
+  (define-app))
 
 (defn start [port]
   (init)
