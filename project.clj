@@ -8,6 +8,7 @@
                  [clojure-solr "0.2.0"]
                  [org.clojure/data.json "0.1.1"]
                  [org.clojars.ninjudd/data.xml "0.0.1-SNAPSHOT"]
+                 [org.clojars.serabe/rinzelight "0.0.3"]
                  [ring/ring-jetty-adapter "0.3.10"]
                  [com.instrument.triface/triface-action-adapter "1.0-SNAPSHOT"]
                  [clojure-csv/clojure-csv "1.3.2"]]

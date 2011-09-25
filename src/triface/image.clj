@@ -1,7 +1,5 @@
 (ns triface.image
-  (:use clojure.contrib.java-utils))
-
-(import '(com.thebuzzmedia.imgscalr Scalr Scalr$Mode Scalr$Method))
+  (:use rinzelight))
 
 (defn resize
   "resize the given image according to the supplied options, saving to the new filename"
