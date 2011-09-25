@@ -1,17 +1,22 @@
 (ns triface.image
-  (:use rinzelight))
+  (:use rinzelight.image)
+  (:use rinzelight.rendering-hints)
+  (:use rinzelight.effects.affine-transforms))
 
 (defn resize
-  "resize the given image according to the supplied options, saving to the new filename"
+  "resize the image specified by filename according to the supplied options
+  (:width or :height), saving to file new-filename"
   [filename new-filename opts]
-  (let [img (javax.imageio.ImageIO/read (as-file filename))
-        img-type (java.awt.image.BufferedImage/TYPE_INT_ARGB)
-        aspect-ratio (/ (.getWidth img) (.getHeight img))
-        subwidth (if (opts :width) (opts :width) (.getWidth img))
-        subheight (if (opts :height) (opts :height) (.getHeight img))
+  (let [img (read-image filename)
+        width (img :width)
+        height (img :height)
+        aspect-ratio (/ width height)
+        subwidth (if (opts :width) (opts :width) width)
+        subheight (if (opts :height) (opts :height) height)
         subratio (/ subwidth subheight)
-        [mode dim] (if (> subratio aspect-ratio)
-                     [Scalr$Mode/FIT_TO_HEIGHT subheight]
-                     [Scalr$Mode/FIT_TO_WIDTH subwidth])
-        scaled (Scalr/resize img Scalr$Method/QUALITY mode dim (into-array [Scalr/OP_ANTIALIAS]))]
-    (javax.imageio.ImageIO/write scaled "png" (as-file (str new-filename ".png")))))
+        master (if (> subratio aspect-ratio)
+                 (/ subheight height)
+                 (/ subwidth width))
+        scaled (scale img master antialiasing-on interpolation-bicubic)]
+    (write-image scaled new-filename)))
+
