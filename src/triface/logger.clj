@@ -1,4 +1,4 @@
-(ns triface.core
+(ns triface.logger
   (:use clojure.tools.logging)
   (:use clj-logging-config.log4j))
 
