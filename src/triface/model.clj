@@ -1,7 +1,6 @@
 (ns triface.model
   (:use triface.debug)
   (:use triface.util)
-  ;; (:use [clojure.contrib.str-utils])
   (:require [triface.db :as db]))
 
 (defprotocol Field
