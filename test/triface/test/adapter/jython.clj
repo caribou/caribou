@@ -32,7 +32,7 @@
         (is (= (m "string") "hello world!"))
         (is (= (m "boolean") true))
         (is (= (m "int") 1))
-        (is (= (m "long") 1.0))
+        (is (= (m "long") 1))
         (is (= (m "float") 1.0))
         (is (= ((m "map") "key1") "val1"))
         (is (= ((m "map") "key2") 2))

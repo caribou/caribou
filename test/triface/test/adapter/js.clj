@@ -16,7 +16,7 @@
     (.getContextClassLoader)
     (.getResourceAsStream "test.properties"))))))
   
-(deftest jruby-action-test
+(deftest js-action-test
 ;;instantiate a jyton object factory and get a reference to it
 (let [jof (TrifaceJSObjectFactory. ITrifaceAction "MapMangler")]
   (.addLoadPath jof (test-properties "testApplicationPath"))
@@ -31,12 +31,12 @@
         ;; inserted by mapmangler
         (is (= (m "string") "hello world!"))
         (is (= (m "boolean") true))
-        (is (= (m "int") 1))
-        (is (= (m "float") 1.0))
+        (is (= (m "int") 1.0))
+        (is (= (m "float") 1.1))
         (is (= ((m "map") "key1") "val1"))
-        (is (= ((m "map") "key2") 2))
-        (is (= (first (m "list")) 1))
-        (is (= (rest (m "list")) [1,2,3,5]))
+        (is (= ((m "map") "key2") 2.0))
+        (is (= (first (m "list")) 1.0))
+        (is (= (rest (m "list")) [1.0,2.0,3.0,5.0]))
       )
   )
   (catch Exception e (print e)))  
