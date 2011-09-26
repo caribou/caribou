@@ -75,7 +75,6 @@
   ;;   (sql/with-connection db
   ;;     (sql/do-commands
   ;;       (log :db q)))))
-
   (log :db (clause "insert into %1 values %2" [(name table) (value-map values)]))
   (sql/with-connection db
     (sql/insert-record table values)))
