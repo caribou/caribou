@@ -108,6 +108,22 @@
   {:meta (merge {:status "200" :msg "OK"} meta)
    :response response})
 
+(defn ensure-seq
+  "if given a map, convert to a seq containing only its values.
+  otherwise, leave it alone"
+  [col]
+  (cond
+   (map? col) (vals col)
+   :else col))
+
+(defn ensure-lists-in
+  "flatten nested params into lists"
+  [params]
+  (reduce
+   #(if (map? (%1 %2)) (assoc %1 %2 (ensure-seq (%1 %2))) %1)
+   params
+   (keys params)))
+
 ;; actions ------------------------------------------------
 
 (action home [params]
@@ -153,11 +169,11 @@
     (wrap-response response {})))
 
 (action create-content [params slug]
-  (let [response (render slug (model/create slug (params (keyword slug))) params)]
+  (let [response (render slug (model/create slug (ensure-lists-in (params (keyword slug)))) params)]
     (wrap-response response {:type slug})))
 
 (action update-content [params slug id]
-  (let [content (model/update slug id (params (keyword slug)))
+  (let [content (model/update slug id (ensure-lists-in (params (keyword slug))))
         response (render slug (db/choose slug id) params)]
     (wrap-response response {:type slug})))
 

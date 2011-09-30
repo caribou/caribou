@@ -3,6 +3,13 @@
   (:use triface.util)
   (:require [triface.db :as db]))
 
+(import java.text.SimpleDateFormat)
+(def simple-date-format (java.text.SimpleDateFormat. "MMMMMMMMM dd', 'yyyy HH':'mm"))
+(defn format-date
+  "given a date object, return a string representing the canonical format for that date"
+  [date]
+  (.format simple-date-format date))
+
 (defprotocol Field
   "a protocol for expected behavior of all model fields"
   (table-additions [this field]
@@ -158,7 +165,7 @@
   (post-update [this content] content)
   (pre-destroy [this content] content)
   (field-from [this content opts] (content (keyword (row :slug))))
-  (render [this content opts] (str (field-from this content opts))))
+  (render [this content opts] (format-date (field-from this content opts))))
 
 (defrecord ImageField [row env]
   Field
@@ -218,11 +225,17 @@
 
   (target-for [this] (models (row :target_id)))
 
-  (update-values [this content values] values)
+  (update-values [this content values]
+    values)
+    ;; (let [model (models (row :model_id))
+    ;;       model_slug (keyword (model :slug))
+    ;;       field_slug (keyword (row :slug))
+    ;;       collection ((debug values) model_slug field_slug)]
+    ;;   (update-in values [(keyword (model :slug)) (row :slug)] (ensure-seq collection))))
 
   (post-update [this content]
     (let [collection (content (keyword (row :slug)))]
-      (if collection
+      (if (debug collection)
         (let [part (env :link)
               part-key (keyword (str (part :slug) "_id"))
               model (models (part :model_id))
@@ -544,7 +557,7 @@
   this means you can use this create method to create or update something,
   using the presence or absence of an id to signal which operation gets triggered."
   [slug spec]
-  (if (spec :id)
+  (if ((debug spec) :id)
     (update slug (spec :id) spec)
     (let [model (models (keyword slug))
           values (reduce #(update-values %2 spec %1) {} (vals (dissoc (model :fields) :updated_at)))
