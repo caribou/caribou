@@ -130,8 +130,25 @@
 (action home [params]
   (wrap-response {} {}))
 
-(action upload [params]
-  ())
+(defn upload [params]
+  (log :action (str "upload => " params))
+  "
+<!doctype html>
+<html>
+    <head>
+    <title>upload response</title>
+    </head>
+    <body>
+        <script type=\"text/javascript\">
+            parent.rpc.returnUploadResponse({
+                status: 'success',
+                msg: 'The upload succeeded!'
+            });
+        </script>
+    </body>
+</html>
+"
+)
 
 (action list-all [params slug]
   (if (model/models (keyword slug))
