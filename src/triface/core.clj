@@ -6,9 +6,10 @@
   (:require [triface.db :as db]
             [triface.model :as model]
             [triface.util :as util]
-            [compojure.route :as route]
             [ring.adapter.jetty :as ring]
+            [compojure.route :as route]
             [compojure.handler :as handler]
+            [clojure.java.io :as io]
             [clojure-csv.core :as csv]
             [clojure.data.xml :as xml]))
 
@@ -129,6 +130,9 @@
 (action home [params]
   (wrap-response {} {}))
 
+(action upload [params]
+  ())
+
 (action list-all [params slug]
   (if (model/models (keyword slug))
     (let [include (process-include (params :include))
@@ -169,7 +173,7 @@
     (wrap-response response {})))
 
 (action create-content [params slug]
-  (let [response (render slug (model/create slug (ensure-lists-in (params (keyword slug)))) params)]
+  (let [response (render slug (model/create slug (debug (ensure-lists-in (params (keyword slug))))) (debug params))]
     (wrap-response response {:type slug})))
 
 (action update-content [params slug id]
@@ -186,6 +190,7 @@
 
 (defroutes main-routes
   (GET  "/" {params :params} (home params))
+  (POST "/upload" {params :params} (upload params))
 
   (GET  "/:slug.:format" {params :params} (list-all params))
   (POST "/:slug.:format" {params :params} (create-content params))

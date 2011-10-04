@@ -48,6 +48,7 @@
            :locked true
            :fields (lock [{:name "name" :type "string"}
                           {:name "slug" :type "slug" :link_slug "name"}
+                          {:name "asset" :type "asset"}
                           {:name "description" :type "text"}])})
 
 (def domain {:name "domain"

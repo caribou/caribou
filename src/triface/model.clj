@@ -167,14 +167,14 @@
   (field-from [this content opts] (content (keyword (row :slug))))
   (render [this content opts] (format-date (field-from this content opts))))
 
-(defrecord ImageField [row env]
+(defrecord AssetField [row env]
   Field
   (table-additions [this field] [])
   (subfield-names [this field] [(str field "_id")])
   (setup-field [this] nil)
   (cleanup-field [this] nil)
   (target-for [this] nil)
-  (update-values [this content values])
+  (update-values [this content values] values)
   (post-update [this content] content)
   (pre-destroy [this content] content)
   (field-from [this content opts])
@@ -235,7 +235,7 @@
 
   (post-update [this content]
     (let [collection (content (keyword (row :slug)))]
-      (if (debug collection)
+      (if collection
         (let [part (env :link)
               part-key (keyword (str (part :slug) "_id"))
               model (models (part :model_id))
@@ -349,7 +349,7 @@
    :text (fn [row] (TextField. row {}))
    :boolean (fn [row] (BooleanField. row {}))
    :timestamp (fn [row] (TimestampField. row {}))
-   :image (fn [row] (ImageField. row {}))
+   :asset (fn [row] (AssetField. row {}))
    :collection (fn [row]
                  (let [link (if (row :link_id) (db/choose :field (row :link_id)))]
                    (CollectionField. row {:link link})))
@@ -557,7 +557,7 @@
   this means you can use this create method to create or update something,
   using the presence or absence of an id to signal which operation gets triggered."
   [slug spec]
-  (if ((debug spec) :id)
+  (if (spec :id)
     (update slug (spec :id) spec)
     (let [model (models (keyword slug))
           values (reduce #(update-values %2 spec %1) {} (vals (dissoc (model :fields) :updated_at)))
