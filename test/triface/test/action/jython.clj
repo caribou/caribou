@@ -2,12 +2,12 @@
 ;; jython action adapter integration test. 
 ;;
 
-(ns triface.test.adapter.jython
+(ns triface.test.action.jython
   (:use [clojure.test])
-  (:use [triface.debug]))
+  (:require [triface.action.adapter :as adapter]))
 
 (import com.instrument.triface.JythonObjectFactory)
-(import '(com.instrument.triface.action ITrifaceAction ITrifaceAction$MapType))
+(import java.io.File)
 
 (def test-properties 
   (into {} (doto (java.util.Properties.)
@@ -16,15 +16,9 @@
     (.getResourceAsStream "test.properties"))))))
   
 (deftest jython-action-test
-;; add app path to the python sys path
-;; instantiate a jyton object factory and get a reference to it
-(let [jof (JythonObjectFactory. ITrifaceAction "MapMangler")]
-  (.addLoadPath jof (test-properties "testApplicationPath"))
+(let [action (adapter/get-action (File. (str (test-properties "testApplicationPath") "/MapMangler.py")))]
   (try    
-    (let [mangler (.createObject jof)]
-      (.setMap mangler {:foo "bar", "mp" {"eff" "yes"}})
-      (.execute mangler)
-      (let [m (.getConvertedMap mangler ITrifaceAction$MapType/CLOJURE)]
+    (let [m (action {:foo "bar", "mp" {"eff" "yes"}})]
         (is (= (m :foo) "bar"))
         (is (= ((m "mp") "eff" "yes"))) 
         
@@ -39,6 +33,5 @@
         (is (= (first (m "list")) 1))
         (is (= (rest (m "list")) [1,2,3,5]))
       )
-  )
   (catch Exception e (print e)))  
 ))
