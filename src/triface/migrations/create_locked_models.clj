@@ -36,9 +36,10 @@
             :description "a reference to some system resource"
             :position 7
             :locked true
-            :fields (lock [{:name "name" :type "string"}
+            :fields (lock [{:name "filename" :type "string"}
                            {:name "url" :type "string"}
                            {:name "content_type" :type "string"}
+                           {:name "size" :type "integer"}
                            {:name "parent_id" :type "integer"}
                            {:name "description" :type "text"}])})
 
