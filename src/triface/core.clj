@@ -113,9 +113,13 @@
   "if given a map, convert to a seq containing only its values.
   otherwise, leave it alone"
   [col]
-  (cond
-   (map? col) (vals col)
-   :else col))
+  (try 
+    (cond
+     (map? col) (let [int-test (doall (map #(Integer/parseInt (name %)) (keys col)))]
+                  (vals col))
+     :else col)
+    (catch Exception e
+      col)))
 
 (defn ensure-lists-in
   "flatten nested params into lists"

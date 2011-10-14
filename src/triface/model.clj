@@ -210,8 +210,36 @@
   (post-update [this content] content)
   (pre-destroy [this content] content)
   (field-from [this content opts]
-    (let [asset (db/choose :asset (content (keyword (str (row :slug) "_id"))))]
+    (let [asset (or (db/choose :asset (content (keyword (str (row :slug) "_id")))) {})]
       (assoc asset :path (asset-path asset))))
+  (render [this content opts] (model-render (models :asset) (field-from this content opts) {})))
+
+(defrecord AddressField [row env]
+  Field
+  (table-additions [this field] [])
+  (subfield-names [this field] [(str field "_id")])
+  (setup-field [this]
+    (update :model (row :model_id)
+            {:fields [{:name (str (row :slug) "_id")
+                       :type "integer"
+                       :editable false}]}))
+  (cleanup-field [this]
+    (let [fields ((models (row :model_id)) :fields)
+          id (keyword (str (row :slug) "_id"))]
+      (destroy :field (-> fields id :row :id))))
+  (target-for [this] nil)
+  (update-values [this content values]
+    (let [posted (values (keyword (row :slug)))
+          idkey (keyword (str (row :slug) "_id"))
+          preexisting (content idkey)
+          address (if preexisting (assoc posted :id preexisting) posted)]
+      (if address
+        (let [location (create :location address)]
+          (assoc values idkey (location :id))))))
+  (post-update [this content] content)
+  (pre-destroy [this content] content)
+  (field-from [this content opts]
+    (or (db/choose :location (content (keyword (str (row :slug) "_id")))) {}))
   (render [this content opts] (model-render (models :asset) (field-from this content opts) {})))
 
 (defn from
@@ -375,6 +403,7 @@
    :boolean (fn [row] (BooleanField. row {}))
    :timestamp (fn [row] (TimestampField. row {}))
    :asset (fn [row] (AssetField. row {}))
+   :address (fn [row] (AddressField. row {}))
    :collection (fn [row]
                  (let [link (if (row :link_id) (db/choose :field (row :link_id)))]
                    (CollectionField. row {:link link})))

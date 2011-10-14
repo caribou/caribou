@@ -59,8 +59,21 @@
              :fields (lock [{:name "name" :type "string"}
                             {:name "description" :type "text"}])})
 
+(def location {:name "location"
+               :description "a location somewhere on the planet"
+               :position 10
+               :locked true
+               :fields (lock [{:name "address" :type "string"}
+                              {:name "address_two" :type "string"}
+                              {:name "city" :type "string"}
+                              {:name "postal_code" :type "string"}
+                              {:name "state" :type "string"}
+                              {:name "country" :type "string"}
+                              {:name "lat" :type "string"}
+                              {:name "lng" :type "string"}])})
+
 (def incubating
-  [page view locale asset site domain])
+  [page view locale asset site domain location])
 
 (defn spawn-models []
   (doall (map #(model/create :model %) incubating)))
