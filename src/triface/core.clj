@@ -130,29 +130,14 @@
 (action home [params]
   (wrap-response {} {}))
 
-(defn pad-break-id [id]
-  (let [root (str id)
-        len (count root)
-        pad-len (- 8 len)
-        pad (apply str (repeat pad-len "0"))
-        halves (map #(apply str %) (partition 4 (str pad root)))
-        path (join "/" halves)]
-    path))
-
-(defn asset-dir [asset]
-  (str "assets/" (pad-break-id (asset :id))))
-
-(defn asset-path [asset]
-  (str (asset-dir asset) "/" (asset :filename)))
-
 (defn upload [params]
   (log :action (str "upload => " params))
   (let [upload (params :upload)
         asset (model/create :asset {:filename (upload :filename)
                                     :content_type (upload :content-type)
                                     :size (upload :size)})
-        dir (asset-dir asset)
-        path (asset-path asset)
+        dir (model/asset-dir asset)
+        path (model/asset-path asset)
         response (str "
 <!doctype html>
 <html>

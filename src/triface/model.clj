@@ -1,6 +1,7 @@
 (ns triface.model
   (:use triface.debug)
   (:use triface.util)
+  (:use [clojure.string :only (join split)])
   (:require [triface.db :as db]))
 
 (import java.text.SimpleDateFormat)
@@ -18,7 +19,7 @@
     "the names of any additional fields added to the model
     by this field given this name")
   (setup-field [this] "further processing on creation of field")
-  (cleanup-field [this] "further processing on creation of field")
+  (cleanup-field [this] "further processing on removal of field")
   (target-for [this] "retrieves the model this field points to, if applicable")
   (update-values [this content values]
     "adds to the map of values that will be committed to the db for this row")
@@ -167,20 +168,7 @@
   (field-from [this content opts] (content (keyword (row :slug))))
   (render [this content opts] (format-date (field-from this content opts))))
 
-(defrecord AssetField [row env]
-  Field
-  (table-additions [this field] [])
-  (subfield-names [this field] [(str field "_id")])
-  (setup-field [this] nil)
-  (cleanup-field [this] nil)
-  (target-for [this] nil)
-  (update-values [this content values] values)
-  (post-update [this content] content)
-  (pre-destroy [this content] content)
-  (field-from [this content opts])
-  (render [this content opts] ""))
-
-;; forward reference for CollectionField
+;; forward reference for Fields that need them
 (def make-field)
 (def model-render)
 (def invoke-model)
@@ -188,6 +176,43 @@
 (def update)
 (def destroy)
 (def models (ref {}))
+
+(defn pad-break-id [id]
+  (let [root (str id)
+        len (count root)
+        pad-len (- 8 len)
+        pad (apply str (repeat pad-len "0"))
+        halves (map #(apply str %) (partition 4 (str pad root)))
+        path (join "/" halves)]
+    path))
+
+(defn asset-dir [asset]
+  (str "assets/" (pad-break-id (asset :id))))
+
+(defn asset-path [asset]
+  (str (asset-dir asset) "/" (asset :filename)))
+
+(defrecord AssetField [row env]
+  Field
+  (table-additions [this field] [])
+  (subfield-names [this field] [(str field "_id")])
+  (setup-field [this]
+    (update :model (row :model_id)
+            {:fields [{:name (str (row :slug) "_id")
+                       :type "integer"
+                       :editable false}]}))
+  (cleanup-field [this]
+    (let [fields ((models (row :model_id)) :fields)
+          id (keyword (str (row :slug) "_id"))]
+      (destroy :field (-> fields id :row :id))))
+  (target-for [this] nil)
+  (update-values [this content values] values)
+  (post-update [this content] content)
+  (pre-destroy [this content] content)
+  (field-from [this content opts]
+    (let [asset (db/choose :asset (content (keyword (str (row :slug) "_id"))))]
+      (assoc asset :path (asset-path asset))))
+  (render [this content opts] (model-render (models :asset) (field-from this content opts) {})))
 
 (defn from
   "takes a model and a raw db row and converts it into a full
