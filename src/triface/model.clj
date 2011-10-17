@@ -2,7 +2,8 @@
   (:use triface.debug)
   (:use triface.util)
   (:use [clojure.string :only (join split)])
-  (:require [triface.db :as db]))
+  (:require [triface.db :as db]
+            [geocoder.core :as geo]))
 
 (import java.text.SimpleDateFormat)
 (def simple-date-format (java.text.SimpleDateFormat. "MMMMMMMMM dd', 'yyyy HH':'mm"))
@@ -214,6 +215,18 @@
       (assoc asset :path (asset-path asset))))
   (render [this content opts] (model-render (models :asset) (field-from this content opts) {})))
 
+(defn full-address [address]
+  (join " " [(address :address)
+             (address :address_two)
+             (address :postal_code)
+             (address :city)
+             (address :state)
+             (address :country)]))
+
+(defn geocode-address [address]
+  (let [{lat :latitude lng :longitude} ((first (debug (geo/geocode (full-address address)))) :location)]
+    {:lat lat :lng lng}))
+
 (defrecord AddressField [row env]
   Field
   (table-additions [this field] [])
@@ -229,18 +242,21 @@
       (destroy :field (-> fields id :row :id))))
   (target-for [this] nil)
   (update-values [this content values]
-    (let [posted (values (keyword (row :slug)))
+    (let [posted (content (keyword (row :slug)))
           idkey (keyword (str (row :slug) "_id"))
           preexisting (content idkey)
           address (if preexisting (assoc posted :id preexisting) posted)]
       (if address
-        (let [location (create :location address)]
-          (assoc values idkey (location :id))))))
+        (let [geocode (geocode-address address)
+              location (create :location address)]
+              ;; location (create :location (merge address geocode))]
+          (assoc values idkey (location :id)))
+        values)))
   (post-update [this content] content)
   (pre-destroy [this content] content)
   (field-from [this content opts]
     (or (db/choose :location (content (keyword (str (row :slug) "_id")))) {}))
-  (render [this content opts] (model-render (models :asset) (field-from this content opts) {})))
+  (render [this content opts] (model-render (models :location) (field-from this content opts) {})))
 
 (defn from
   "takes a model and a raw db row and converts it into a full

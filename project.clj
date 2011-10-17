@@ -10,6 +10,7 @@
                  [org.clojars.ninjudd/data.xml "0.0.1-SNAPSHOT"]
                  [org.clojars.serabe/rinzelight "0.0.3"]
                  [ring/ring-jetty-adapter "0.3.10"]
+                 [geocoder-clj "0.0.3-SNAPSHOT"]
                  [com.instrument.triface/triface-action-adapter "1.0-SNAPSHOT"]
                  [clojure-csv/clojure-csv "1.3.2"]
                  [clj-logging-config "1.7.0"]
