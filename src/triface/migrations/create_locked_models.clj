@@ -69,8 +69,8 @@
                               {:name "postal_code" :type "string"}
                               {:name "state" :type "string"}
                               {:name "country" :type "string"}
-                              {:name "lat" :type "string"}
-                              {:name "lng" :type "string"}])})
+                              {:name "lat" :type "decimal"}
+                              {:name "lng" :type "decimal"}])})
 
 (def incubating
   [page view locale asset site domain location])

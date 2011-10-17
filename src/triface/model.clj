@@ -72,6 +72,33 @@
   (field-from [this content opts] (content (keyword (row :slug))))
   (render [this content opts] (field-from this content opts)))
   
+(defrecord DecimalField [row env]
+  Field
+  (table-additions [this field]
+    (let [default (or (env :default) "NULL")]
+      [[(keyword field) :decimal (str "DEFAULT " default)]]))
+  (subfield-names [this field] [])
+  (setup-field [this] nil)
+  (cleanup-field [this] nil)
+  (target-for [this] nil)
+
+  (update-values [this content values]
+    (let [key (keyword (row :slug))]
+      (if (contains? content key)
+        (try
+          (let [value (content key)
+                tval (if (isa? (type value) String)
+                       (BigDecimal. value)
+                       value)]
+            (assoc values key tval))
+          (catch Exception e values))
+        values)))
+
+  (post-update [this content] content)
+  (pre-destroy [this content] content)
+  (field-from [this content opts] (content (keyword (row :slug))))
+  (render [this content opts] (field-from this content opts)))
+  
 (defrecord StringField [row env]
   Field
   (table-additions [this field] [[(keyword field) "varchar(256)"]])
@@ -224,8 +251,11 @@
              (address :country)]))
 
 (defn geocode-address [address]
-  (let [{lat :latitude lng :longitude} ((first (debug (geo/geocode (full-address address)))) :location)]
-    {:lat lat :lng lng}))
+  (let [code (geo/geocode (full-address address))]
+    (if (empty? code)
+      {}
+      {:lat (-> (first code) :location :latitude)
+       :lng (-> (first code) :location :longitude)})))
 
 (defrecord AddressField [row env]
   Field
@@ -244,12 +274,11 @@
   (update-values [this content values]
     (let [posted (content (keyword (row :slug)))
           idkey (keyword (str (row :slug) "_id"))
-          preexisting (content idkey)
+          preexisting ((debug content) idkey)
           address (if preexisting (assoc posted :id preexisting) posted)]
       (if address
         (let [geocode (geocode-address address)
-              location (create :location address)]
-              ;; location (create :location (merge address geocode))]
+              location (create :location (merge address geocode))]
           (assoc values idkey (location :id)))
         values)))
   (post-update [this content] content)
@@ -411,6 +440,7 @@
 (def field-constructors
   {:id (fn [row] (IdField. row {}))
    :integer (fn [row] (IntegerField. row {}))
+   :decimal (fn [row] (DecimalField. row {}))
    :string (fn [row] (StringField. row {}))
    :slug (fn [row] 
            (let [link (db/choose :field (row :link_id))]
