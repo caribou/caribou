@@ -23,7 +23,7 @@
                      [clojure-source "1.2.0"]
                      [com.instrument.triface/triface-action-adapter "1.0-SNAPSHOT"]
 ;;                     [org.clojure/data.json "0.1.1"]
-                     [geocoder-clj "0.0.3-SNAPSHOT"]
+;;                     [geocoder-clj "0.0.3-SNAPSHOT"]
                      [lein-eclipse "1.0.0"]
                      [clj-logging-config "1.7.0"]
                      [log4j "1.2.16"]]
