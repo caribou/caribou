@@ -3,12 +3,6 @@
   (:use [clojure.contrib.str-utils])
   (:require [clojure.java.jdbc :as sql]))
 
-(def db
-  {:classname "org.postgresql.Driver"
-   :subprotocol "postgresql"
-   :subname "//localhost/triface"
-   :user "postgres"})
-
 (defn zap
   "quickly sanitize a potentially dirty string in preparation for a sql query"
   [s]
@@ -36,10 +30,9 @@
 (defn query
   "make an arbitrary query, substituting in extra args as % parameters"
   [q & args]
-  (sql/with-connection db
-    (sql/with-query-results res
-      [(log :db (clause q args))]
-      (doall res))))
+  (sql/with-query-results res
+    [(log :db (clause q args))]
+    (doall res)))
 
 (defn recursive-query [table fields base-where recur-where]
   (let [field-names (distinct (map name (concat [:id :parent_id] fields)))
@@ -76,8 +69,7 @@
   ;;     (sql/do-commands
   ;;       (log :db q)))))
   (log :db (clause "insert into %1 values %2" [(name table) (value-map values)]))
-  (sql/with-connection db
-    (sql/insert-record table values)))
+  (sql/insert-record table values))
 
 (defn update
   "update the given row with the given values"
@@ -86,15 +78,13 @@
         q (clause "update %1 set %2 where " [(zap (name table)) v])
         w (clause (first where) (rest where))
         t (str q w)]
-    (sql/with-connection db
-      (sql/do-commands (log :db t)))))
+    (sql/do-commands (log :db t))))
 
 (defn delete
   "delete out of the given table according to the supplied where clause"
   [table & where]
   (log :db (clause "delete from %1 values %2" [(name table) (clause (first where) (rest where))]))
-  (sql/with-connection db
-    (sql/delete-rows table [(if (not (empty? where)) (clause (first where) (rest where)))])))
+  (sql/delete-rows table [(if (not (empty? where)) (clause (first where) (rest where)))]))
 
 (defn fetch
   "pull all items from a table according to the given conditions"
@@ -119,57 +109,61 @@
   [:column_name :type & :extra]"
   [table & fields]
   (log :db (clause "create table %1 %2" [(name table) fields]))
-  (sql/with-connection db
-    (apply sql/create-table (cons table fields))))
+  (apply sql/create-table (cons table fields)))
 
 (defn rename-table
   "change the name of a table to new-name."
   [table new-name]
   (let [rename (log :db (clause "alter table %1 rename to %2" [(name table) (name new-name)]))]
-    (sql/with-connection db
-      (sql/do-commands rename))))
+    (sql/do-commands rename)))
 
 (defn drop-table
   "remove the given table from the database."
   [table]
   (log :db (clause "drop table %1" [(name table)]))
-  (sql/with-connection db
-    (sql/drop-table (name table))))
+  (sql/drop-table (name table)))
 
-(defn rebuild-database
-  "this function currently fails, as you cannot drop or
-  create databases in a transaction."
-  []
-  (sql/with-connection (assoc db :subname "//localhost/template1")
-    (sql/do-commands "drop database triface" "create database triface")))
+;; (defn rebuild-database
+;;   "this function currently fails, as you cannot drop or
+;;   create databases in a transaction."
+;;   []
+;;   (sql/with-connection (assoc db :subname "//localhost/template1")
+;;     (sql/do-commands "drop database triface" "create database triface")))
 
 (defn add-column
   "add the given column to the table."
   [table column opts]
   (let [type (str-join " " (map name opts))]
-    (sql/with-connection db
-      (sql/do-commands
-       (log :db (clause "alter table %1 add column %2 %3" (map #(zap (name %)) [table column type])))))))
+    (sql/do-commands
+     (log :db (clause "alter table %1 add column %2 %3" (map #(zap (name %)) [table column type]))))))
 
 (defn rename-column
   "rename a column in the given table to new-name."
   [table column new-name]
   (let [rename (log :db (clause "alter table %1 rename column %2 to %3" (map name [table column new-name])))]
-    (sql/with-connection db
-      (sql/do-commands rename))))
+    (sql/do-commands rename)))
 
 (defn drop-column
   "remove the given column from the table."
   [table column]
-  (sql/with-connection db
-    (sql/do-commands
-     (log :db (clause "alter table %1 drop column %2" (map #(zap (name %)) [table column]))))))
+  (sql/do-commands
+   (log :db (clause "alter table %1 drop column %2" (map #(zap (name %)) [table column])))))
 
 (defn do-sql
   "execute arbitrary sql.  direct proxy to sql/do-commands."
   [commands]
-  (sql/with-connection db
-    (sql/do-commands commands)))
+  (sql/do-commands commands))
+
+(def default-db
+  {:classname "org.postgresql.Driver"
+   :subprotocol "postgresql"
+   :subname "//localhost/triface"
+   :user "postgres"})
+
+(defn wrap-db
+  [handler db & [opts]]
+  (fn [request]
+    (sql/with-connection db (handler request))))
 
 (defn count
   "this aliases clojure.core$count so I keep it here at the bottom"

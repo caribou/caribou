@@ -1,0 +1,9 @@
+#!/usr/bin/env bash -x
+
+COMMAND=$1
+NAME=$2
+
+if [ $COMMAND == "new" ]
+then
+    mkdir -p $NAME/{app/{model,controller,view},config/migrations,public}
+fi

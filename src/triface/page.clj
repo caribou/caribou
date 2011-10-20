@@ -8,6 +8,7 @@
             [triface.app.controller :as controller]
             [triface.app.view :as view]
             [clojure.string :as string]
+            [clojure.java.jdbc :as sql]
             [compojure.route :as route]
             [ring.adapter.jetty :as ring]
             [compojure.handler :as handler]))
@@ -86,6 +87,8 @@
      #(make-route % "" (str app-path "/app/controller"))
      pages))))
 
+(def all-routes)
+
 (defn invoke-pages
   "call up the pages and arrange them into a tree."
   []
@@ -94,7 +97,7 @@
     (dosync
      (alter pages (fn [a b] b) tree))))
 
-(defmacro invoke-routes
+(defn invoke-routes
   "invoke pages from the db and generate the routes based on them."
   []
   (let [app-path (triface-properties "applicationPath")
@@ -103,26 +106,26 @@
         generated (generate-routes @pages app-path)]
     `(defroutes all-routes ~@generated)))
 
-(def all-routes)
-
-(defn define-app
-  ""
-  []
-  (def app
-    (-> all-routes
-        (wrap-file (str (triface-properties "applicationPath") "/public"))
-        (wrap-file-info)
-        (wrap-stacktrace)
-        (handler/site))))
-
 (defn init
   "initialize page related activities"
   []
   (model/init)
-  (invoke-routes)
-  (define-app))
+  (invoke-routes))
 
-(defn start [port]
-  (init)
-  (ring/run-jetty (var app) {:port (or port 22212) :join? false}))
+(defn start [port db]
+  (let [full-db (merge db/default-db db)]
+    (sql/with-connection full-db (init))
+    (def app (-> all-routes
+                 (wrap-file (str (triface-properties "applicationPath") "/public"))
+                 (wrap-file-info)
+                 (wrap-stacktrace)
+                 (handler/site)
+                 (db/wrap-db full-db)))
+    (ring/run-jetty (var app) {:port (or port 22212) :join? false})))
 
+(defn go []
+  (let [port (Integer/parseInt (or (System/getenv "PORT") "22212"))]
+    (start port db/default-db)))
+
+(defn -main []
+  (go))

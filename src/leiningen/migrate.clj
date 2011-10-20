@@ -2,4 +2,4 @@
   (require [triface.migration :as mm]))
 
 (defn migrate []
-  (mm/run-migrations))
+  (mm/run-migrations "triface"))

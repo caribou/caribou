@@ -9,6 +9,7 @@
             [ring.adapter.jetty :as ring]
             [compojure.route :as route]
             [compojure.handler :as handler]
+            [clojure.java.jdbc :as sql]
             [clojure.java.io :as io]
             [clojure-csv.core :as csv]
             [clojure.data.xml :as xml]))
@@ -239,18 +240,17 @@
   (route/resources "/")
   (route/not-found "NONONONONONON"))
 
-(def app (handler/site main-routes))
-
 (defn init []
   (model/init))
 
-(defn start [port]
+(defn start [port db]
+  (sql/with-connection db (init))
+  (def app (db/wrap-db (handler/site main-routes) (merge db/default-db db)))
   (ring/run-jetty (var app) {:port (or port 33333) :join? false}))
 
 (defn go []
   (let [port (Integer/parseInt (or (System/getenv "PORT") "33333"))]
-    (init)
-    (start port)))
+    (start port db/default-db)))
 
 (defn -main []
   (go))
