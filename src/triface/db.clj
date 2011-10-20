@@ -123,13 +123,6 @@
   (log :db (clause "drop table %1" [(name table)]))
   (sql/drop-table (name table)))
 
-;; (defn rebuild-database
-;;   "this function currently fails, as you cannot drop or
-;;   create databases in a transaction."
-;;   []
-;;   (sql/with-connection (assoc db :subname "//localhost/template1")
-;;     (sql/do-commands "drop database triface" "create database triface")))
-
 (defn add-column
   "add the given column to the table."
   [table column opts]
@@ -159,6 +152,32 @@
    :subprotocol "postgresql"
    :subname "//localhost/triface"
    :user "postgres"})
+
+(defn drop-database
+  "drop a database of the given name"
+  [name]
+  (try
+    (sql/with-connection (assoc default-db :subname "//localhost/template1")
+      (with-open [s (.createStatement (sql/connection))]
+        (.addBatch s (str "drop database " (zap name)))
+        (seq (.executeBatch s))))
+    (catch Exception e (str "database " name " doesn't exist"))))
+
+(defn create-database
+  "create a database of the given name"
+  [name]
+  (try
+    (sql/with-connection (assoc default-db :subname "//localhost/template1")
+      (with-open [s (.createStatement (sql/connection))]
+        (.addBatch s (str "create database " (zap name)))
+        (seq (.executeBatch s))))
+    (catch Exception e (str "database " name " already exists"))))
+
+(defn rebuild-database
+  "drop and recreate the given database"
+  [name]
+  (drop-database name)
+  (create-database name))
 
 (defn wrap-db
   [handler db & [opts]]
