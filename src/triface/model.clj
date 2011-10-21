@@ -324,12 +324,17 @@
   (target-for [this] (models (row :target_id)))
 
   (update-values [this content values]
-    values)
-    ;; (let [model (models (row :model_id))
-    ;;       model_slug (keyword (model :slug))
-    ;;       field_slug (keyword (row :slug))
-    ;;       collection ((debug values) model_slug field_slug)]
-    ;;   (update-in values [(keyword (model :slug)) (row :slug)] (ensure-seq collection))))
+    (let [removed (keyword (str "removed_" (row :slug)))]
+      (if (content removed)
+        (let [ex (map #(Integer/parseInt %) (split (content removed) #","))
+              part (env :link)
+              part-key (keyword (str (part :slug) "_id"))
+              target ((models (row :target_id)) :slug)]
+          (if (row :dependent)
+            (doall (map #(destroy target %) ex))
+            (doall (map #(update target % {part-key nil}) ex)))
+          values)
+        values)))
 
   (post-update [this content]
     (let [collection (content (keyword (row :slug)))]
@@ -358,7 +363,8 @@
     (let [include (if (opts :include) ((opts :include) (keyword (row :slug))))]
       (if include
         (let [down (assoc opts :include include)
-              parts (db/fetch (-> (target-for this) :slug) (str (-> this :env :link :slug) "_id = %1") (content :id))]
+              link (-> this :env :link :slug)
+              parts (db/fetch (-> (target-for this) :slug) (str link "_id = %1 order by %2 asc") (content :id) (str link "_position"))]
           (map #(from (target-for this) % down) parts))
         [])))
 
@@ -569,6 +575,9 @@
   (add-hook :model :before_create :add_base_fields (fn [env]
     (assoc-in env [:spec :fields] (concat (-> env :spec :fields) base-fields))))
 
+  ;; (add-hook :model :before_save :write_migrations (fn [env]
+                                                    
+
   (add-hook :model :after_create :invoke (fn [env]
     (if (-> env :content :nested)
       (create :field {:name "parent_id" :model_id (-> env :content :id) :type "integer" :_parent (-> env :content)}))
@@ -671,6 +680,17 @@
           _final (run-hook slug :after_save (merge _after {:content post}))]
       (_final :content))))
 
+(defn rally
+  "pull a set of content up through the model system with the given options."
+  ([slug] (rally slug {}))
+  ([slug opts]
+     (let [model (models (keyword slug))
+           order (or (opts :order) "asc")
+           order-by (or (opts :order_by) "position")
+           limit (str (or (opts :limit) 30))
+           offset (str (or (opts :offset) 0))]
+       (doall (map #(from model % opts) (db/query "select * from %1 order by %2 %3 limit %4 offset %5" slug order-by order limit offset))))))
+
 (defn update
   "slug represents the model to be updated.
   id is the specific row to update.
@@ -702,17 +722,6 @@
         deleted (db/delete slug "id = %1" id)
         _after (run-hook slug :after_destroy (merge _before {:content pre}))]
     (_after :content)))
-
-(defn rally
-  "pull a set of content up through the model system with the given options."
-  ([slug] (rally slug {}))
-  ([slug opts]
-     (let [model (models (keyword slug))
-           order (or (opts :order) "asc")
-           order-by (or (opts :order_by) "position")
-           limit (str (or (opts :limit) 30))
-           offset (str (or (opts :offset) 0))]
-       (doall (map #(from model % opts) (db/query "select * from %1 order by %2 %3 limit %4 offset %5" slug order-by order limit offset))))))
 
 (defn table-columns
   "return a list of all columns for the table corresponding to this model."

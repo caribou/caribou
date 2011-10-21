@@ -240,11 +240,14 @@
   (route/resources "/")
   (route/not-found "NONONONONONON"))
 
-(defn init []
+(defn dbinit []
   (model/init))
 
+(defn init []
+  (sql/with-connection db/default-db (dbinit)))
+
 (defn start [port db]
-  (sql/with-connection db (init))
+  (sql/with-connection db (dbinit))
   (def app (db/wrap-db (handler/site main-routes) (merge db/default-db db)))
   (ring/run-jetty (var app) {:port (or port 33333) :join? false}))
 
