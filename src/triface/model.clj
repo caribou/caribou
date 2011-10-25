@@ -431,6 +431,48 @@
       (if field
         (model-render (target-for this) field (assoc opts :include ((opts :include) (keyword (row :slug)))))))))
 
+(defrecord TieField [row env]
+  Field
+
+  (table-additions [this field] [])
+  (subfield-names [this field] [(str field "_id")])
+
+  (setup-field [this]
+    (let [model_id (row :model_id)
+          model (models model_id)]
+      (update :model model_id
+        {:fields
+         [{:name (str (row :slug) "_id")
+           :type "integer"
+           :editable false}]})))
+
+  (cleanup-field [this]
+    (let [fields ((models (row :model_id)) :fields)
+          id (keyword (str (row :slug) "_id"))]
+      (destroy :field (-> fields id :row :id))))
+
+  (target-for [this] this)
+
+  (update-values [this content values] values)
+
+  (post-update [this content] content)
+
+  (pre-destroy [this content] content)
+
+  (field-from [this content opts]
+    (let [include (if (opts :include) ((opts :include) (keyword (row :slug))))
+          model (models (row :model_id))]
+      (if include
+        (let [down (assoc opts :include include)
+              tie-key (keyword (str (row :slug) "_id"))]
+          (if (content tie-key)
+            (from model (db/choose (-> model :slug) (content tie-key)) down))))))
+
+  (render [this content opts]
+    (let [field (field-from this content opts)]
+      (if field
+        (model-render (models (row :model_id)) field (assoc opts :include ((opts :include) (keyword (row :slug)))))))))
+
 (defrecord LinkField [row env]
   Field
   (table-additions [this field] [])
@@ -451,7 +493,7 @@
    :string (fn [row] (StringField. row {}))
    :slug (fn [row] 
            (let [link (db/choose :field (row :link_id))]
-             (SlugField. (assoc row :link_id (link :id)) {:link link})))
+             (SlugField. row {:link link})))
    :text (fn [row] (TextField. row {}))
    :boolean (fn [row] (BooleanField. row {}))
    :timestamp (fn [row] (TimestampField. row {}))
@@ -463,6 +505,7 @@
    :part (fn [row]
            (let [link (db/choose :field (row :link_id))]
              (PartField. row {:link link})))
+   :tie (fn [row] (TieField. row {}))
    :link (fn [row] (LinkField. row {}))
    })
 

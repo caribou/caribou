@@ -137,6 +137,15 @@
       :model_id model-id})
     (db/insert
      :field
+     {:name "link"
+      :slug "link"
+      :type "tie"
+      :locked true
+      :immutable true
+      :editable false
+      :model_id model-id})
+    (db/insert
+     :field
      {:name "link_id"
       :slug "link_id"
       :type "integer"
