@@ -1,7 +1,9 @@
 (ns triface.model
   (:use triface.debug)
   (:use triface.util)
+  (:use [clojure.string :only (join split)])
   (:require [triface.db :as db]))
+;;            [geocoder.core :as geo]))
 
 (import java.text.SimpleDateFormat)
 (def simple-date-format (java.text.SimpleDateFormat. "MMMMMMMMM dd', 'yyyy HH':'mm"))
@@ -18,7 +20,7 @@
     "the names of any additional fields added to the model
     by this field given this name")
   (setup-field [this] "further processing on creation of field")
-  (cleanup-field [this] "further processing on creation of field")
+  (cleanup-field [this] "further processing on removal of field")
   (target-for [this] "retrieves the model this field points to, if applicable")
   (update-values [this content values]
     "adds to the map of values that will be committed to the db for this row")
@@ -60,6 +62,33 @@
           (let [value (content key)
                 tval (if (isa? (type value) String)
                        (Integer/parseInt value)
+                       value)]
+            (assoc values key tval))
+          (catch Exception e values))
+        values)))
+
+  (post-update [this content] content)
+  (pre-destroy [this content] content)
+  (field-from [this content opts] (content (keyword (row :slug))))
+  (render [this content opts] (field-from this content opts)))
+  
+(defrecord DecimalField [row env]
+  Field
+  (table-additions [this field]
+    (let [default (or (env :default) "NULL")]
+      [[(keyword field) :decimal (str "DEFAULT " default)]]))
+  (subfield-names [this field] [])
+  (setup-field [this] nil)
+  (cleanup-field [this] nil)
+  (target-for [this] nil)
+
+  (update-values [this content values]
+    (let [key (keyword (row :slug))]
+      (if (contains? content key)
+        (try
+          (let [value (content key)
+                tval (if (isa? (type value) String)
+                       (BigDecimal. value)
                        value)]
             (assoc values key tval))
           (catch Exception e values))
@@ -167,20 +196,7 @@
   (field-from [this content opts] (content (keyword (row :slug))))
   (render [this content opts] (format-date (field-from this content opts))))
 
-(defrecord ImageField [row env]
-  Field
-  (table-additions [this field] [])
-  (subfield-names [this field] [(str field "_id")])
-  (setup-field [this] nil)
-  (cleanup-field [this] nil)
-  (target-for [this] nil)
-  (update-values [this content values])
-  (post-update [this content] content)
-  (pre-destroy [this content] content)
-  (field-from [this content opts])
-  (render [this content opts] ""))
-
-;; forward reference for CollectionField
+;; forward reference for Fields that need them
 (def make-field)
 (def model-render)
 (def invoke-model)
@@ -188,6 +204,89 @@
 (def update)
 (def destroy)
 (def models (ref {}))
+
+(defn pad-break-id [id]
+  (let [root (str id)
+        len (count root)
+        pad-len (- 8 len)
+        pad (apply str (repeat pad-len "0"))
+        halves (map #(apply str %) (partition 4 (str pad root)))
+        path (join "/" halves)]
+    path))
+
+(defn asset-dir [asset]
+  (str "assets/" (pad-break-id (asset :id))))
+
+(defn asset-path [asset]
+  (str (asset-dir asset) "/" (asset :filename)))
+
+(defrecord AssetField [row env]
+  Field
+  (table-additions [this field] [])
+  (subfield-names [this field] [(str field "_id")])
+  (setup-field [this]
+    (update :model (row :model_id)
+            {:fields [{:name (str (row :slug) "_id")
+                       :type "integer"
+                       :editable false}]}))
+  (cleanup-field [this]
+    (let [fields ((models (row :model_id)) :fields)
+          id (keyword (str (row :slug) "_id"))]
+      (destroy :field (-> fields id :row :id))))
+  (target-for [this] nil)
+  (update-values [this content values] values)
+  (post-update [this content] content)
+  (pre-destroy [this content] content)
+  (field-from [this content opts]
+    (let [asset (or (db/choose :asset (content (keyword (str (row :slug) "_id")))) {})]
+      (assoc asset :path (asset-path asset))))
+  (render [this content opts] (model-render (models :asset) (field-from this content opts) {})))
+
+(defn full-address [address]
+  (join " " [(address :address)
+             (address :address_two)
+             (address :postal_code)
+             (address :city)
+             (address :state)
+             (address :country)]))
+
+;; (defn geocode-address [address]
+;;   (let [code (geo/geocode (full-address address))]
+;;     (if (empty? code)
+;;       {}
+;;       {:lat (-> (first code) :location :latitude)
+;;        :lng (-> (first code) :location :longitude)})))
+
+(defrecord AddressField [row env]
+  Field
+  (table-additions [this field] [])
+  (subfield-names [this field] [(str field "_id")])
+  (setup-field [this]
+    (update :model (row :model_id)
+            {:fields [{:name (str (row :slug) "_id")
+                       :type "integer"
+                       :editable false}]}))
+  (cleanup-field [this]
+    (let [fields ((models (row :model_id)) :fields)
+          id (keyword (str (row :slug) "_id"))]
+      (destroy :field (-> fields id :row :id))))
+  (target-for [this] nil)
+  (update-values [this content values]
+    (let [posted (content (keyword (row :slug)))
+          idkey (keyword (str (row :slug) "_id"))
+          preexisting ((debug content) idkey)
+          address (if preexisting (assoc posted :id preexisting) posted)]
+      (if address
+        (let [location (create :location address)]
+        ;; (let [geocode (geocode-address address)
+        ;;       location (create :location (merge address geocode))]
+          (assoc values idkey (location :id)))
+        values)))
+  (post-update [this content] content)
+  (pre-destroy [this content] content)
+  (field-from [this content opts]
+    (or (db/choose :location (content (keyword (str (row :slug) "_id")))) {}))
+  (render [this content opts] (model-render (models :location) (field-from this content opts) {})))
 
 (defn from
   "takes a model and a raw db row and converts it into a full
@@ -226,16 +325,21 @@
   (target-for [this] (models (row :target_id)))
 
   (update-values [this content values]
-    values)
-    ;; (let [model (models (row :model_id))
-    ;;       model_slug (keyword (model :slug))
-    ;;       field_slug (keyword (row :slug))
-    ;;       collection ((debug values) model_slug field_slug)]
-    ;;   (update-in values [(keyword (model :slug)) (row :slug)] (ensure-seq collection))))
+    (let [removed (keyword (str "removed_" (row :slug)))]
+      (if (content removed)
+        (let [ex (map #(Integer/parseInt %) (split (content removed) #","))
+              part (env :link)
+              part-key (keyword (str (part :slug) "_id"))
+              target ((models (row :target_id)) :slug)]
+          (if (row :dependent)
+            (doall (map #(destroy target %) ex))
+            (doall (map #(update target % {part-key nil}) ex)))
+          values)
+        values)))
 
   (post-update [this content]
     (let [collection (content (keyword (row :slug)))]
-      (if (debug collection)
+      (if collection
         (let [part (env :link)
               part-key (keyword (str (part :slug) "_id"))
               model (models (part :model_id))
@@ -260,7 +364,8 @@
     (let [include (if (opts :include) ((opts :include) (keyword (row :slug))))]
       (if include
         (let [down (assoc opts :include include)
-              parts (db/fetch (-> (target-for this) :slug) (str (-> this :env :link :slug) "_id = %1") (content :id))]
+              link (-> this :env :link :slug)
+              parts (db/fetch (-> (target-for this) :slug) (str link "_id = %1 order by %2 asc") (content :id) (str link "_position"))]
           (map #(from (target-for this) % down) parts))
         [])))
 
@@ -342,6 +447,7 @@
 (def field-constructors
   {:id (fn [row] (IdField. row {}))
    :integer (fn [row] (IntegerField. row {}))
+   :decimal (fn [row] (DecimalField. row {}))
    :string (fn [row] (StringField. row {}))
    :slug (fn [row] 
            (let [link (db/choose :field (row :link_id))]
@@ -349,7 +455,8 @@
    :text (fn [row] (TextField. row {}))
    :boolean (fn [row] (BooleanField. row {}))
    :timestamp (fn [row] (TimestampField. row {}))
-   :image (fn [row] (ImageField. row {}))
+   :asset (fn [row] (AssetField. row {}))
+   :address (fn [row] (AddressField. row {}))
    :collection (fn [row]
                  (let [link (if (row :link_id) (db/choose :field (row :link_id)))]
                    (CollectionField. row {:link link})))
@@ -469,6 +576,9 @@
   (add-hook :model :before_create :add_base_fields (fn [env]
     (assoc-in env [:spec :fields] (concat (-> env :spec :fields) base-fields))))
 
+  ;; (add-hook :model :before_save :write_migrations (fn [env]
+                                                    
+
   (add-hook :model :after_create :invoke (fn [env]
     (if (-> env :content :nested)
       (create :field {:name "parent_id" :model_id (-> env :content :id) :type "integer" :_parent (-> env :content)}))
@@ -557,7 +667,7 @@
   this means you can use this create method to create or update something,
   using the presence or absence of an id to signal which operation gets triggered."
   [slug spec]
-  (if ((debug spec) :id)
+  (if (spec :id)
     (update slug (spec :id) spec)
     (let [model (models (keyword slug))
           values (reduce #(update-values %2 spec %1) {} (vals (dissoc (model :fields) :updated_at)))
@@ -570,6 +680,17 @@
           post (reduce #(post-update %2 %1) (_after :content) (vals (model :fields)))
           _final (run-hook slug :after_save (merge _after {:content post}))]
       (_final :content))))
+
+(defn rally
+  "pull a set of content up through the model system with the given options."
+  ([slug] (rally slug {}))
+  ([slug opts]
+     (let [model (models (keyword slug))
+           order (or (opts :order) "asc")
+           order-by (or (opts :order_by) "position")
+           limit (str (or (opts :limit) 30))
+           offset (str (or (opts :offset) 0))]
+       (doall (map #(from model % opts) (db/query "select * from %1 order by %2 %3 limit %4 offset %5" slug order-by order limit offset))))))
 
 (defn update
   "slug represents the model to be updated.
@@ -602,17 +723,6 @@
         deleted (db/delete slug "id = %1" id)
         _after (run-hook slug :after_destroy (merge _before {:content pre}))]
     (_after :content)))
-
-(defn rally
-  "pull a set of content up through the model system with the given options."
-  ([slug] (rally slug {}))
-  ([slug opts]
-     (let [model (models (keyword slug))
-           order (or (opts :order) "asc")
-           order-by (or (opts :order_by) "position")
-           limit (str (or (opts :limit) 30))
-           offset (str (or (opts :offset) 0))]
-       (doall (map #(from model % opts) (db/query "select * from %1 order by %2 %3 limit %4 offset %5" slug order-by order limit offset))))))
 
 (defn table-columns
   "return a list of all columns for the table corresponding to this model."

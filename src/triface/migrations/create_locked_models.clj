@@ -36,9 +36,10 @@
             :description "a reference to some system resource"
             :position 7
             :locked true
-            :fields (lock [{:name "name" :type "string"}
+            :fields (lock [{:name "filename" :type "string"}
                            {:name "url" :type "string"}
                            {:name "content_type" :type "string"}
+                           {:name "size" :type "integer"}
                            {:name "parent_id" :type "integer"}
                            {:name "description" :type "text"}])})
 
@@ -48,6 +49,7 @@
            :locked true
            :fields (lock [{:name "name" :type "string"}
                           {:name "slug" :type "slug" :link_slug "name"}
+                          {:name "asset" :type "asset"}
                           {:name "description" :type "text"}])})
 
 (def domain {:name "domain"
@@ -57,8 +59,21 @@
              :fields (lock [{:name "name" :type "string"}
                             {:name "description" :type "text"}])})
 
+(def location {:name "location"
+               :description "a location somewhere on the planet"
+               :position 10
+               :locked true
+               :fields (lock [{:name "address" :type "string"}
+                              {:name "address_two" :type "string"}
+                              {:name "city" :type "string"}
+                              {:name "postal_code" :type "string"}
+                              {:name "state" :type "string"}
+                              {:name "country" :type "string"}
+                              {:name "lat" :type "decimal"}
+                              {:name "lng" :type "decimal"}])})
+
 (def incubating
-  [page view locale asset site domain])
+  [page view locale asset site domain location])
 
 (defn spawn-models []
   (doall (map #(model/create :model %) incubating)))

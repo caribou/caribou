@@ -6,9 +6,11 @@
   (:require [triface.db :as db]
             [triface.model :as model]
             [triface.util :as util]
-            [compojure.route :as route]
             [ring.adapter.jetty :as ring]
+            [compojure.route :as route]
             [compojure.handler :as handler]
+            [clojure.java.jdbc :as sql]
+            [clojure.java.io :as io]
             [clojure-csv.core :as csv]
             [clojure.data.xml :as xml]))
 
@@ -112,9 +114,13 @@
   "if given a map, convert to a seq containing only its values.
   otherwise, leave it alone"
   [col]
-  (cond
-   (map? col) (vals col)
-   :else col))
+  (try 
+    (cond
+     (map? col) (let [int-test (doall (map #(Integer/parseInt (name %)) (keys col)))]
+                  (vals col))
+     :else col)
+    (catch Exception e
+      col)))
 
 (defn ensure-lists-in
   "flatten nested params into lists"
@@ -128,6 +134,36 @@
 
 (action home [params]
   (wrap-response {} {}))
+
+(defn upload [params]
+  (log :action (str "upload => " params))
+  (let [upload (params :upload)
+        asset (model/create :asset {:filename (upload :filename)
+                                    :content_type (upload :content-type)
+                                    :size (upload :size)})
+        dir (model/asset-dir asset)
+        path (model/asset-path asset)
+        response (str "
+<!doctype html>
+<html>
+    <head>
+    <title>upload response</title>
+    </head>
+    <body>
+        <script type=\"text/javascript\">
+            parent.rpc.returnUploadResponse({
+                asset_id: " (asset :id) ",
+                url: '" path "',
+                context: '" (params :context) "',
+            });
+        </script>
+    </body>
+</html>
+"
+                )]
+    (.mkdirs (io/file (str "public/" dir)))
+    (io/copy (-> params :upload :tempfile) (io/file (str "public/" path)))
+    (debug response)))
 
 (action list-all [params slug]
   (if (model/models (keyword slug))
@@ -169,7 +205,7 @@
     (wrap-response response {})))
 
 (action create-content [params slug]
-  (let [response (render slug (model/create slug (ensure-lists-in (params (keyword slug)))) params)]
+  (let [response (render slug (model/create slug (debug (ensure-lists-in (params (keyword slug))))) (debug params))]
     (wrap-response response {:type slug})))
 
 (action update-content [params slug id]
@@ -186,6 +222,7 @@
 
 (defroutes main-routes
   (GET  "/" {params :params} (home params))
+  (POST "/upload" {params :params} (upload params))
 
   (GET  "/:slug.:format" {params :params} (list-all params))
   (POST "/:slug.:format" {params :params} (create-content params))
@@ -203,18 +240,20 @@
   (route/resources "/")
   (route/not-found "NONONONONONON"))
 
-(def app (handler/site main-routes))
-
-(defn init []
+(defn dbinit []
   (model/init))
 
-(defn start [port]
+(defn init []
+  (sql/with-connection db/default-db (dbinit)))
+
+(defn start [port db]
+  (sql/with-connection db (dbinit))
+  (def app (db/wrap-db (handler/site main-routes) (merge db/default-db db)))
   (ring/run-jetty (var app) {:port (or port 33333) :join? false}))
 
 (defn go []
   (let [port (Integer/parseInt (or (System/getenv "PORT") "33333"))]
-    (init)
-    (start port)))
+    (start port db/default-db)))
 
 (defn -main []
   (go))

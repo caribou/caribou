@@ -1,7 +1,8 @@
 (ns triface.migration
-  (require [clojure.set :as set]
-           [triface.db :as db]
-           [triface.model :as model]))
+  (:require [clojure.set :as set]
+            [clojure.java.jdbc :as sql]
+            [triface.db :as db]
+            [triface.model :as model]))
 
 (def migrate (fn [] :nothing))
 
@@ -25,12 +26,13 @@
   (migrate)
   (db/insert :migration {:name name}))
 
-(defn run-migrations []
+(defn run-migrations [db-name]
   (try
-    (if (not (db/table? "migration"))
-      (doall (map run-migration premigration-list)))
-    (doall (map #(if (not (some #{%} (migration-names))) (run-migration %))
-                @migration-list))
+    (sql/with-connection (merge db/default-db {:subname (str "//localhost/" db-name)})
+      (if (not (db/table? "migration"))
+        (doall (map run-migration premigration-list)))
+      (doall (map #(if (not (some #{%} (migration-names))) (run-migration %))
+                  @migration-list)))
     (catch Exception e
       (println "Caught an exception attempting to run migrations: " (.getMessage e) (.printStackTrace e)))))
 
