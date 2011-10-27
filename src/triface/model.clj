@@ -126,7 +126,7 @@
   (update-values [this content values]
     (let [key (keyword (row :slug))]
       (cond
-       (env :link) 
+       (env :link)
          (let [icon (content (keyword (-> env :link :slug)))]
            (if icon
              (assoc values key (slugify icon))

@@ -221,6 +221,7 @@
 ;; routes --------------------------------------------------
 
 (defroutes main-routes
+  (route/files "/" {:root "config"})
   (GET  "/" {params :params} (home params))
   (POST "/upload" {params :params} (upload params))
 
