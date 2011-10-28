@@ -1,15 +1,15 @@
 [
-  {type: 'id', options: []},
-  {type: 'integer', options: ['default']},
-  {type: 'decimal', options: ['default']},
-  {type: 'string', options: ['default']},
-  {type: 'slug', options: ['slug_link']},
-  {type: 'text', options: []},
-  {type: 'boolean', options: ['default']},
-  {type: 'timestamp', options: []},
-  {type: 'asset', options: []},
-  {type: 'address', options: []},
-  {type: 'collection', options: ['link']},
-  {type: 'part', options: ['link']},
-  {type: 'tie', options: ['link']}
+  {name:'ID', slug:'id'},
+  {name:'Integer', slug:'integer', options: ['default']},
+  {name:'Decimal', slug:'decimal', options: ['default']},
+  {name:'Single Line Text', slug:'string', options: ['default']},
+  {name:'Paragraph Text', slug:'text'},
+  {name:'Boolean', slug:'boolean', options: ['default']},
+  {name:'Slug', slug:'slug', options: ['slugLink']},
+  {name:'Timestamp', slug:'timestamp'},
+  {name:'Asset', slug:'asset'},
+  {name:'Address', slug:'address'},
+  {name:'Collection', slug:'collection', options: ['link']},
+  {name:'Part', slug:'part', options: ['link']},
+  {name:'Tie', slug:'tie', options: ['link']}
 ]
