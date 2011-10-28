@@ -6,7 +6,6 @@
   (:use [clojure.test])
   (:require [triface.action.adapter :as adapter]))
 
-(import com.instrument.triface.TrifaceJSObjectFactory)
 (import java.io.File)
 
 (def test-properties 
