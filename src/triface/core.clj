@@ -1,7 +1,8 @@
 (ns triface.core
   (:use compojure.core)
   (:use [clojure.string :only (join split)])
-  (:use [clojure.data.json :only (json-str write-json read-json)])
+  ;; (:use [clojure.data.json :only (json-str write-json read-json)])
+  (:use [cheshire.core :only (generate-string)])
   (:use triface.debug)
   (:require [triface.db :as db]
             [triface.model :as model]
@@ -73,11 +74,17 @@
 
 (def format-handlers
   {:json (fn [result params]
-           (let [jsonify (json-str result)
+           (let [jsonify (generate-string result)
                  jsonp (params :jsonp)]
              (if jsonp
                (wrap-jsonp jsonp jsonify)
                jsonify)))
+  ;; {:json (fn [result params]
+  ;;          (let [jsonify (json-str result)
+  ;;                jsonp (params :jsonp)]
+  ;;            (if jsonp
+  ;;              (wrap-jsonp jsonp jsonify)
+  ;;              jsonify)))
    :xml  (fn [result params]
            (let [xmlify (prep-xml result)]
              (with-out-str
@@ -103,7 +110,8 @@
          (catch Exception e#
            (log :error (str "error rendering /" (join "/" [~@(rest path-args)]) ": "
                      (util/render-exception e#)))
-           (json-str
+           (generate-string
+           ;; (json-str
             ~(reduce #(assoc %1 (keyword %2) %2) error path-args)))))))
 
 (defn wrap-response [response meta]
@@ -175,7 +183,7 @@
           limit (Integer/parseInt (or (params :limit) page_size))
           offset (or (params :offset) (* limit (dec page)))
           included (merge params {:include include :limit limit :offset offset :order order :order_by order-by})
-          response (map #(render slug % included) (model/rally slug included))
+          response (model/rally slug included) ;; (map #(render slug % included) (model/rally slug included))
           showing (count response)
           total (db/count slug)
           extra (if (> (rem total limit) 0) 1 0)

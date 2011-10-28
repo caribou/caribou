@@ -4,7 +4,7 @@
 (defn create-model-model []
   (db/insert
    :model
-   {:name "model"
+   {:name "Model"
     :slug "model"
     :description "base model for models"
     :position 1
@@ -13,17 +13,17 @@
 (defn create-field-model []
   (db/insert
    :model
-   {:name "field"
+   {:name "Field"
     :slug "field"
     :description "a model that specifies what fields a model has"
     :position 2
     :locked true}))
 
 (defn create-model-fields []
-  (let [model-id ((first (db/query "select id from model where name = 'model'")) :id)]
+  (let [model-id ((first (db/query "select id from model where slug = 'model'")) :id)]
     (db/insert
      :field
-     {:name "id"
+     {:name "Id"
       :slug "id"
       :type "integer"
       :locked true
@@ -32,14 +32,14 @@
       :model_id model-id})
     (let [name-field (db/insert
                       :field
-                      {:name "name"
+                      {:name "Name"
                        :slug "name"
                        :type "string"
                        :locked true
                        :model_id model-id})]
       (db/insert
        :field
-       {:name "slug"
+       {:name "Slug"
         :slug "slug"
         :type "slug"
         :locked true
@@ -48,28 +48,28 @@
         :model_id model-id}))
     (db/insert
      :field
-     {:name "description"
+     {:name "Description"
       :slug "description"
       :type "text"
       :locked true
       :model_id model-id})
     (db/insert
      :field
-     {:name "position"
+     {:name "Position"
       :slug "position"
       :type "integer"
       :locked true
       :model_id model-id})
     (db/insert
      :field
-     {:name "nested"
+     {:name "Nested"
       :slug "nested"
       :type "boolean"
       :locked true
       :model_id model-id})
     (db/insert
      :field
-     {:name "fields"
+     {:name "Fields"
       :slug "fields"
       :type "collection"
       :dependent true
@@ -77,7 +77,7 @@
       :model_id model-id})
     (db/insert
      :field
-     {:name "locked"
+     {:name "Locked"
       :slug "locked"
       :type "boolean"
       :locked true
@@ -86,21 +86,21 @@
       :model_id model-id})
     (db/insert
      :field
-     {:name "abstract"
+     {:name "Abstract"
       :slug "abstract"
       :type "boolean"
       :locked true
       :model_id model-id})
     (db/insert
      :field
-     {:name "searchable"
+     {:name "Searchable"
       :slug "searchable"
       :type "boolean"
       :locked true
       :model_id model-id})
     (db/insert
      :field
-     {:name "ancestor_id"
+     {:name "Ancestor Id"
       :slug "ancestor_id"
       :type "integer"
       :locked true
@@ -108,7 +108,7 @@
       :model_id model-id})
     (db/insert
      :field
-     {:name "created_at"
+     {:name "Created At"
       :slug "created_at"
       :type "timestamp"
       :locked true
@@ -117,7 +117,7 @@
       :model_id model-id})
     (db/insert
      :field
-     {:name "updated_at"
+     {:name "Updated At"
       :slug "updated_at"
       :type "timestamp"
       :locked true
@@ -125,10 +125,10 @@
       :model_id model-id})))
 
 (defn create-field-fields []
-  (let [model-id ((first (db/query "select id from model where name = 'field'")) :id)]
+  (let [model-id ((first (db/query "select id from model where slug = 'field'")) :id)]
     (db/insert
      :field
-     {:name "id"
+     {:name "Id"
       :slug "id"
       :type "integer"
       :locked true
@@ -137,7 +137,7 @@
       :model_id model-id})
     (db/insert
      :field
-     {:name "link"
+     {:name "Link"
       :slug "link"
       :type "tie"
       :locked true
@@ -146,7 +146,7 @@
       :model_id model-id})
     (db/insert
      :field
-     {:name "link_id"
+     {:name "Link Id"
       :slug "link_id"
       :type "integer"
       :locked true
@@ -154,14 +154,14 @@
       :model_id model-id})
     (let [name-field (db/insert
                       :field
-                      {:name "name"
+                      {:name "Name"
                        :slug "name"
                        :type "string"
                        :locked true
                        :model_id model-id})]
       (db/insert
        :field
-       {:name "slug"
+       {:name "Slug"
         :slug "slug"
         :type "slug"
         :locked true
@@ -170,7 +170,7 @@
         :model_id model-id}))
     (db/insert
      :field
-     {:name "type"
+     {:name "Type"
       :slug "type"
       :type "string"
       :locked true
@@ -179,21 +179,30 @@
       :model_id model-id})
     (db/insert
      :field
-     {:name "description"
+     {:name "Default Value"
+      :slug "default_value"
+      :type "string"
+      :locked true
+      :immutable true
+      :editable false
+      :model_id model-id})
+    (db/insert
+     :field
+     {:name "Description"
       :slug "description"
       :type "text"
       :locked true
       :model_id model-id})
     (db/insert
      :field
-     {:name "position"
+     {:name "Position"
       :slug "position"
       :type "integer"
       :locked true
       :model_id model-id})
     (db/insert
      :field
-     {:name "model_id"
+     {:name "Model Id"
       :slug "model_id"
       :type "integer"
       :locked true
@@ -201,7 +210,7 @@
       :model_id model-id})
     (db/insert
      :field
-     {:name "target_id"
+     {:name "Target Id"
       :slug "target_id"
       :type "integer"
       :locked true
@@ -209,7 +218,7 @@
       :model_id model-id})
     (db/insert
      :field
-     {:name "model_position"
+     {:name "Model Position"
       :slug "model_position"
       :type "integer"
       :locked true
@@ -217,7 +226,7 @@
       :model_id model-id})
     (db/insert
      :field
-     {:name "model"
+     {:name "Model"
       :slug "model"
       :type "part"
       :locked true
@@ -225,28 +234,28 @@
       :model_id model-id})
     (db/insert
      :field
-     {:name "required"
+     {:name "Required"
       :slug "required"
       :type "boolean"
       :locked true
       :model_id model-id})
     (db/insert
      :field
-     {:name "disjoint"
+     {:name "Disjoint"
       :slug "disjoint"
       :type "boolean"
       :locked true
       :model_id model-id})
     (db/insert
      :field
-     {:name "singular"
+     {:name "Singular"
       :slug "singular"
       :type "boolean"
       :locked true
       :model_id model-id})
     (db/insert
      :field
-     {:name "editable"
+     {:name "Editable"
       :slug "editable"
       :type "boolean"
       :locked true
@@ -255,7 +264,7 @@
       :model_id model-id})
     (db/insert
      :field
-     {:name "immutable"
+     {:name "Immutable"
       :slug "immutable"
       :type "boolean"
       :locked true
@@ -264,7 +273,7 @@
       :model_id model-id})
     (db/insert
      :field
-     {:name "locked"
+     {:name "Locked"
       :slug "locked"
       :type "boolean"
       :locked true
@@ -273,21 +282,21 @@
       :model_id model-id})
     (db/insert
      :field
-     {:name "searchable"
+     {:name "Searchable"
       :slug "searchable"
       :type "boolean"
       :locked true
       :model_id model-id})
     (db/insert
      :field
-     {:name "dependent"
+     {:name "Dependent"
       :slug "dependent"
       :type "boolean"
       :locked true
       :model_id model-id})
     (db/insert
      :field
-     {:name "created_at"
+     {:name "Created At"
       :slug "created_at"
       :type "timestamp"
       :locked true
@@ -296,7 +305,7 @@
       :model_id model-id})
     (db/insert
      :field
-     {:name "updated_at"
+     {:name "Updated At"
       :slug "updated_at"
       :type "timestamp"
       :locked true
@@ -304,10 +313,10 @@
       :model_id model-id})))
 
 (defn forge-link []
-  (let [model (first (db/fetch :model "name = '%1'" "model"))
-        field (first (db/fetch :model "name = '%1'" "field"))
-        collection (first (db/fetch :field "name = '%1' and model_id = %2" "fields" (model :id)))
-        part (first (db/fetch :field "name = '%1' and model_id = %2" "model" (field :id)))]
+  (let [model (first (db/fetch :model "slug = '%1'" "model"))
+        field (first (db/fetch :model "slug = '%1'" "field"))
+        collection (first (db/fetch :field "slug = '%1' and model_id = %2" "fields" (model :id)))
+        part (first (db/fetch :field "slug = '%1' and model_id = %2" "model" (field :id)))]
     (db/update :field {:link_id (collection :id) :target_id (model :id)} "id = %1" (part :id))
     (db/update :field {:link_id (part :id) :target_id (field :id)} "id = %1" (collection :id))))
 

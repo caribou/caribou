@@ -1,5 +1,5 @@
 (ns triface.util
-  (:use [clojure.string :only (join)]))
+  (:use [clojure.string :only (split join capitalize)]))
 
 (import java.sql.SQLException)
 
@@ -8,6 +8,9 @@
 
 (defn slugify [s]
   (.toLowerCase (join "_" (re-seq #"[a-zA-Z]+" s))))
+
+(defn titleize [s]
+  (join " " (map capitalize (split s #"[^a-zA-Z]+"))))
 
 (defn render-exception [e]
   (let [cause (.getCause e)]
