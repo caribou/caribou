@@ -97,7 +97,7 @@
   (post-update [this content] content)
   (pre-destroy [this content] content)
   (field-from [this content opts] (content (keyword (row :slug))))
-  (render [this content opts] (field-from this content opts)))
+  (render [this content opts] (str (field-from this content opts))))
   
 (defrecord StringField [row env]
   Field

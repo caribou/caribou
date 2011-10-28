@@ -2,7 +2,8 @@
   (:use compojure.core)
   (:use [clojure.string :only (join split)])
   ;; (:use [clojure.data.json :only (json-str write-json read-json)])
-  (:use [cheshire.core :only (generate-string)])
+  (:use [cheshire.core :only (generate-string encode)])
+  (:use [cheshire.custom :only (add-encoder)])
   (:use triface.debug)
   (:require [triface.db :as db]
             [triface.model :as model]
@@ -79,12 +80,6 @@
              (if jsonp
                (wrap-jsonp jsonp jsonify)
                jsonify)))
-  ;; {:json (fn [result params]
-  ;;          (let [jsonify (json-str result)
-  ;;                jsonp (params :jsonp)]
-  ;;            (if jsonp
-  ;;              (wrap-jsonp jsonp jsonify)
-  ;;              jsonify)))
    :xml  (fn [result params]
            (let [xmlify (prep-xml result)]
              (with-out-str
@@ -183,7 +178,7 @@
           limit (Integer/parseInt (or (params :limit) page_size))
           offset (or (params :offset) (* limit (dec page)))
           included (merge params {:include include :limit limit :offset offset :order order :order_by order-by})
-          response (model/rally slug included) ;; (map #(render slug % included) (model/rally slug included))
+          response (map #(render slug % included) (debug (model/rally slug included)))
           showing (count response)
           total (db/count slug)
           extra (if (> (rem total limit) 0) 1 0)
