@@ -2,8 +2,8 @@
   (:use triface.debug)
   (:use triface.util)
   (:use [clojure.string :only (join split)])
-  (:require [triface.db :as db]))
-;;            [geocoder.core :as geo]))
+  (:require [triface.db :as db]
+            [geocoder.core :as geo]))
 
 (import java.text.SimpleDateFormat)
 (def simple-date-format (java.text.SimpleDateFormat. "MMMMMMMMM dd', 'yyyy HH':'mm"))
@@ -250,12 +250,12 @@
              (address :state)
              (address :country)]))
 
-;; (defn geocode-address [address]
-;;   (let [code (geo/geocode (full-address address))]
-;;     (if (empty? code)
-;;       {}
-;;       {:lat (-> (first code) :location :latitude)
-;;        :lng (-> (first code) :location :longitude)})))
+(defn geocode-address [address]
+  (let [code (geo/geocode (full-address address))]
+    (if (empty? code)
+      {}
+      {:lat (-> (first code) :location :latitude)
+       :lng (-> (first code) :location :longitude)})))
 
 (defrecord AddressField [row env]
   Field
@@ -277,9 +277,9 @@
           preexisting ((debug content) idkey)
           address (if preexisting (assoc posted :id preexisting) posted)]
       (if address
-        (let [location (create :location address)]
-        ;; (let [geocode (geocode-address address)
-        ;;       location (create :location (merge address geocode))]
+        ;; (let [location (create :location address)]
+        (let [geocode (geocode-address address)
+              location (create :location (merge address geocode))]
           (assoc values idkey (location :id)))
         values)))
   (post-update [this content] content)
