@@ -2,6 +2,7 @@
   (:use [clojure.string :only (split join capitalize)]))
 
 (import java.sql.SQLException)
+(import java.io.File)
 
 (defn seq-to-map [f q]
   (reduce #(assoc %1 (f %2) %2) {} q))
@@ -20,3 +21,8 @@
           (str next (.printStackTrace next)))
         (str cause (.printStackTrace cause)))
       (str e (.printStackTrace e)))))
+
+(defn get-file-extension [file]
+  (let [filename (.getName file)]
+  (.toLowerCase (.substring filename (.lastIndexOf filename ".")))
+))
