@@ -5,10 +5,10 @@
 (defn build-links []
   (invoke-models)
   (update :model ((models :site) :id)
-          {:fields [{:name "domains"
+          {:fields [{:name "Domains"
                      :type "collection"
                      :target_id ((models :domain) :id)}
-                    {:name "pages"
+                    {:name "Pages"
                      :type "collection"
                      :target_id ((models :page) :id)}]}))
 

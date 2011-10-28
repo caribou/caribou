@@ -2,8 +2,8 @@
   (:use triface.debug)
   (:use triface.util)
   (:use [clojure.string :only (join split)])
-  (:require [triface.db :as db]))
-;;            [geocoder.core :as geo]))
+  (:require [triface.db :as db]
+            [geocoder.core :as geo]))
 
 (import java.text.SimpleDateFormat)
 (def simple-date-format (java.text.SimpleDateFormat. "MMMMMMMMM dd', 'yyyy HH':'mm"))
@@ -48,7 +48,7 @@
 (defrecord IntegerField [row env]
   Field
   (table-additions [this field]
-    (let [default (or (env :default) "NULL")]
+    (let [default (or (row :default_value) "0")]
       [[(keyword field) :integer (str "DEFAULT " default)]]))
   (subfield-names [this field] [])
   (setup-field [this] nil)
@@ -75,7 +75,7 @@
 (defrecord DecimalField [row env]
   Field
   (table-additions [this field]
-    (let [default (or (env :default) "NULL")]
+    (let [default (or (row :default_value) "NULL")]
       [[(keyword field) :decimal (str "DEFAULT " default)]]))
   (subfield-names [this field] [])
   (setup-field [this] nil)
@@ -101,7 +101,11 @@
   
 (defrecord StringField [row env]
   Field
-  (table-additions [this field] [[(keyword field) "varchar(256)"]])
+  (table-additions [this field]
+    (if (row :default_value)
+      [[(keyword field) "varchar(256)" (str "DEFAULT \"" (row :default_value) "\"")]]      
+      [[(keyword field) "varchar(256)"]]))
+
   (subfield-names [this field] [])
   (setup-field [this] nil)
   (cleanup-field [this] nil)
@@ -111,6 +115,7 @@
       (if (contains? content key)
         (assoc values key (content key))
         values)))
+
   (post-update [this content] content)
   (pre-destroy [this content] content)
   (field-from [this content opts] (content (keyword (row :slug))))
@@ -126,7 +131,7 @@
   (update-values [this content values]
     (let [key (keyword (row :slug))]
       (cond
-       (env :link) 
+       (env :link)
          (let [icon (content (keyword (-> env :link :slug)))]
            (if icon
              (assoc values key (slugify icon))
@@ -157,7 +162,10 @@
 
 (defrecord BooleanField [row env]
   Field
-  (table-additions [this field] [[(keyword field) :boolean]])
+  (table-additions [this field]
+    (let [default (or (row :default_value) "false")
+          entry (str "DEFAULT " default)]
+      [[(keyword field) :boolean entry]]))
   (subfield-names [this field] [])
   (setup-field [this] nil)
   (cleanup-field [this] nil)
@@ -226,7 +234,7 @@
   (subfield-names [this field] [(str field "_id")])
   (setup-field [this]
     (update :model (row :model_id)
-            {:fields [{:name (str (row :slug) "_id")
+            {:fields [{:name (titleize (str (row :slug) "_id"))
                        :type "integer"
                        :editable false}]}))
   (cleanup-field [this]
@@ -250,12 +258,12 @@
              (address :state)
              (address :country)]))
 
-;; (defn geocode-address [address]
-;;   (let [code (geo/geocode (full-address address))]
-;;     (if (empty? code)
-;;       {}
-;;       {:lat (-> (first code) :location :latitude)
-;;        :lng (-> (first code) :location :longitude)})))
+(defn geocode-address [address]
+  (let [code (geo/geocode (full-address address))]
+    (if (empty? code)
+      {}
+      {:lat (-> (first code) :location :latitude)
+       :lng (-> (first code) :location :longitude)})))
 
 (defrecord AddressField [row env]
   Field
@@ -263,7 +271,7 @@
   (subfield-names [this field] [(str field "_id")])
   (setup-field [this]
     (update :model (row :model_id)
-            {:fields [{:name (str (row :slug) "_id")
+            {:fields [{:name (titleize (str (row :slug) "_id"))
                        :type "integer"
                        :editable false}]}))
   (cleanup-field [this]
@@ -277,9 +285,9 @@
           preexisting ((debug content) idkey)
           address (if preexisting (assoc posted :id preexisting) posted)]
       (if address
-        (let [location (create :location address)]
-        ;; (let [geocode (geocode-address address)
-        ;;       location (create :location (merge address geocode))]
+        ;; (let [location (create :location address)]
+        (let [geocode (geocode-address address)
+              location (create :location (merge address geocode))]
           (assoc values idkey (location :id)))
         values)))
   (post-update [this content] content)
@@ -296,7 +304,7 @@
     the name of an association any content associated to this item through
     that association will be inserted under that key."
   [model content opts]
-  (reduce #(assoc %1 (keyword (-> %2 :row :name)) (field-from %2 %1 opts)) content (vals (model :fields))))
+  (reduce #(assoc %1 (keyword (-> %2 :row :slug)) (field-from %2 %1 opts)) content (vals (model :fields))))
 
 (defrecord CollectionField [row env]
   Field
@@ -384,7 +392,7 @@
           target (models (row :target_id))]
       (if (or (nil? (row :link_id)) (zero? (row :link_id)))
         (let [collection (create :field
-                           {:name (:name model)
+                           {:name (model :name)
                             :type "collection"
                             :model_id (row :target_id)
                             :target_id model_id
@@ -394,10 +402,10 @@
 
       (update :model model_id
         {:fields
-         [{:name (str (row :slug) "_id")
+         [{:name (titleize (str (row :slug) "_id"))
            :type "integer"
            :editable false}
-          {:name (str (row :slug) "_position")
+          {:name (titleize (str (row :slug) "_position"))
            :type "integer"
            :editable false}]})))
 
@@ -431,6 +439,48 @@
       (if field
         (model-render (target-for this) field (assoc opts :include ((opts :include) (keyword (row :slug)))))))))
 
+(defrecord TieField [row env]
+  Field
+
+  (table-additions [this field] [])
+  (subfield-names [this field] [(str field "_id")])
+
+  (setup-field [this]
+    (let [model_id (row :model_id)
+          model (models model_id)]
+      (update :model model_id
+        {:fields
+         [{:name (titleize (str (row :slug) "_id"))
+           :type "integer"
+           :editable false}]})))
+
+  (cleanup-field [this]
+    (let [fields ((models (row :model_id)) :fields)
+          id (keyword (str (row :slug) "_id"))]
+      (destroy :field (-> fields id :row :id))))
+
+  (target-for [this] this)
+
+  (update-values [this content values] values)
+
+  (post-update [this content] content)
+
+  (pre-destroy [this content] content)
+
+  (field-from [this content opts]
+    (let [include (if (opts :include) ((opts :include) (keyword (row :slug))))
+          model (models (row :model_id))]
+      (if include
+        (let [down (assoc opts :include include)
+              tie-key (keyword (str (row :slug) "_id"))]
+          (if (content tie-key)
+            (from model (db/choose (-> model :slug) (content tie-key)) down))))))
+
+  (render [this content opts]
+    (let [field (field-from this content opts)]
+      (if field
+        (model-render (models (row :model_id)) field (assoc opts :include ((opts :include) (keyword (row :slug)))))))))
+
 (defrecord LinkField [row env]
   Field
   (table-additions [this field] [])
@@ -451,7 +501,7 @@
    :string (fn [row] (StringField. row {}))
    :slug (fn [row] 
            (let [link (db/choose :field (row :link_id))]
-             (SlugField. (assoc row :link_id (link :id)) {:link link})))
+             (SlugField. row {:link link})))
    :text (fn [row] (TextField. row {}))
    :boolean (fn [row] (BooleanField. row {}))
    :timestamp (fn [row] (TimestampField. row {}))
@@ -463,6 +513,7 @@
    :part (fn [row]
            (let [link (db/choose :field (row :link_id))]
              (PartField. row {:link link})))
+   :tie (fn [row] (TieField. row {}))
    :link (fn [row] (LinkField. row {}))
    })
 
@@ -475,14 +526,14 @@
 ;;                   [:created_at "timestamp with time zone" "NOT NULL" "DEFAULT current_timestamp"]
 ;;                   [:updated_at "timestamp with time zone" "NOT NULL" "DEFAULT current_timestamp"]])
 
-(def base-fields [{:name "id" :type "id" :locked true :immutable true :editable false}
-                  {:name "position" :type "integer" :locked true}
-                  {:name "status" :type "integer" :locked true}
-                  {:name "locale_id" :type "integer" :locked true :editable false}
-                  {:name "env_id" :type "integer" :locked true :editable false}
-                  {:name "locked" :type "boolean" :locked true :immutable true :editable false}
-                  {:name "created_at" :type "timestamp" :locked true :immutable true :editable false}
-                  {:name "updated_at" :type "timestamp" :locked true :editable false}])
+(def base-fields [{:name "Id" :type "id" :locked true :immutable true :editable false}
+                  {:name "Position" :type "integer" :locked true}
+                  {:name "Status" :type "integer" :locked true}
+                  {:name "Locale Id" :type "integer" :locked true :editable false}
+                  {:name "Env Id" :type "integer" :locked true :editable false}
+                  {:name "Locked" :type "boolean" :locked true :immutable true :editable false}
+                  {:name "Created At" :type "timestamp" :locked true :immutable true :editable false}
+                  {:name "Updated At" :type "timestamp" :locked true :editable false}])
 
 (defn make-field
   "turn a row from the field table into a full fledged Field record"
@@ -492,7 +543,7 @@
 (defn fields-render
   "render all fields out to a string friendly format"
   [fields content opts]
-  (reduce #(assoc %1 (keyword (-> %2 :row :name))
+  (reduce #(assoc %1 (keyword (-> %2 :row :slug))
              (render %2 content opts))
           content fields))
 
@@ -551,7 +602,7 @@
   and vals being the field invoked as a Field protocol record."
   [model]
   (let [fields (db/query "select * from field where model_id = %1" (model :id))
-        field-map (seq-to-map #(keyword (-> % :row :name)) (map make-field fields))]
+        field-map (seq-to-map #(keyword (-> % :row :slug)) (map make-field fields))]
     (make-lifecycle-hooks (model :slug))
     (assoc model :fields field-map)))
 
@@ -570,7 +621,7 @@
 
 (defn add-model-hooks []
   (add-hook :model :before_create :build_table (fn [env]
-    (create-model-table (-> env :spec :name))
+    (create-model-table (slugify (-> env :spec :name)))
     env))
   
   (add-hook :model :before_create :add_base_fields (fn [env]
@@ -578,10 +629,9 @@
 
   ;; (add-hook :model :before_save :write_migrations (fn [env]
                                                     
-
   (add-hook :model :after_create :invoke (fn [env]
     (if (-> env :content :nested)
-      (create :field {:name "parent_id" :model_id (-> env :content :id) :type "integer" :_parent (-> env :content)}))
+      (create :field {:name "Parent Id" :model_id (-> env :content :id) :type "integer" :_parent (-> env :content)}))
     (alter-models (-> env :content))
     env))
   

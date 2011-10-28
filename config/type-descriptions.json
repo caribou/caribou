@@ -1,0 +1,15 @@
+[
+  {type: 'id', options: []},
+  {type: 'integer', options: ['default']},
+  {type: 'decimal', options: ['default']},
+  {type: 'string', options: ['default']},
+  {type: 'slug', options: ['slug_link']},
+  {type: 'text', options: []},
+  {type: 'boolean', options: ['default']},
+  {type: 'timestamp', options: []},
+  {type: 'asset', options: []},
+  {type: 'address', options: []},
+  {type: 'collection', options: ['link']},
+  {type: 'part', options: ['link']},
+  {type: 'tie', options: ['link']}
+]
