@@ -130,6 +130,13 @@
     (sql/do-commands
      (log :db (clause "alter table %1 add column %2 %3" (map #(zap (name %)) [table column type]))))))
 
+(defn set-default
+  "sets the default for a column"
+  [table column default]
+  (let [value (debug (sqlize default))]
+    (sql/do-commands
+     (log :db (clause "alter table %1 alter column %2 set default %3" [(zap table) (zap column) value])))))
+
 (defn rename-column
   "rename a column in the given table to new-name."
   [table column new-name]

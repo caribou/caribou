@@ -47,9 +47,7 @@
   
 (defrecord IntegerField [row env]
   Field
-  (table-additions [this field]
-    (let [default (or (row :default_value) "0")]
-      [[(keyword field) :integer (str "DEFAULT " default)]]))
+  (table-additions [this field] [[(keyword field) :integer]])
   (subfield-names [this field] [])
   (setup-field [this] nil)
   (cleanup-field [this] nil)
@@ -74,9 +72,7 @@
   
 (defrecord DecimalField [row env]
   Field
-  (table-additions [this field]
-    (let [default (or (row :default_value) "NULL")]
-      [[(keyword field) :decimal (str "DEFAULT " default)]]))
+  (table-additions [this field] [[(keyword field) :decimal]])
   (subfield-names [this field] [])
   (setup-field [this] nil)
   (cleanup-field [this] nil)
@@ -101,11 +97,7 @@
   
 (defrecord StringField [row env]
   Field
-  (table-additions [this field]
-    (if (row :default_value)
-      [[(keyword field) "varchar(256)" (str "DEFAULT \"" (row :default_value) "\"")]]      
-      [[(keyword field) "varchar(256)"]]))
-
+  (table-additions [this field] [[(keyword field) "varchar(256)"]])
   (subfield-names [this field] [])
   (setup-field [this] nil)
   (cleanup-field [this] nil)
@@ -162,10 +154,7 @@
 
 (defrecord BooleanField [row env]
   Field
-  (table-additions [this field]
-    (let [default (or (row :default_value) "false")
-          entry (str "DEFAULT " default)]
-      [[(keyword field) :boolean entry]]))
+  (table-additions [this field] [[(keyword field) :boolean]])
   (subfield-names [this field] [])
   (setup-field [this] nil)
   (cleanup-field [this] nil)
@@ -282,7 +271,7 @@
   (update-values [this content values]
     (let [posted (content (keyword (row :slug)))
           idkey (keyword (str (row :slug) "_id"))
-          preexisting ((debug content) idkey)
+          preexisting (content idkey)
           address (if preexisting (assoc posted :id preexisting) posted)]
       (if address
         ;; (let [location (create :location address)]
@@ -517,15 +506,6 @@
    :link (fn [row] (LinkField. row {}))
    })
 
-;; (def base-fields [[:id "SERIAL" "PRIMARY KEY"]
-;;                   [:position :integer "DEFAULT 1"]
-;;                   [:status :integer "DEFAULT 1"]
-;;                   [:locale_id :integer "DEFAULT 1"]
-;;                   [:env_id :integer "DEFAULT 1"]
-;;                   [:locked :boolean "DEFAULT false"]
-;;                   [:created_at "timestamp with time zone" "NOT NULL" "DEFAULT current_timestamp"]
-;;                   [:updated_at "timestamp with time zone" "NOT NULL" "DEFAULT current_timestamp"]])
-
 (def base-fields [{:name "Id" :type "id" :locked true :immutable true :editable false}
                   {:name "Position" :type "integer" :locked true}
                   {:name "Status" :type "integer" :locked true}
@@ -665,24 +645,31 @@
   
   (add-hook :field :after_create :add_columns (fn [env]
     (let [field (make-field (env :content))
-          slug (-> env :spec :_parent :slug)]
+          slug (-> env :spec :_parent :slug)
+          default (-> env :spec :default_value)]
           ;; slug (if (-> env :spec :_parent)
           ;;        (-> env :spec :_parent :slug)
           ;;        ((models (-> env :spec :model_id)) :slug))]
       (doall (map #(db/add-column slug (name (first %)) (rest %)) (table-additions field (-> env :content :slug))))
       (setup-field field)
+      (if default
+        (db/set-default slug (-> env :content :slug) default))
       (assoc env :content field))))
   
   (add-hook :field :after_update :reify_field (fn [env]
     (let [field (make-field (env :content))
           original (-> env :original :slug)
           slug (-> env :content :slug)
+          odefault (-> env :original :default_value)
+          default (-> env :content :default_value)
           model (models (-> field :row :model_id))
           spawn (apply zipmap (map #(subfield-names field %) [original slug]))
           transition (apply zipmap (map #(map first (table-additions field %)) [original slug]))]
       (if (not (= original slug))
         (do (doall (map #(update :field (-> ((model :fields) (keyword (first %))) :row :id) {:name (last %)}) spawn))
-            (doall (map #(db/rename-column (model :slug) (first %) (last %)) transition)))))
+            (doall (map #(db/rename-column (model :slug) (first %) (last %)) transition))))
+      (if (not (= odefault default))
+        (db/set-default (model :slug) slug default)))
     (assoc env :content (make-field (env :content)))))
 
   (add-hook :field :after_destroy :drop_columns (fn [env]

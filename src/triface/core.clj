@@ -178,7 +178,7 @@
           limit (Integer/parseInt (or (params :limit) page_size))
           offset (or (params :offset) (* limit (dec page)))
           included (merge params {:include include :limit limit :offset offset :order order :order_by order-by})
-          response (map #(render slug % included) (debug (model/rally slug included)))
+          response (map #(render slug % included) (model/rally slug included))
           showing (count response)
           total (db/count slug)
           extra (if (> (rem total limit) 0) 1 0)
