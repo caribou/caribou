@@ -133,7 +133,7 @@
 (defn set-default
   "sets the default for a column"
   [table column default]
-  (let [value (debug (sqlize default))]
+  (let [value (sqlize default)]
     (sql/do-commands
      (log :db (clause "alter table %1 alter column %2 set default %3" [(zap table) (zap column) value])))))
 

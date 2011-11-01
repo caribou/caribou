@@ -1,4 +1,4 @@
-{"meta": {"status": "200"}
+{"meta": {"status": "200"},
  "response": [
    {"name":"ID", "slug":"id"},
    {"name":"Integer", "slug":"integer", "options": ["default"]},
