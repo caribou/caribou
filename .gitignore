@@ -7,5 +7,5 @@ pom.xml
 .lein-deps-sum
 *.log
 /public/assets/
-/nginx/
+/nginx/*.conf
 /resources/triface.properties

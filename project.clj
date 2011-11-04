@@ -11,7 +11,7 @@
                  [ring/ring-jetty-adapter "0.3.10"]
                  [geocoder-clj "0.0.3"]
                  [clojure-csv/clojure-csv "1.3.2"]
-                 ;; [com.instrument.triface/triface-action-adapter "1.0-SNAPSHOT"]
+                 [com.instrument.triface/triface-action-adapter "1.0-SNAPSHOT"]
                  ;; --------- THESE DEPS ARE NOT ON 1.3 -------------
                  ;; [sandbar "0.4.0-SNAPSHOT"]
                  ;; [clojure-solr "0.2.0"]
@@ -23,7 +23,7 @@
                      [org.clojure/java.jdbc "0.0.6"]
                      [postgresql/postgresql "8.4-702.jdbc4"]
                      [swank-clojure "1.4.0-SNAPSHOT"]
-                     ;; [com.instrument.triface/triface-action-adapter "1.0-SNAPSHOT"]
+                     [com.instrument.triface/triface-action-adapter "1.0-SNAPSHOT"]
                      ;; [org.clojure/data.json "0.1.1"]
                      [geocoder-clj "0.0.3"]
                      [lein-eclipse "1.0.0"]
