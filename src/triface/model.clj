@@ -310,8 +310,7 @@
                     :model_id (row :target_id)
                     :target_id (row :model_id)
                     :link_id (row :id)
-                    :dependent (row :dependent)
-                    :_parent target})]
+                    :dependent (row :dependent)})]
         (db/update :field {:link_id (-> part :row :id)} "id = %1" (row :id)))))
 
   (cleanup-field [this]
@@ -344,8 +343,7 @@
                        (map
                         #(create
                           (model :slug)
-                          (merge % {part-key (content :id)
-                                    :_parent content}))
+                          (merge % {part-key (content :id)}))
                         collection))]
           (assoc content (keyword (row :slug)) updated))
         content)))
@@ -385,8 +383,7 @@
                             :type "collection"
                             :model_id (row :target_id)
                             :target_id model_id
-                            :link_id (row :id)
-                            :_parent target})]
+                            :link_id (row :id)})]
           (db/update :field {:link_id (-> collection :row :id)} "id = %1" (row :id))))
 
       (update :model model_id
@@ -486,8 +483,7 @@
                     :model_id (row :target_id)
                     :target_id (row :model_id)
                     :link_id (row :id)
-                    :dependent (row :dependent)
-                    :_parent target})]
+                    :dependent (row :dependent)})]
         (db/update :field {:link_id (-> part :row :id)} "id = %1" (row :id)))))
 
   (cleanup-field [this]
@@ -520,8 +516,7 @@
                        (map
                         #(create
                           (model :slug)
-                          (merge % {part-key (content :id)
-                                    :_parent content}))
+                          (merge % {part-key (content :id)}))
                         collection))]
           (assoc content (keyword (row :slug)) updated))
         content)))
@@ -686,7 +681,7 @@
                                                     
   (add-hook :model :after_create :invoke (fn [env]
     (if (-> env :content :nested)
-      (create :field {:name "Parent Id" :model_id (-> env :content :id) :type "integer" :_parent (-> env :content)}))
+      (create :field {:name "Parent Id" :model_id (-> env :content :id) :type "integer"}))
     (alter-models (-> env :content))
     env))
   
@@ -720,13 +715,14 @@
   
   (add-hook :field :after_create :add_columns (fn [env]
     (let [field (make-field (env :content))
-          slug (-> env :spec :_parent :slug)
+          model_id (-> env :content :model_id)
+          model (models model_id)
+          slug (if model
+                 (model :slug)
+                 ((db/choose :model model_id) :slug))
           default (-> env :spec :default_value)]
-          ;; slug (if (-> env :spec :_parent)
-          ;;        (-> env :spec :_parent :slug)
-          ;;        ((models (-> env :spec :model_id)) :slug))]
       (doall (map #(db/add-column slug (name (first %)) (rest %)) (table-additions field (-> env :content :slug))))
-      (setup-field field)
+      (setup-field field (env :spec))
       (if default
         (db/set-default slug (-> env :content :slug) default))
       (assoc env :content field))))
