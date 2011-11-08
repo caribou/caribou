@@ -304,8 +304,9 @@
     (if (or (nil? (row :link_id)) (zero? (row :link_id)))
       (let [model (models (row :model_id))
             target (models (row :target_id))
+            reciprocal-name (or (spec :reciprocal_name) (model :name))
             part (create :field
-                   {:name (model :name)
+                   {:name reciprocal-name
                     :type "part"
                     :model_id (row :target_id)
                     :target_id (row :model_id)
@@ -376,10 +377,11 @@
   (setup-field [this spec]
     (let [model_id (row :model_id)
           model (models model_id)
-          target (models (row :target_id))]
+          target (models (row :target_id))
+          reciprocal-name (or (spec :reciprocal_name) (model :name))]
       (if (or (nil? (row :link_id)) (zero? (row :link_id)))
         (let [collection (create :field
-                           {:name (model :name)
+                           {:name reciprocal-name
                             :type "collection"
                             :model_id (row :target_id)
                             :target_id model_id
@@ -467,6 +469,11 @@
       (if field
         (model-render (models (row :model_id)) field (assoc opts :include ((opts :include) (keyword (row :slug)))))))))
 
+(defn join-table-name
+  "construct a join table name out of two link names"
+  [a b]
+  (join "_" (sort (map slugify [a b]))))
+
 (defrecord LinkField [row env]
   Field
 
@@ -477,18 +484,37 @@
     (if (or (nil? (row :link_id)) (zero? (row :link_id)))
       (let [model (models (row :model_id))
             target (models (row :target_id))
-            part (create :field
-                   {:name (model :name)
-                    :type "part"
+            reciprocal-name (or (spec :reciprocal_name) (model :name))
+            join-name (join-table-name (spec :name) reciprocal-name)
+            link (create :field
+                   {:name reciprocal-name
+                    :type "link"
                     :model_id (row :target_id)
                     :target_id (row :model_id)
                     :link_id (row :id)
                     :dependent (row :dependent)})]
-        (db/update :field {:link_id (-> part :row :id)} "id = %1" (row :id)))))
+        (create :model
+                {:name (join " " (sort (row :name) reciprocal-name))
+                 :slug join-name
+                 :fields
+                 [{:name (spec :name)
+                   :type "part"
+                   :dependent true
+                   :reciprocal_name (join " " [reciprocal-name "Join"])
+                   :target_id (row :target_id)}
+                  {:name reciprocal-name
+                   :type "part"
+                   :dependent true
+                   :reciprocal_name (join " " [(spec :name) "Join"])
+                   :target_id (row :model_id)}]})
+        (db/update :field {:link_id (-> link :row :id)} "id = %1" (row :id))))))
 
   (cleanup-field [this]
     (try
-      (do (destroy :field (-> env :link :id)))
+      (do
+        (destroy :field (-> env :link :id))
+        (let []
+          (destroy :model )))
       (catch Exception e (str e))))
 
   (target-for [this] (models (row :target_id)))
