@@ -19,7 +19,7 @@
   (subfield-names [this field]
     "the names of any additional fields added to the model
     by this field given this name")
-  (setup-field [this] "further processing on creation of field")
+  (setup-field [this spec] "further processing on creation of field")
   (cleanup-field [this] "further processing on removal of field")
   (target-for [this] "retrieves the model this field points to, if applicable")
   (update-values [this content values]
@@ -36,7 +36,7 @@
   Field
   (table-additions [this field] [[(keyword field) "SERIAL" "PRIMARY KEY"]])
   (subfield-names [this field] [])
-  (setup-field [this] nil)
+  (setup-field [this spec] nil)
   (cleanup-field [this] nil)
   (target-for [this] nil)
   (update-values [this content values] values)
@@ -49,7 +49,7 @@
   Field
   (table-additions [this field] [[(keyword field) :integer]])
   (subfield-names [this field] [])
-  (setup-field [this] nil)
+  (setup-field [this spec] nil)
   (cleanup-field [this] nil)
   (target-for [this] nil)
 
@@ -74,7 +74,7 @@
   Field
   (table-additions [this field] [[(keyword field) :decimal]])
   (subfield-names [this field] [])
-  (setup-field [this] nil)
+  (setup-field [this spec] nil)
   (cleanup-field [this] nil)
   (target-for [this] nil)
 
@@ -99,7 +99,7 @@
   Field
   (table-additions [this field] [[(keyword field) "varchar(256)"]])
   (subfield-names [this field] [])
-  (setup-field [this] nil)
+  (setup-field [this spec] nil)
   (cleanup-field [this] nil)
   (target-for [this] nil)
   (update-values [this content values]
@@ -117,7 +117,7 @@
   Field
   (table-additions [this field] [[(keyword field) "varchar(256)"]])
   (subfield-names [this field] [])
-  (setup-field [this] nil)
+  (setup-field [this spec] nil)
   (cleanup-field [this] nil)
   (target-for [this] nil)
   (update-values [this content values]
@@ -139,7 +139,7 @@
   Field
   (table-additions [this field] [[(keyword field) :text]])
   (subfield-names [this field] [])
-  (setup-field [this] nil)
+  (setup-field [this spec] nil)
   (cleanup-field [this] nil)
   (target-for [this] nil)
   (update-values [this content values]
@@ -156,7 +156,7 @@
   Field
   (table-additions [this field] [[(keyword field) :boolean]])
   (subfield-names [this field] [])
-  (setup-field [this] nil)
+  (setup-field [this spec] nil)
   (cleanup-field [this] nil)
   (target-for [this] nil)
   (update-values [this content values]
@@ -179,7 +179,7 @@
   Field
   (table-additions [this field] [[(keyword field) "timestamp with time zone" "NOT NULL" "DEFAULT current_timestamp"]])
   (subfield-names [this field] [])
-  (setup-field [this] nil)
+  (setup-field [this spec] nil)
   (cleanup-field [this] nil)
   (target-for [this] nil)
   (update-values [this content values]
@@ -221,7 +221,7 @@
   Field
   (table-additions [this field] [])
   (subfield-names [this field] [(str field "_id")])
-  (setup-field [this]
+  (setup-field [this spec]
     (update :model (row :model_id)
             {:fields [{:name (titleize (str (row :slug) "_id"))
                        :type "integer"
@@ -258,7 +258,7 @@
   Field
   (table-additions [this field] [])
   (subfield-names [this field] [(str field "_id")])
-  (setup-field [this]
+  (setup-field [this spec]
     (update :model (row :model_id)
             {:fields [{:name (titleize (str (row :slug) "_id"))
                        :type "integer"
@@ -300,7 +300,7 @@
   (table-additions [this field] [])
   (subfield-names [this field] [])
 
-  (setup-field [this]
+  (setup-field [this spec]
     (if (or (nil? (row :link_id)) (zero? (row :link_id)))
       (let [model (models (row :model_id))
             target (models (row :target_id))
@@ -375,7 +375,7 @@
   (table-additions [this field] [])
   (subfield-names [this field] [(str field "_id") (str field "_position")])
 
-  (setup-field [this]
+  (setup-field [this spec]
     (let [model_id (row :model_id)
           model (models model_id)
           target (models (row :target_id))]
@@ -434,7 +434,7 @@
   (table-additions [this field] [])
   (subfield-names [this field] [(str field "_id")])
 
-  (setup-field [this]
+  (setup-field [this spec]
     (let [model_id (row :model_id)
           model (models model_id)]
       (update :model model_id
@@ -472,16 +472,91 @@
 
 (defrecord LinkField [row env]
   Field
+
   (table-additions [this field] [])
   (subfield-names [this field] [])
-  (setup-field [this] nil)
-  (cleanup-field [this] nil)
-  (target-for [this] nil)
-  (update-values [this content values])
-  (post-update [this content] content)
-  (pre-destroy [this content] content)
-  (field-from [this content opts])
-  (render [this content opts] ""))
+
+  (setup-field [this spec]
+    (if (or (nil? (row :link_id)) (zero? (row :link_id)))
+      (let [model (models (row :model_id))
+            target (models (row :target_id))
+            part (create :field
+                   {:name (model :name)
+                    :type "part"
+                    :model_id (row :target_id)
+                    :target_id (row :model_id)
+                    :link_id (row :id)
+                    :dependent (row :dependent)
+                    :_parent target})]
+        (db/update :field {:link_id (-> part :row :id)} "id = %1" (row :id)))))
+
+  (cleanup-field [this]
+    (try
+      (do (destroy :field (-> env :link :id)))
+      (catch Exception e (str e))))
+
+  (target-for [this] (models (row :target_id)))
+
+  (update-values [this content values]
+    (let [removed (keyword (str "removed_" (row :slug)))]
+      (if (content removed)
+        (let [ex (map #(Integer/parseInt %) (split (content removed) #","))
+              part (env :link)
+              part-key (keyword (str (part :slug) "_id"))
+              target ((models (row :target_id)) :slug)]
+          (if (row :dependent)
+            (doall (map #(destroy target %) ex))
+            (doall (map #(update target % {part-key nil}) ex)))
+          values)
+        values)))
+
+  (post-update [this content]
+    (let [collection (content (keyword (row :slug)))]
+      (if collection
+        (let [part (env :link)
+              part-key (keyword (str (part :slug) "_id"))
+              model (models (part :model_id))
+              updated (doall
+                       (map
+                        #(create
+                          (model :slug)
+                          (merge % {part-key (content :id)
+                                    :_parent content}))
+                        collection))]
+          (assoc content (keyword (row :slug)) updated))
+        content)))
+
+  (pre-destroy [this content]
+    (if (or (row :dependent) (-> env :link :dependent))
+      (let [parts (field-from this content {:include {(keyword (row :slug)) {}}})
+            target (keyword ((target-for this) :slug))]
+        (doall (map #(destroy target (% :id)) parts))))
+    content)
+
+  (field-from [this content opts]
+    (let [include (if (opts :include) ((opts :include) (keyword (row :slug))))]
+      (if include
+        (let [down (assoc opts :include include)
+              link (-> this :env :link :slug)
+              parts (db/fetch (-> (target-for this) :slug) (str link "_id = %1 order by %2 asc") (content :id) (str link "_position"))]
+          (map #(from (target-for this) % down) parts))
+        [])))
+
+  (render [this content opts]
+    (map #(model-render (target-for this) % (assoc opts :include ((opts :include) (keyword (row :slug))))) (field-from this content opts))))
+
+
+
+  ;; (table-additions [this field] [])
+  ;; (subfield-names [this field] [])
+  ;; (setup-field [this] nil)
+  ;; (cleanup-field [this] nil)
+  ;; (target-for [this] nil)
+  ;; (update-values [this content values])
+  ;; (post-update [this content] content)
+  ;; (pre-destroy [this content] content)
+  ;; (field-from [this content opts])
+  ;; (render [this content opts] ""))
 
 (def field-constructors
   {:id (fn [row] (IdField. row {}))
