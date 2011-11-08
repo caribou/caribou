@@ -191,8 +191,8 @@
   (fn [request]
     (sql/with-connection db (handler request))))
 
-(defn count
-  "this aliases clojure.core$count so I keep it here at the bottom"
+(defn tally
+  "return how many total records are in this table"
   [table]
   ((first (query "select count(id) from %1" (name table))) :count))
 

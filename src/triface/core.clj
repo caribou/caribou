@@ -180,7 +180,7 @@
           included (merge params {:include include :limit limit :offset offset :order order :order_by order-by})
           response (map #(render slug % included) (model/rally slug included))
           showing (count response)
-          total (db/count slug)
+          total (db/tally slug)
           extra (if (> (rem total limit) 0) 1 0)
           total_pages (+ extra (quot total limit))]
       (wrap-response response {:type slug
