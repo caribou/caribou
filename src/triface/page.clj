@@ -97,24 +97,28 @@
     (dosync
      (alter pages (fn [a b] b) tree))))
 
-(defn invoke-routes
+(defmacro invoke-routes
   "invoke pages from the db and generate the routes based on them."
   []
+  (sql/with-connection db/default-db
   (let [app-path (triface-properties "applicationPath")
         _pages (invoke-pages)
         _templates (load-templates app-path)
         generated (generate-routes @pages app-path)]
-    `(defroutes all-routes ~@generated)))
+    `(defroutes all-routes ~@generated))))
+
+(defn dbinit []
+  (model/init)
+  (invoke-routes))
 
 (defn init
   "initialize page related activities"
   []
-  (model/init)
-  (invoke-routes))
+  (sql/with-connection db/default-db (dbinit)))
 
 (defn start [port db]
   (let [full-db (merge db/default-db db)]
-    (sql/with-connection full-db (init))
+    (sql/with-connection full-db (dbinit))
     (def app (-> all-routes
                  (wrap-file (str (triface-properties "applicationPath") "/public"))
                  (wrap-file-info)
