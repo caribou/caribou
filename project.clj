@@ -13,6 +13,7 @@
                  [clojure-csv/clojure-csv "1.3.2"]
                  [com.instrument.triface/triface-action-adapter "1.0-SNAPSHOT"]
                  ;; --------- THESE DEPS ARE NOT ON 1.3 -------------
+                 ;; [aleph "0.2.0-rc2"]
                  ;; [sandbar "0.4.0-SNAPSHOT"]
                  ;; [clojure-solr "0.2.0"]
                  ;; [org.clojars.serabe/rinzelight "0.0.3"]
@@ -24,7 +25,6 @@
                      [postgresql/postgresql "8.4-702.jdbc4"]
                      [swank-clojure "1.4.0-SNAPSHOT"]
                      [com.instrument.triface/triface-action-adapter "1.0-SNAPSHOT"]
-                     ;; [org.clojure/data.json "0.1.1"]
                      [geocoder-clj "0.0.3"]
                      [lein-eclipse "1.0.0"]
                      [clj-logging-config "1.7.0"]

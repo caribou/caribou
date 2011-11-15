@@ -69,6 +69,13 @@
       :model_id model-id})
     (db/insert
      :field
+     {:name "Join Model"
+      :slug "join_model"
+      :type "boolean"
+      :locked true
+      :model_id model-id})
+    (db/insert
+     :field
      {:name "Fields"
       :slug "fields"
       :type "collection"

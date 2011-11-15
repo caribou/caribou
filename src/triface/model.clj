@@ -496,25 +496,26 @@
         (create :model
                 {:name (join " " (sort (row :name) reciprocal-name))
                  :slug join-name
+                 :join_model true
                  :fields
                  [{:name (spec :name)
                    :type "part"
                    :dependent true
-                   :reciprocal_name (join " " [reciprocal-name "Join"])
+                   :reciprocal_name (str reciprocal-name " Join")
                    :target_id (row :target_id)}
                   {:name reciprocal-name
                    :type "part"
                    :dependent true
-                   :reciprocal_name (join " " [(spec :name) "Join"])
+                   :reciprocal_name (str (spec :name) " Join")
                    :target_id (row :model_id)}]})
-        (db/update :field {:link_id (-> link :row :id)} "id = %1" (row :id))))))
+        (db/update :field {:link_id (-> link :row :id)} "id = %1" (row :id)))))
 
   (cleanup-field [this]
     (try
       (do
-        (destroy :field (-> env :link :id))
         (let []
-          (destroy :model )))
+          (destroy :model )
+          (destroy :field (-> env :link :id))))
       (catch Exception e (str e))))
 
   (target-for [this] (models (row :target_id)))

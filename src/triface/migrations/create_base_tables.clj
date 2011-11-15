@@ -17,6 +17,7 @@
    [:position :integer "DEFAULT 0"]
    [:nested :boolean "DEFAULT false"]
    [:locked :boolean "DEFAULT false"]
+   [:join_model :boolean "DEFAULT false"]
    [:abstract :boolean "DEFAULT false"]
    [:searchable :boolean "DEFAULT false"]
    [:ancestor_id :integer "DEFAULT NULL"]
