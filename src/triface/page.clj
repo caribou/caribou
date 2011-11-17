@@ -1,6 +1,5 @@
 (ns triface.page
   (:use triface.debug
-        clojure.contrib.str-utils
         compojure.core
         [ring.middleware file file-info stacktrace reload])
   (:require [triface.model :as model]
