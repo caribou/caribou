@@ -911,7 +911,7 @@
 (defn init
   "run any necessary initialization for the model environment."
   []
-  (invoke-models)
+  ;; (invoke-models)
   (log :model "models-invoked"))
 
 (gen-class

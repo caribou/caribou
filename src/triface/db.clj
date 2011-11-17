@@ -1,6 +1,7 @@
 (ns triface.db
   (:use [triface.debug])
-  (:use [clojure.contrib.str-utils])
+  (:use [clojure.string :only (join split)])
+  ;; (:use [clojure.contrib.str-utils])
   (:require [clojure.java.jdbc :as sql]))
 
 (defn zap
@@ -36,11 +37,11 @@
 
 (defn recursive-query [table fields base-where recur-where]
   (let [field-names (distinct (map name (concat [:id :parent_id] fields)))
-        field-list (str-join "," field-names)]
+        field-list (join "," field-names)]
     (query (str "with recursive %1_tree(" field-list
                 ") as (select " field-list
                 " from %1 where %2 union select "
-                (str-join "," (map #(str "%1." %) field-names))
+                (join "," (map #(str "%1." %) field-names))
                 " from %1,%1_tree where %3)"
                 " select * from %1_tree") (name table) base-where recur-where)))
 
@@ -57,13 +58,13 @@
 (defn value-map
   "build a string of values fit for an insert or update statement"
   [values]
-  (str-join ", " (map #(str (name %) " = " (sqlize (values %))) (keys values))))
+  (join ", " (map #(str (name %) " = " (sqlize (values %))) (keys values))))
 
 (defn insert
   "insert a row into the given table with the given values"
   [table values]
-  ;; (let [keys (str-join "," (map sqlize (keys mapping)))
-  ;;       values (str-join "," (map sqlize (vals mapping)))
+  ;; (let [keys (join "," (map sqlize (keys mapping)))
+  ;;       values (join "," (map sqlize (vals mapping)))
   ;;       q (clause "insert into %1 (%2) values (%3)" [(zap (name table)) keys values])]
   ;;   (sql/with-connection db
   ;;     (sql/do-commands
@@ -126,7 +127,7 @@
 (defn add-column
   "add the given column to the table."
   [table column opts]
-  (let [type (str-join " " (map name opts))]
+  (let [type (join " " (map name opts))]
     (sql/do-commands
      (log :db (clause "alter table %1 add column %2 %3" (map #(zap (name %)) [table column type]))))))
 
