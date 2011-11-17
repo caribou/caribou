@@ -30,6 +30,7 @@
                      [clj-logging-config "1.7.0"]
                      [log4j "1.2.16"]]
   :jvm-opts ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n"]
+  :aot [triface.model]
   :ring {:handler triface.core/app
          :servlet-name "triface"
          :init triface.core/init}

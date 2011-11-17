@@ -3,6 +3,7 @@
   (:use triface.util)
   (:use [clojure.string :only (join split)])
   (:require [triface.db :as db]
+            [clojure.java.jdbc :as sql]
             [geocoder.core :as geo]))
 
 (import java.text.SimpleDateFormat)
@@ -913,4 +914,26 @@
   (invoke-models)
   (log :model "models-invoked"))
 
+(gen-class
+ :name triface.model.Model
+ :prefix model-
+ :state state
+ :init init
+ :constructors {[String] []}
+ :methods [[slug [] String]
+           [create [clojure.lang.APersistentMap] clojure.lang.APersistentMap]])
 
+(defn model-init [slug]
+  [[] slug])
+
+(defn model-create [this spec]
+  (sql/with-connection db/default-db
+    (create (.state this) spec)))
+
+(defn model-slug [this]
+  (.state this))
+
+;; (defmacro 
+
+(sql/with-connection db/default-db
+  (invoke-models))
