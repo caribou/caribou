@@ -31,7 +31,7 @@
                      [log4j "1.2.16"]]
   :jvm-opts ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n"]
   :aot [triface.model]
-  :ring {:handler triface.core/app
+  :ring {:handler triface.api/app
          :servlet-name "triface"
-         :init triface.core/init}
+         :init triface.api/init}
   :repositories {"sonatype-oss-public" "https://oss.sonatype.org/content/groups/public/"})
