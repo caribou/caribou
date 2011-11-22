@@ -11,7 +11,7 @@
                  [ring/ring-jetty-adapter "0.3.10"]
                  [geocoder-clj "0.0.3"]
                  [clojure-csv/clojure-csv "1.3.2"]
-;;                 [com.instrument.caribou/caribou-action-adapter "1.0-SNAPSHOT"]
+                 ;; [com.instrument.caribou/caribou-action-adapter "1.0-SNAPSHOT"]
                  ;; --------- THESE DEPS ARE NOT ON 1.3 -------------
                  ;; [aleph "0.2.0-rc2"]
                  ;; [sandbar "0.4.0-SNAPSHOT"]
@@ -21,10 +21,11 @@
                  ;; -------------------------------------------------
                  [log4j "1.2.16"]]
   :dev-dependencies [[lein-ring "0.4.5"]
+                     [backtype/autodoc "0.9.0-SNAPSHOT"]
                      [org.clojure/java.jdbc "0.0.6"]
                      [postgresql/postgresql "8.4-702.jdbc4"]
                      [swank-clojure "1.4.0-SNAPSHOT"]
-;;                     [com.instrument.caribou/caribou-action-adapter "1.0-SNAPSHOT"]
+                     ;; [com.instrument.caribou/caribou-action-adapter "1.0-SNAPSHOT"]
                      [geocoder-clj "0.0.3"]
                      [lein-eclipse "1.0.0"]
                      [clj-logging-config "1.7.0"]
@@ -34,4 +35,5 @@
   :ring {:handler caribou.api/app
          :servlet-name "caribou"
          :init caribou.api/init}
+  :autodoc {:name "Caribou" :page-title "Caribou API Documentation"}
   :repositories {"sonatype-oss-public" "https://oss.sonatype.org/content/groups/public/"})
