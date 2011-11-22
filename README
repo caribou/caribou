@@ -14,6 +14,6 @@ At the command line:
 
   lein deps
   lein migrate
-  lein run -m triface.core
+  lein run -m caribou.core
 
 

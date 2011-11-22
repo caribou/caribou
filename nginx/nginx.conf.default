@@ -1,12 +1,12 @@
-upstream triface {
+upstream caribou {
     server 127.0.0.1:33333;
 }
 
 server {
     listen 80;
-    server_name api.triface;
+    server_name api.caribou;
 
-    root /Users/yourname/Projects/triface/public;
+    root /Users/yourname/Projects/caribou/public;
     index  index.html;
 
     location /img {
@@ -34,7 +34,7 @@ server {
         }
 
         if (!-f $request_filename) {
-            proxy_pass http://triface;
+            proxy_pass http://caribou;
             break;
         }
     }

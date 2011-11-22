@@ -1,6 +1,6 @@
 (ns leiningen.bootstrap
-  (require [triface.db :as db])
-  (require [triface.migration :as mm]))
+  (require [caribou.db :as db])
+  (require [caribou.migration :as mm]))
 
 (defn bootstrap [name]
   (db/rebuild-database name)

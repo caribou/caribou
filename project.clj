@@ -1,5 +1,5 @@
-(defproject triface "1.0.0-SNAPSHOT"
-  :description "Interface: type structure interaction api"
+(defproject caribou "1.0.0-SNAPSHOT"
+  :description "caribou: type structure interaction api"
   :dependencies [[org.clojure/clojure "1.3.0"]
                  [org.clojure/java.jdbc "0.0.6"]
                  [postgresql/postgresql "8.4-702.jdbc4"]
@@ -11,7 +11,7 @@
                  [ring/ring-jetty-adapter "0.3.10"]
                  [geocoder-clj "0.0.3"]
                  [clojure-csv/clojure-csv "1.3.2"]
-                 [com.instrument.triface/triface-action-adapter "1.0-SNAPSHOT"]
+;;                 [com.instrument.caribou/caribou-action-adapter "1.0-SNAPSHOT"]
                  ;; --------- THESE DEPS ARE NOT ON 1.3 -------------
                  ;; [aleph "0.2.0-rc2"]
                  ;; [sandbar "0.4.0-SNAPSHOT"]
@@ -24,14 +24,14 @@
                      [org.clojure/java.jdbc "0.0.6"]
                      [postgresql/postgresql "8.4-702.jdbc4"]
                      [swank-clojure "1.4.0-SNAPSHOT"]
-                     [com.instrument.triface/triface-action-adapter "1.0-SNAPSHOT"]
+;;                     [com.instrument.caribou/caribou-action-adapter "1.0-SNAPSHOT"]
                      [geocoder-clj "0.0.3"]
                      [lein-eclipse "1.0.0"]
                      [clj-logging-config "1.7.0"]
                      [log4j "1.2.16"]]
   :jvm-opts ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n"]
-  :aot [triface.model]
-  :ring {:handler triface.api/app
-         :servlet-name "triface"
-         :init triface.api/init}
+  :aot [caribou.model]
+  :ring {:handler caribou.api/app
+         :servlet-name "caribou"
+         :init caribou.api/init}
   :repositories {"sonatype-oss-public" "https://oss.sonatype.org/content/groups/public/"})
