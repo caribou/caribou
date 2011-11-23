@@ -10,7 +10,8 @@
             [clojure.java.jdbc :as sql]
             [compojure.route :as route]
             [ring.adapter.jetty :as ring]
-            [compojure.handler :as handler]))
+            [compojure.handler :as handler]
+            [triface.app.config :as app-config]))
 
 (import (java.io File))
 
@@ -96,15 +97,15 @@
     (dosync
      (alter pages (fn [a b] b) tree))))
 
-(defmacro invoke-routes
-  "invoke pages from the db and generate the routes based on them."
-  []
-  (sql/with-connection db/default-db
-  (let [app-path (triface-properties "applicationPath")
-        _pages (invoke-pages)
-        _templates (load-templates app-path)
-        generated (generate-routes @pages app-path)]
-    `(defroutes all-routes ~@generated))))
+  (defmacro invoke-routes
+    "invoke pages from the db and generate the routes based on them."
+    []
+    (sql/with-connection @app-config/db
+    (let [app-path (triface-properties "applicationPath")
+          _pages (invoke-pages)
+          _templates (load-templates app-path)
+          generated (generate-routes @pages app-path)]
+      `(defroutes all-routes ~@generated))))
 
 (defn dbinit []
   (model/init)
@@ -113,10 +114,10 @@
 (defn init
   "initialize page related activities"
   []
-  (sql/with-connection db/default-db (dbinit)))
+  (sql/with-connection @app-config/db (dbinit)))
 
 (defn start [port db]
-  (let [full-db (merge db/default-db db)]
+  (let [full-db (merge @app-config/db db)]
     (sql/with-connection full-db (dbinit))
     (def app (-> all-routes
                  (wrap-file (str (triface-properties "applicationPath") "/public"))
@@ -128,7 +129,7 @@
 
 (defn go []
   (let [port (Integer/parseInt (or (System/getenv "PORT") "22212"))]
-    (start port db/default-db)))
+    (start port @app-config/db)))
 
 (defn -main []
   (go))

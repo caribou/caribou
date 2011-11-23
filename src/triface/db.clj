@@ -2,7 +2,8 @@
   (:use [triface.debug])
   (:use [clojure.string :only (join split)])
   ;; (:use [clojure.contrib.str-utils])
-  (:require [clojure.java.jdbc :as sql]))
+  (:require [clojure.java.jdbc :as sql]
+            [triface.app.config :as app-config]))
 
 (defn zap
   "quickly sanitize a potentially dirty string in preparation for a sql query"
@@ -155,17 +156,20 @@
   [commands]
   (sql/do-commands commands))
 
-(def default-db
-  {:classname "org.postgresql.Driver"
-   :subprotocol "postgresql"
-   :subname "//localhost/triface"
-   :user "postgres"})
+
+(defn change-db-keep-host
+  "given the current db config, change the database but keep the hostname"
+  [db-config new-db]
+  ;FIXME make this prettier
+  (assoc db-config
+    :subname
+    (str "//" (first (split (replace (db-config :subname) "//" "") #"/")) "/" new-db)))
 
 (defn drop-database
   "drop a database of the given name"
   [name]
   (try
-    (sql/with-connection (assoc default-db :subname "//localhost/template1")
+    (sql/with-connection (change-db-keep-host @app-config/db "template1")
       (with-open [s (.createStatement (sql/connection))]
         (.addBatch s (str "drop database " (zap name)))
         (seq (.executeBatch s))))
@@ -175,7 +179,7 @@
   "create a database of the given name"
   [name]
   (try
-    (sql/with-connection (assoc default-db :subname "//localhost/template1")
+    (sql/with-connection (change-db-keep-host @app-config/db "template1") 
       (with-open [s (.createStatement (sql/connection))]
         (.addBatch s (str "create database " (zap name)))
         (seq (.executeBatch s))))

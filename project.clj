@@ -9,6 +9,7 @@
                  ;; [org.clojure/data.json "0.1.1"]
                  [org.clojars.ninjudd/data.xml "0.0.1-SNAPSHOT"]
                  [ring/ring-jetty-adapter "0.3.10"]
+                 [clj-yaml "0.3.0-SNAPSHOT"]
                  [geocoder-clj "0.0.3"]
                  [clojure-csv/clojure-csv "1.3.2"]
                  [com.instrument.triface/triface-action-adapter "1.0-SNAPSHOT"]

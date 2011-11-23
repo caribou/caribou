@@ -4,7 +4,8 @@
   (:use [clojure.string :only (join split)])
   (:require [triface.db :as db]
             [clojure.java.jdbc :as sql]
-            [geocoder.core :as geo]))
+            [geocoder.core :as geo]
+            [triface.app.config :as app-config]))
 
 (import java.text.SimpleDateFormat)
 (def simple-date-format (java.text.SimpleDateFormat. "MMMMMMMMM dd', 'yyyy HH':'mm"))
@@ -927,7 +928,7 @@
   [[] slug])
 
 (defn model-create [this spec]
-  (sql/with-connection db/default-db
+  (sql/with-connection app-config/db
     (create (.state this) spec)))
 
 (defn model-slug [this]
@@ -935,5 +936,5 @@
 
 ;; (defmacro 
 
-(sql/with-connection db/default-db
+(sql/with-connection @app-config/db
   (invoke-models))
