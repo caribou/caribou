@@ -3,7 +3,7 @@
   (:use [clojure.string :only (join split)])
   ;; (:use [clojure.contrib.str-utils])
   (:require [clojure.java.jdbc :as sql]
-            [triface.app.config :as app-config]))
+            [caribou.app.config :as app-config]))
 
 (defn zap
   "quickly sanitize a potentially dirty string in preparation for a sql query"
@@ -159,10 +159,9 @@
 (defn change-db-keep-host
   "given the current db config, change the database but keep the hostname"
   [db-config new-db]
-  ;FIXME make this prettier
   (assoc db-config
-    :subname
-    (str "//" (first (split (replace (db-config :subname) "//" "") #"/")) "/" new-db)))
+    :subname (replace (db-config :subname) #"[^/]+$" new-db)))
+    ;; (str "//" (first (split (replace (db-config :subname) "//" "") #"/")) "/" new-db)))
 
 (defn drop-database
   "drop a database of the given name"

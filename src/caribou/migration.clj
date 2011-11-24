@@ -28,7 +28,7 @@
 
 (defn run-migrations [db-name]
   (try
-    (sql/with-connection (merge db/default-db {:subname (str "//localhost/" db-name)})
+    (sql/with-connection (merge config/db {:subname (str "//localhost/" db-name)})
       (if (not (db/table? "migration"))
         (doall (map run-migration premigration-list)))
       (doall (map #(if (not (some #{%} (migration-names))) (run-migration %))

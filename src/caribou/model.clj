@@ -5,7 +5,7 @@
   (:require [caribou.db :as db]
             [clojure.java.jdbc :as sql]
             [geocoder.core :as geo]
-            [triface.app.config :as app-config]))
+            [caribou.app.config :as app-config]))
 
 (import java.text.SimpleDateFormat)
 (def simple-date-format (java.text.SimpleDateFormat. "MMMMMMMMM dd', 'yyyy HH':'mm"))

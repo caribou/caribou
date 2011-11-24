@@ -11,19 +11,13 @@
             [compojure.route :as route]
             [ring.adapter.jetty :as ring]
             [compojure.handler :as handler]
-            [triface.app.config :as app-config]))
+            [caribou.app.config :as config]))
 
 (import (java.io File))
 
 (def pages (ref ()))
 (def actions (ref {}))
 (def templates (ref {}))
-
-(def caribou-properties 
-  (into {} (doto (java.util.Properties.)
-    (.load (-> (Thread/currentThread)
-    (.getContextClassLoader)
-    (.getResourceAsStream "caribou.properties"))))))
 
 (defn default-action [params]
   (assoc params :result (str params)))
@@ -100,12 +94,12 @@
 (defmacro invoke-routes
   "invoke pages from the db and generate the routes based on them."
   []
-  (sql/with-connection db/default-db
-  (let [app-path (caribou-properties "applicationPath")
-        _pages (invoke-pages)
-        _templates (load-templates app-path)
-        generated (generate-routes @pages app-path)]
-    `(defroutes all-routes ~@generated))))
+  (sql/with-connection @config/db
+    (let [app-path (config/caribou-properties "applicationPath")
+          _pages (invoke-pages)
+          _templates (load-templates app-path)
+          generated (generate-routes @pages app-path)]
+      `(defroutes all-routes ~@generated))))
 
 (defn dbinit []
   (model/init)
@@ -114,13 +108,13 @@
 (defn init
   "initialize page related activities"
   []
-  (sql/with-connection @app-config/db (dbinit)))
+  (sql/with-connection @config/db (dbinit)))
 
 (defn start [port db]
-  (let [full-db (merge @app-config/db db)]
+  (let [full-db (merge @config/db db)]
     (sql/with-connection full-db (dbinit))
     (def app (-> all-routes
-                 (wrap-file (str (caribou-properties "applicationPath") "/public"))
+                 (wrap-file (str (config/caribou-properties "applicationPath") "/public"))
                  (wrap-file-info)
                  (wrap-stacktrace)
                  (handler/site)
@@ -129,7 +123,7 @@
 
 (defn go []
   (let [port (Integer/parseInt (or (System/getenv "PORT") "22212"))]
-    (start port @app-config/db)))
+    (start port @config/db)))
 
 (defn -main []
   (go))

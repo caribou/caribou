@@ -8,6 +8,7 @@
   (:require [caribou.db :as db]
             [caribou.model :as model]
             [caribou.util :as util]
+            [caribou.app.config :as config]
             [ring.adapter.jetty :as ring]
             [compojure.route :as route]
             [compojure.handler :as handler]
@@ -244,23 +245,16 @@
   (route/resources "/")
   (route/not-found "NONONONONONON"))
 
-(defn dbinit []
-  (model/init))
+(def app (db/wrap-db (handler/site main-routes) @config/db))
 
-(defn init []
-  (sql/with-connection db/default-db (dbinit)))
-
-(def app (db/wrap-db (handler/site main-routes) db/default-db))
-
-(defn start [port db]
-  (sql/with-connection db (dbinit))
-  ;; (let [app (db/wrap-db (handler/site main-routes) (merge db/default-db db))]
-  ;;   (ring/run-jetty app {:port (or port 33333) :join? false})))
+(defn start [port]
   (ring/run-jetty (var app) {:port (or port 33333) :join? false}))
+
+(defn init [] )
 
 (defn go []
   (let [port (Integer/parseInt (or (System/getenv "PORT") "33333"))]
-    (start port db/default-db)))
+    (start port)))
 
 (defn -main []
   (go))
