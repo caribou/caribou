@@ -1,5 +1,5 @@
 (ns leiningen.migrate
-  (require [triface.migration :as mm]))
+  (require [caribou.migration :as mm]))
 
 (defn migrate [name]
   (mm/run-migrations name))

@@ -1,5 +1,6 @@
 pom.xml
 *jar
+/autodoc/
 /lib/
 /classes/
 /checkouts/
