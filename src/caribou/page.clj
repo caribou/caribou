@@ -11,7 +11,9 @@
             [compojure.route :as route]
             [ring.adapter.jetty :as ring]
             [compojure.handler :as handler]
-            [caribou.app.config :as config]))
+            [caribou.app.config :as config]
+            [clojure.java.io :as io]
+            [caribou.app.template.freemarker :as freemarker]))
 
 (import (java.io File))
 
@@ -36,6 +38,7 @@
   (let [path (str above-path "/" (name (page :path)))
         action-path (str above-action "/" (page :action))
         route `(GET ~path {~(symbol "params") :params} ((actions ~(keyword (page :action))) ~(symbol "params")))]
+    (log :page path)
     (do
       (let [action-file (str action-path ".clj")
             action (if (.exists (new File action-file))
@@ -54,19 +57,19 @@
 
 (defn load-templates
   "recurse through the view directory and add all the templates that can be found"
-  [template-path]
-  (let [base (str template-path "/app/view")]
+  [app-path]
+  (let [base (str app-path "/app/template")]
+    (freemarker/init base)
     (loop [fseq (file-seq (new File base))]
       (if fseq
-        (let [filename (.toString (first fseq))]
+        (let [filename (.toString (first fseq))
+              template-name (string/replace filename (str base "/") "")]
           (if (.isFile (first fseq))
             (do
-              (load-file filename)
-              (let [template view/template
-                    template-key (keyword
-                                  (string/replace 
-                                   (string/replace filename (str base "/") "")
-                                   ".clj" ""))]
+              ;(load-file filename)
+              (let [template (freemarker/render-wrapper template-name)
+                    template-key (keyword template-name)]
+                                   
                 (dosync
                  (alter templates merge {template-key template})))))
           (recur (next fseq)))))))
