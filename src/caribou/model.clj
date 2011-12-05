@@ -5,7 +5,7 @@
   (:require [caribou.db :as db]
             [clojure.java.jdbc :as sql]
             [geocoder.core :as geo]
-            [caribou.app.config :as app-config]))
+            [caribou.app.config :as config]))
 
 (import java.text.SimpleDateFormat)
 (def simple-date-format (java.text.SimpleDateFormat. "MMMMMMMMM dd', 'yyyy HH':'mm"))
@@ -514,10 +514,9 @@
 
   (cleanup-field [this]
     (try
-      (do
-        (let []
-          (destroy :model )
-          (destroy :field (-> env :link :id))))
+      (let []
+        (destroy :model )
+        (destroy :field (-> env :link :id)))
       (catch Exception e (str e))))
 
   (target-for [this] (models (row :target_id)))
@@ -911,9 +910,7 @@
 
 (defn init
   "run any necessary initialization for the model environment."
-  []
-  ;; (invoke-models)
-  (log :model "models-invoked"))
+  [])
 
 (gen-class
  :name caribou.model.Model
@@ -928,7 +925,7 @@
   [[] slug])
 
 (defn model-create [this spec]
-  (sql/with-connection app-config/db
+  (sql/with-connection @config/db
     (create (.state this) spec)))
 
 (defn model-slug [this]
@@ -937,6 +934,6 @@
 ;; (defmacro 
 
 (try
-  (sql/with-connection @app-config/db
+  (sql/with-connection @config/db
     (invoke-models))
   (catch Exception e (str (.toString e) " -- models table does not exist yet")))

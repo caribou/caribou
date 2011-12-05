@@ -1,4 +1,4 @@
-(defproject caribou "1.0.0-SNAPSHOT"
+(defproject antler/caribou "0.3.0-SNAPSHOT"
   :description "caribou: type structure interaction api"
   :dependencies [[org.clojure/clojure "1.3.0"]
                  [org.clojure/java.jdbc "0.0.6"]
@@ -26,6 +26,7 @@
                      [org.clojure/java.jdbc "0.0.6"]
                      [postgresql/postgresql "8.4-702.jdbc4"]
                      [swank-clojure "1.4.0-SNAPSHOT"]
+                     [lein-clojars "0.7.0"]
                      ;; [com.instrument.caribou/caribou-action-adapter "1.0-SNAPSHOT"]
                      [geocoder-clj "0.0.3"]
                      [lein-eclipse "1.0.0"]

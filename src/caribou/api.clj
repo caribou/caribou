@@ -1,7 +1,6 @@
 (ns caribou.api
   (:use compojure.core)
   (:use [clojure.string :only (join split)])
-  ;; (:use [clojure.data.json :only (json-str write-json read-json)])
   (:use [cheshire.core :only (generate-string encode)])
   (:use [cheshire.custom :only (add-encoder)])
   (:use caribou.debug)
