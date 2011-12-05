@@ -32,7 +32,9 @@
 (defn render-wrapper
   "Wraps a template filename in a render"
   [template-name]
-  (let [template (get-template template-name)
-        template-length (.length (.toString template))]
-    (fn [root] 
+  (fn [root] 
+    ; we put get-template inside the func call because we want freemarker to handle 
+    ; caching/reloading for us
+    (let [template (get-template template-name)
+          template-length (.length (.toString template))]
         (render template root template-length))))
