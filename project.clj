@@ -12,6 +12,7 @@
                  [clj-yaml "0.3.0-SNAPSHOT"]
                  [geocoder-clj "0.0.3"]
                  [clojure-csv/clojure-csv "1.3.2"]
+                 [org.freemarker/freemarker "2.3.18"]
                  ;; [com.instrument.caribou/caribou-action-adapter "1.0-SNAPSHOT"]
                  ;; --------- THESE DEPS ARE NOT ON 1.3 -------------
                  ;; [aleph "0.2.0-rc2"]
