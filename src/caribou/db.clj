@@ -1,9 +1,9 @@
 (ns caribou.db
   (:use [caribou.debug])
-  (:use [clojure.string :only (join split)])
+  (:use [clojure.string :only (join split replace)])
   ;; (:use [clojure.contrib.str-utils])
   (:require [clojure.java.jdbc :as sql]
-            [caribou.app.config :as app-config]))
+            [caribou.app.config :as config]))
 
 (defn zap
   "quickly sanitize a potentially dirty string in preparation for a sql query"
@@ -167,21 +167,21 @@
   "drop a database of the given name"
   [name]
   (try
-    (sql/with-connection (change-db-keep-host @app-config/db "template1")
+    (sql/with-connection (change-db-keep-host @config/db "template1")
       (with-open [s (.createStatement (sql/connection))]
         (.addBatch s (str "drop database " (zap name)))
         (seq (.executeBatch s))))
-    (catch Exception e (str "database " name " doesn't exist"))))
+    (catch Exception e (println (str "database " name " doesn't exist: " (.getNextException e))))))
 
 (defn create-database
   "create a database of the given name"
   [name]
   (try
-    (sql/with-connection (change-db-keep-host @app-config/db "template1") 
+    (sql/with-connection (change-db-keep-host @config/db "template1") 
       (with-open [s (.createStatement (sql/connection))]
         (.addBatch s (str "create database " (zap name)))
         (seq (.executeBatch s))))
-    (catch Exception e (str "database " name " already exists"))))
+    (catch Exception e (println (str "database " name " already exists: " (.getNextException e))))))
 
 (defn rebuild-database
   "drop and recreate the given database"
