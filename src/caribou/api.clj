@@ -194,7 +194,7 @@
     (merge error {:meta {:msg "no model by that name"}})))
 
 (action model-spec [params slug]
-  (let [response (render "model" (first (db/query "select * from model where name = '%1'" slug)) {:include {:fields {}}})]
+  (let [response (render "model" (first (db/query "select * from model where slug = '%1'" slug)) {:include {:fields {}}})]
     (wrap-response response {:type slug})))
 
 (action item-detail [params slug id]

@@ -1,17 +1,17 @@
 (ns caribou.test.model
+  (:use [caribou.debug]
+        [caribou.model]
+        [clojure.test])
   (:require [clojure.java.jdbc :as sql]
             [caribou.db :as db]
             [caribou.util :as util]
-            [caribou.app.config :as config])
-  (:use [caribou.debug])
-  (:use [caribou.model])
-  (:use [clojure.test]))
+            [caribou.app.config :as config]))
 
 (deftest invoke-model-test
   (sql/with-connection @config/db
     (let [model (db/query "select * from model where id = 1")
           invoked (invoke-model (first model))]
-      (is (= "name" (:name (:row (:name (invoked :fields)))))))))
+      (is (= "name" (-> (debug invoked) :fields :name :row :slug))))))
 
 (deftest model-lifecycle-test
   (sql/with-connection @config/db
@@ -125,5 +125,3 @@
       (catch Exception e (util/render-exception e))
       (finally (if (db/table? :white) (destroy :model (-> @models :white :id)))))))
 
-
-          
