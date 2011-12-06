@@ -1,0 +1,381 @@
+<html>
+  <head>
+    <title>Overview - Caribou nil API documentation</title>
+    <link href="static/favicon.png" rel="icon" />
+    <link href="static/favicon.png" rel="shortcut icon" />
+    <link media="all" type="text/css" href="static/clojure.css" rel="stylesheet" />
+    <link media="all" type="text/css" href="static/wiki.css" rel="stylesheet" />
+    <link media="all" type="text/css" href="static/internal.css" rel="stylesheet" />
+    <style>.menuWrapper{height: 36px;}</style>
+    <!--[if lte IE 6]>
+    <link rel="stylesheet" href="http://www.wikispaces.com/_/2009051601/s/internal_ie.css" type="text/css" />
+    <![endif]-->
+  </head>
+<!--
+This document was auto-generated from the source by the clojure autodoc system.
+To report errors or ask questions about the overall documentation structure, formatting,
+etc., contact Tom Faulhaber (google mail name: tomfaulhaber).
+For errors in the documentation of a particular namespace, contact the author of that
+namespace.
+-->
+  <body>
+    <div id="AllContentContainer">
+      <div id="Header">
+	<a id="Logo" href="index.html"><img alt="Clojure" height="100" width="100" src="static/clojure-icon.gif" /></a>
+	<h1><a title="page header title" id="page-header" href="index.html">Caribou API Documentation</a></h1>
+      </div>
+      <div id="leftcolumn"><div style="text-align: center;"></div>
+<div class="menu">
+  <div class="WikiCustomNav WikiElement wiki">
+    <span class="toc-header"><span id="project-name">Caribou</span> <span id="version"></span> API</span><br />
+    <ul>
+      <li><a class="wiki_link" href="index.html">Overview</a></li>
+      <li><a class="wiki_link" href="api-index.html">API Index</a></li>
+    </ul>
+    <div class="NamespaceTOC">
+      <span class="toc-header">Namespaces</span>
+      <ul id="left-sidebar-list">
+        <li><a href="caribou.action.adapter-api.html" class="wiki_link">caribou.action.adapter</a></li><li><a href="caribou.api-api.html" class="wiki_link">caribou.api</a></li><li><a href="caribou.app.config-api.html" class="wiki_link">caribou.app.config</a></li><li><a href="caribou.app.controller-api.html" class="wiki_link">caribou.app.controller</a></li><li><a href="caribou.app.template.freemarker-api.html" class="wiki_link">caribou.app.template.freemarker</a></li><li><a href="caribou.app.view-api.html" class="wiki_link">caribou.app.view</a></li><li><a href="caribou.core-api.html" class="wiki_link">caribou.core</a></li><li><a href="caribou.db-api.html" class="wiki_link">caribou.db</a></li><li><a href="caribou.debug-api.html" class="wiki_link">caribou.debug</a></li><li><a href="caribou.image-api.html" class="wiki_link">caribou.image</a></li><li><a href="caribou.logger-api.html" class="wiki_link">caribou.logger</a></li><li><a href="caribou.migration-api.html" class="wiki_link">caribou.migration</a></li><li><a href="caribou.model-api.html" class="wiki_link">caribou.model</a></li><li><a href="caribou.page-api.html" class="wiki_link">caribou.page</a></li><li><a href="caribou.template.adapter-api.html" class="wiki_link">caribou.template.adapter</a></li><li><a href="caribou.util-api.html" class="wiki_link">caribou.util</a></li><li><a href="leiningen.bootstrap-api.html" class="wiki_link">leiningen.bootstrap</a></li><li><a href="leiningen.migrate-api.html" class="wiki_link">leiningen.migrate</a></li>
+      </ul>
+    </div>
+    
+    <a href="http://clojure.org" class="wiki_link">Clojure Home</a>
+  </div>
+</div>
+</div>
+      <div id="rightcolumn">
+	<div id="Content">
+	  <div class="contentBox"><div class="innerContentBox">
+              <div id="content_view" class="wiki wikiPage">
+                <div id="right-sidebar"><div id="toc">
+  <h1 class="nopad">Table of Contents</h1>
+  <div style="margin-left: 1em;" class="toc-section">
+    <a href="#caribou.action.adapter">caribou.action.adapter</a>
+    
+    <br />
+  </div><div style="margin-left: 1em;" class="toc-section">
+    <a href="#caribou.api">caribou.api</a>
+    
+    <br />
+  </div><div style="margin-left: 1em;" class="toc-section">
+    <a href="#caribou.app.config">caribou.app.config</a>
+    
+    <br />
+  </div><div style="margin-left: 1em;" class="toc-section">
+    <a href="#caribou.app.controller">caribou.app.controller</a>
+    
+    <br />
+  </div><div style="margin-left: 1em;" class="toc-section">
+    <a href="#caribou.app.template.freemarker">caribou.app.template.freemarker</a>
+    
+    <br />
+  </div><div style="margin-left: 1em;" class="toc-section">
+    <a href="#caribou.app.view">caribou.app.view</a>
+    
+    <br />
+  </div><div style="margin-left: 1em;" class="toc-section">
+    <a href="#caribou.core">caribou.core</a>
+    
+    <br />
+  </div><div style="margin-left: 1em;" class="toc-section">
+    <a href="#caribou.db">caribou.db</a>
+    
+    <br />
+  </div><div style="margin-left: 1em;" class="toc-section">
+    <a href="#caribou.debug">caribou.debug</a>
+    
+    <br />
+  </div><div style="margin-left: 1em;" class="toc-section">
+    <a href="#caribou.image">caribou.image</a>
+    
+    <br />
+  </div><div style="margin-left: 1em;" class="toc-section">
+    <a href="#caribou.logger">caribou.logger</a>
+    
+    <br />
+  </div><div style="margin-left: 1em;" class="toc-section">
+    <a href="#caribou.migration">caribou.migration</a>
+    
+    <br />
+  </div><div style="margin-left: 1em;" class="toc-section">
+    <a href="#caribou.model">caribou.model</a>
+    
+    <br />
+  </div><div style="margin-left: 1em;" class="toc-section">
+    <a href="#caribou.page">caribou.page</a>
+    
+    <br />
+  </div><div style="margin-left: 1em;" class="toc-section">
+    <a href="#caribou.template.adapter">caribou.template.adapter</a>
+    
+    <br />
+  </div><div style="margin-left: 1em;" class="toc-section">
+    <a href="#caribou.util">caribou.util</a>
+    
+    <br />
+  </div><div style="margin-left: 1em;" class="toc-section">
+    <a href="#leiningen.bootstrap">leiningen.bootstrap</a>
+    
+    <br />
+  </div><div style="margin-left: 1em;" class="toc-section">
+    <a href="#leiningen.migrate">leiningen.migrate</a>
+    
+    <br />
+  </div>
+</div>
+</div>
+                <div id="content-tag"><h1 id="toc0">API Overview - <span id="header-project">Caribou</span> <span id="header-version"></span> (<span id="header-status"></span>)</h1>
+<br />
+<div id="project-description">caribou: type structure interaction api</div>
+<br />
+<div id="namespace-entry">
+  <br />
+  <hr />
+  <h2 id="caribou.action.adapter">caribou.action.adapter</h2>
+  
+  <a href="caribou.action.adapter-api.html" id="api-link">Detailed API documentation</a><br />
+  <pre id="namespace-docstr"></pre>
+  
+  
+  
+  Public variables and functions:
+  <br />
+  
+</div><div id="namespace-entry">
+  <br />
+  <hr />
+  <h2 id="caribou.api">caribou.api</h2>
+  
+  <a href="caribou.api-api.html" id="api-link">Detailed API documentation</a><br />
+  <pre id="namespace-docstr"></pre>
+  
+  
+  
+  Public variables and functions:
+  <br />
+  
+</div><div id="namespace-entry">
+  <br />
+  <hr />
+  <h2 id="caribou.app.config">caribou.app.config</h2>
+  
+  <a href="caribou.app.config-api.html" id="api-link">Detailed API documentation</a><br />
+  <pre id="namespace-docstr"></pre>
+  
+  
+  
+  Public variables and functions:
+  <span id="var-link"><a href="caribou.app.config-api.html#caribou.app.config/init" id="var-tag">init</a> </span><span id="var-link"><a href="caribou.app.config-api.html#caribou.app.config/process-db-config" id="var-tag">process-db-config</a> </span><br />
+  
+</div><div id="namespace-entry">
+  <br />
+  <hr />
+  <h2 id="caribou.app.controller">caribou.app.controller</h2>
+  
+  <a href="caribou.app.controller-api.html" id="api-link">Detailed API documentation</a><br />
+  <pre id="namespace-docstr"></pre>
+  
+  
+  
+  Public variables and functions:
+  <br />
+  
+</div><div id="namespace-entry">
+  <br />
+  <hr />
+  <h2 id="caribou.app.template.freemarker">caribou.app.template.freemarker</h2>
+  
+  <a href="caribou.app.template.freemarker-api.html" id="api-link">Detailed API documentation</a><br />
+  <pre id="namespace-docstr"></pre>
+  
+  
+  
+  Public variables and functions:
+  <span id="var-link"><a href="caribou.app.template.freemarker-api.html#caribou.app.template.freemarker/get-template" id="var-tag">get-template</a> </span><span id="var-link"><a href="caribou.app.template.freemarker-api.html#caribou.app.template.freemarker/init" id="var-tag">init</a> </span><span id="var-link"><a href="caribou.app.template.freemarker-api.html#caribou.app.template.freemarker/render" id="var-tag">render</a> </span><span id="var-link"><a href="caribou.app.template.freemarker-api.html#caribou.app.template.freemarker/render-wrapper" id="var-tag">render-wrapper</a> </span><br />
+  
+</div><div id="namespace-entry">
+  <br />
+  <hr />
+  <h2 id="caribou.app.view">caribou.app.view</h2>
+  
+  <a href="caribou.app.view-api.html" id="api-link">Detailed API documentation</a><br />
+  <pre id="namespace-docstr"></pre>
+  
+  
+  
+  Public variables and functions:
+  <br />
+  
+</div><div id="namespace-entry">
+  <br />
+  <hr />
+  <h2 id="caribou.core">caribou.core</h2>
+  
+  <a href="caribou.core-api.html" id="api-link">Detailed API documentation</a><br />
+  <pre id="namespace-docstr"></pre>
+  
+  
+  
+  Public variables and functions:
+  <br />
+  
+</div><div id="namespace-entry">
+  <br />
+  <hr />
+  <h2 id="caribou.db">caribou.db</h2>
+  
+  <a href="caribou.db-api.html" id="api-link">Detailed API documentation</a><br />
+  <pre id="namespace-docstr"></pre>
+  
+  
+  
+  Public variables and functions:
+  <br />
+  
+</div><div id="namespace-entry">
+  <br />
+  <hr />
+  <h2 id="caribou.debug">caribou.debug</h2>
+  
+  <a href="caribou.debug-api.html" id="api-link">Detailed API documentation</a><br />
+  <pre id="namespace-docstr"></pre>
+  
+  
+  
+  Public variables and functions:
+  <span id="var-link"><a href="caribou.debug-api.html#caribou.debug/eval-with-locals" id="var-tag">eval-with-locals</a> </span><span id="var-link"><a href="caribou.debug-api.html#caribou.debug/local-bindings" id="var-tag">local-bindings</a> </span><span id="var-link"><a href="caribou.debug-api.html#caribou.debug/repl" id="var-tag">repl</a> </span><br />
+  
+</div><div id="namespace-entry">
+  <br />
+  <hr />
+  <h2 id="caribou.image">caribou.image</h2>
+  
+  <a href="caribou.image-api.html" id="api-link">Detailed API documentation</a><br />
+  <pre id="namespace-docstr"></pre>
+  
+  
+  
+  Public variables and functions:
+  <br />
+  
+</div><div id="namespace-entry">
+  <br />
+  <hr />
+  <h2 id="caribou.logger">caribou.logger</h2>
+  
+  <a href="caribou.logger-api.html" id="api-link">Detailed API documentation</a><br />
+  <pre id="namespace-docstr"></pre>
+  
+  
+  
+  Public variables and functions:
+  <br />
+  
+</div><div id="namespace-entry">
+  <br />
+  <hr />
+  <h2 id="caribou.migration">caribou.migration</h2>
+  
+  <a href="caribou.migration-api.html" id="api-link">Detailed API documentation</a><br />
+  <pre id="namespace-docstr"></pre>
+  
+  
+  
+  Public variables and functions:
+  <br />
+  
+</div><div id="namespace-entry">
+  <br />
+  <hr />
+  <h2 id="caribou.model">caribou.model</h2>
+  
+  <a href="caribou.model-api.html" id="api-link">Detailed API documentation</a><br />
+  <pre id="namespace-docstr"></pre>
+  
+  
+  
+  Public variables and functions:
+  <br />
+  
+</div><div id="namespace-entry">
+  <br />
+  <hr />
+  <h2 id="caribou.page">caribou.page</h2>
+  
+  <a href="caribou.page-api.html" id="api-link">Detailed API documentation</a><br />
+  <pre id="namespace-docstr"></pre>
+  
+  
+  
+  Public variables and functions:
+  <br />
+  
+</div><div id="namespace-entry">
+  <br />
+  <hr />
+  <h2 id="caribou.template.adapter">caribou.template.adapter</h2>
+  
+  <a href="caribou.template.adapter-api.html" id="api-link">Detailed API documentation</a><br />
+  <pre id="namespace-docstr"></pre>
+  
+  
+  
+  Public variables and functions:
+  <br />
+  
+</div><div id="namespace-entry">
+  <br />
+  <hr />
+  <h2 id="caribou.util">caribou.util</h2>
+  
+  <a href="caribou.util-api.html" id="api-link">Detailed API documentation</a><br />
+  <pre id="namespace-docstr"></pre>
+  
+  
+  
+  Public variables and functions:
+  <br />
+  
+</div><div id="namespace-entry">
+  <br />
+  <hr />
+  <h2 id="leiningen.bootstrap">leiningen.bootstrap</h2>
+  
+  <a href="leiningen.bootstrap-api.html" id="api-link">Detailed API documentation</a><br />
+  <pre id="namespace-docstr"></pre>
+  
+  
+  
+  Public variables and functions:
+  <br />
+  
+</div><div id="namespace-entry">
+  <br />
+  <hr />
+  <h2 id="leiningen.migrate">leiningen.migrate</h2>
+  
+  <a href="leiningen.migrate-api.html" id="api-link">Detailed API documentation</a><br />
+  <pre id="namespace-docstr"></pre>
+  
+  
+  
+  Public variables and functions:
+  <br />
+  
+</div>
+</div>
+              </div>
+            </div>
+          </div>
+	</div>
+	<div id="foot">
+	  <div style="text-align: center;" id="copyright">No copyright info </div>
+	</div>
+      </div>
+      <div id="DesignedBy">Logo &amp; site design by <a title="Visit Tom Hickey's website." href="http://www.tomhickey.com">Tom Hickey</a>.<br />
+      Clojure auto-documentation system by Tom Faulhaber.</div>
+    </div>
+    <!-- /AllContentContainer -->
+  </body>
+
+</html>
