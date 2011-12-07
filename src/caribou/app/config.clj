@@ -33,7 +33,7 @@
       database: caribou
       user: postgres"
   [filename env]
-  (let [config ((debug (load-yaml filename)) (debug (keyword env)))
+  (let [config ((load-yaml filename) (keyword env))
         host (or (config :host) "localhost")
         subname (or (config :subname) (str "//" host "/" (config :database)))]
     (assoc config :subname subname)))
@@ -46,4 +46,4 @@
     (dosync
       (alter db merge db-config))))
 
-(init ((debug caribou-properties) "environment"))
+(init (caribou-properties "environment"))
