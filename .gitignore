@@ -1,4 +1,7 @@
+caribou*.jar
+.lein-failures
 .lein-deps-sum
+
 /classes/
 /lib/
 /nginx/
