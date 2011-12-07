@@ -31,57 +31,32 @@
   (let [template (or (@template/templates (keyword (env :template))) default-template)]
     (template env)))
 
-;; (defn make-route
-;;   "make a single route for a single page, given its overarching path (above-path)
-;;   and action directory on disk (above-action)."
-;;   [page above-path above-action]
-;;   (let [path (str above-path "/" (name (page :path)))
-;;         action-path (str above-action "/" (page :action))
-;;         route `(GET ~path {~(symbol "params") :params} ((actions ~(keyword (page :action))) ~(symbol "params")))]
-;;     (log :page path)
-;;     (do
-;;       (let [action-file (str action-path ".clj")
-;;             action (if (.exists (new File action-file))
-;;                      (do (load-file action-file) controller/action)
-;;                      default-action)
-;;             wrapper
-;;             (fn [params]
-;;               (let [full (merge params {:template (page :template) :page page})
-;;                     env (action full)]
-;;                 (log :action (str (page :action) " - path: " path " - params: " (str params) " - rendering template: " (page :template)))
-;;                 (render-template env)))]
-;;         (dosync
-;;          (alter actions merge {(keyword (page :action)) wrapper}))
-;;         (controller/reset-action)))
-;;     (concat (list route) (apply concat (map #(make-route % path action-path) (page :children))))))
-
 (defn match-action-to-template
   "make a single route for a single page, given its overarching path (above-path)"
   [page above-path]
   (let [path (str above-path "/" (name (page :path)))
         controller (@app/controllers (keyword (page :controller)))
-        action (or ((keyword (page :action)) controller) default-action)
+        action-key (keyword (page :action))
+        action (or (action-key (debug controller)) default-action)
         template (@template/templates (keyword (page :template)))
-        full (fn [params] (template (action params)))]
+        full (fn [params] ((debug template) (action (merge params {"yellow" 555 :page page}))))]
+    (dosync
+     (alter actions merge {(keyword (page :action)) full}))
     (concat
-     [[path full]]
+     [[path action-key]]
      (apply
       concat
       (map #(match-action-to-template % path) (page :children))))))
 
 (defn make-route
   [[path action]]
-  `(GET ~path {params :params} (~action params)))
+  `(GET ~path {~'params :params} ((~'actions ~action) ~'params)))
 
 (defn generate-routes
   "given a tree of pages construct and return a list of corresponding routes."
   [pages]
-  (apply
-   concat
-   (doall
-    (map
-     #(make-route (match-action-to-template % ""))
-     pages))))
+  (let [routes (apply concat (map #(match-action-to-template % "") pages))]
+    (doall (map make-route routes))))
 
 (def all-routes)
 
@@ -99,7 +74,7 @@
   (template/load-templates (join config/file-sep [config/root "app" "templates"]))
   (sql/with-connection @config/db
     (let [_pages (invoke-pages)
-          generated (generate-routes @pages)]
+          generated (debug (generate-routes @pages))]
       `(defroutes all-routes ~@generated))))
 
 (defn dbinit []
