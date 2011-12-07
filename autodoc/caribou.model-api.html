@@ -1,0 +1,569 @@
+<html>
+  <head>
+    <title>caribou.model - Caribou nil API documentation</title>
+    <link href="static/favicon.png" rel="icon" />
+    <link href="static/favicon.png" rel="shortcut icon" />
+    <link media="all" type="text/css" href="static/clojure.css" rel="stylesheet" />
+    <link media="all" type="text/css" href="static/wiki.css" rel="stylesheet" />
+    <link media="all" type="text/css" href="static/internal.css" rel="stylesheet" />
+    <style>.menuWrapper{height: 36px;}</style>
+    <!--[if lte IE 6]>
+    <link rel="stylesheet" href="http://www.wikispaces.com/_/2009051601/s/internal_ie.css" type="text/css" />
+    <![endif]-->
+  </head>
+<!--
+This document was auto-generated from the source by the clojure autodoc system.
+To report errors or ask questions about the overall documentation structure, formatting,
+etc., contact Tom Faulhaber (google mail name: tomfaulhaber).
+For errors in the documentation of a particular namespace, contact the author of that
+namespace.
+-->
+  <body>
+    <div id="AllContentContainer">
+      <div id="Header">
+	<a id="Logo" href="index.html"><img alt="Clojure" height="100" width="100" src="static/clojure-icon.gif" /></a>
+	<h1><a title="page header title" id="page-header" href="index.html">Caribou API Documentation</a></h1>
+      </div>
+      <div id="leftcolumn"><div style="text-align: center;"></div>
+<div class="menu">
+  <div class="WikiCustomNav WikiElement wiki">
+    <span class="toc-header"><span id="project-name">Caribou</span> <span id="version"></span> API</span><br />
+    <ul>
+      <li><a class="wiki_link" href="index.html">Overview</a></li>
+      <li><a class="wiki_link" href="api-index.html">API Index</a></li>
+    </ul>
+    <div class="NamespaceTOC">
+      <span class="toc-header">Namespaces</span>
+      <ul id="left-sidebar-list">
+        <li><a href="caribou.api-api.html" class="wiki_link">caribou.api</a></li><li><a href="caribou.app-api.html" class="wiki_link">caribou.app</a></li><li><a href="caribou.core-api.html" class="wiki_link">caribou.core</a></li><li><a href="caribou.db-api.html" class="wiki_link">caribou.db</a></li><li><a href="caribou.debug-api.html" class="wiki_link">caribou.debug</a></li><li><a href="caribou.image-api.html" class="wiki_link">caribou.image</a></li><li><a href="caribou.logger-api.html" class="wiki_link">caribou.logger</a></li><li><a href="caribou.migration-api.html" class="wiki_link">caribou.migration</a></li><li><a href="caribou.model-api.html" class="wiki_link">caribou.model</a></li><li><a href="caribou.page-api.html" class="wiki_link">caribou.page</a></li><li><a href="caribou.util-api.html" class="wiki_link">caribou.util</a></li><li><a href="leiningen.bootstrap-api.html" class="wiki_link">leiningen.bootstrap</a></li><li><a href="leiningen.migrate-api.html" class="wiki_link">leiningen.migrate</a></li>
+      </ul>
+    </div>
+    
+    <a href="http://clojure.org" class="wiki_link">Clojure Home</a>
+  </div>
+</div>
+</div>
+      <div id="rightcolumn">
+	<div id="Content">
+	  <div class="contentBox"><div class="innerContentBox">
+              <div id="content_view" class="wiki wikiPage">
+                <div id="right-sidebar"><div id="toc">
+  <h1 class="nopad">Table of Contents</h1>
+  <div style="margin-left: 1em;" class="toc-section">
+    <a href="#toc0">Overview</a>
+    <div style="margin-left: 1em;" class="toc-entry">
+      <a href="#caribou.model/Field">Field</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#caribou.model/add-hook">add-hook</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#caribou.model/alter-models">alter-models</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#caribou.model/arrange-tree">arrange-tree</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#caribou.model/cleanup-field">cleanup-field</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#caribou.model/create">create</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#caribou.model/create-model-table">create-model-table</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#caribou.model/descendents">descendents</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#caribou.model/destroy">destroy</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#caribou.model/field-from">field-from</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#caribou.model/fields-render">fields-render</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#caribou.model/format-date">format-date</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#caribou.model/from">from</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#caribou.model/init">init</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#caribou.model/invoke-model">invoke-model</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#caribou.model/invoke-models">invoke-models</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#caribou.model/join-table-name">join-table-name</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#caribou.model/make-field">make-field</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#caribou.model/make-lifecycle-hooks">make-lifecycle-hooks</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#caribou.model/model-render">model-render</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#caribou.model/post-update">post-update</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#caribou.model/pre-destroy">pre-destroy</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#caribou.model/progenitors">progenitors</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#caribou.model/rally">rally</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#caribou.model/reconstruct">reconstruct</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#caribou.model/render">render</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#caribou.model/run-hook">run-hook</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#caribou.model/setup-field">setup-field</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#caribou.model/subfield-names">subfield-names</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#caribou.model/table-additions">table-additions</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#caribou.model/table-columns">table-columns</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#caribou.model/target-for">target-for</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#caribou.model/update">update</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#caribou.model/update-values">update-values</a>
+    </div>
+    <br />
+  </div>
+</div>
+</div>
+                <div id="content-tag"><h1 id="overview">API for <span id="namespace-name">caribou.model</span>
+  - <span id="header-project">Caribou</span> <span id="header-version"></span> (<span id="header-status"></span>)
+  </h1>
+
+<br />Full namespace name: <span id="long-name">caribou.model</span>
+<p></p>
+<h2>Overview</h2>
+<pre id="namespace-docstr"></pre>
+
+
+<br />
+<h2>Public Variables and Functions</h2>
+<div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="caribou.model/Field">Field</h2>
+  <span id="var-type">var</span><br />
+  <pre id="var-usage"></pre>
+  <pre id="var-docstr">a protocol for expected behavior of all model fields</pre>
+  
+  
+  
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="caribou.model/add-hook">add-hook</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (add-hook slug timing id hook)
+</pre>
+  <pre id="var-docstr">add a hook for the given model slug for the given timing.
+each hook must have a unique id, or it overwrites the previous hook at that id.</pre>
+  
+  
+  
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="caribou.model/alter-models">alter-models</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (alter-models model)
+</pre>
+  <pre id="var-docstr">inserts a single model into the hash of cached model records.</pre>
+  
+  
+  
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="caribou.model/arrange-tree">arrange-tree</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (arrange-tree items)
+</pre>
+  <pre id="var-docstr">given a set of nested items, arrange them into a tree
+based on id/parent_id relationships.</pre>
+  
+  
+  
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="caribou.model/cleanup-field">cleanup-field</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (cleanup-field this)
+</pre>
+  <pre id="var-docstr">further processing on removal of field</pre>
+  
+  
+  
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="caribou.model/create">create</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (create slug spec)
+</pre>
+  <pre id="var-docstr">slug represents the model to be updated.
+the spec contains all information about how to update this row,
+including nested specs which update across associations.
+the only difference between a create and an update is if an id is supplied,
+hence this will automatically forward to update if it finds an id in the spec.
+this means you can use this create method to create or update something,
+using the presence or absence of an id to signal which operation gets triggered.</pre>
+  
+  
+  
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="caribou.model/create-model-table">create-model-table</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (create-model-table name)
+</pre>
+  <pre id="var-docstr">create an table with the given name.</pre>
+  
+  
+  
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="caribou.model/descendents">descendents</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (descendents slug id)
+       (descendents slug id opts)
+</pre>
+  <pre id="var-docstr">pull up all the descendents of the item given by id
+in the nested model given by slug.</pre>
+  
+  
+  
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="caribou.model/destroy">destroy</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (destroy slug id)
+</pre>
+  <pre id="var-docstr">destroy the item of the given model with the given id.</pre>
+  
+  
+  
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="caribou.model/field-from">field-from</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (field-from this content opts)
+</pre>
+  <pre id="var-docstr">retrieves the value for this field from this content item</pre>
+  
+  
+  
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="caribou.model/fields-render">fields-render</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (fields-render fields content opts)
+</pre>
+  <pre id="var-docstr">render all fields out to a string friendly format</pre>
+  
+  
+  
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="caribou.model/format-date">format-date</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (format-date date)
+</pre>
+  <pre id="var-docstr">given a date object, return a string representing the canonical format for that date</pre>
+  
+  
+  
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="caribou.model/from">from</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (from model content opts)
+</pre>
+  <pre id="var-docstr">takes a model and a raw db row and converts it into a full
+content representation as specified by the supplied opts.
+some opts that are supported:
+  include - a nested hash of association includes.  if a key matches
+  the name of an association any content associated to this item through
+  that association will be inserted under that key.</pre>
+  
+  
+  
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="caribou.model/init">init</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (init)
+</pre>
+  <pre id="var-docstr">run any necessary initialization for the model environment.</pre>
+  
+  
+  
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="caribou.model/invoke-model">invoke-model</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (invoke-model model)
+</pre>
+  <pre id="var-docstr">translates a row from the model table into a nested hash with references
+to its fields in a hash with keys being the field slugs
+and vals being the field invoked as a Field protocol record.</pre>
+  
+  
+  
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="caribou.model/invoke-models">invoke-models</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (invoke-models)
+</pre>
+  <pre id="var-docstr">call to populate the application model cache in model/models.
+(otherwise we hit the db all the time with model and field selects)
+this also means if a model or field is changed in any way that model will
+have to be reinvoked to reflect the current state.</pre>
+  
+  
+  
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="caribou.model/join-table-name">join-table-name</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (join-table-name a b)
+</pre>
+  <pre id="var-docstr">construct a join table name out of two link names</pre>
+  
+  
+  
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="caribou.model/make-field">make-field</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (make-field row)
+</pre>
+  <pre id="var-docstr">turn a row from the field table into a full fledged Field record</pre>
+  
+  
+  
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="caribou.model/make-lifecycle-hooks">make-lifecycle-hooks</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (make-lifecycle-hooks slug)
+</pre>
+  <pre id="var-docstr">establish the set of functions which are called throughout the lifecycle
+of all rows for a given model (slug).  the possible hook points are:
+  :before_create     -- called for create only, before the record is made
+  :after_create      -- called for create only, now the record has an id
+  :before_update     -- called for update only, before any changes are made
+  :after_update      -- called for update only, now the changes have been committed
+  :before_save       -- called for create and update
+  :after_save        -- called for create and update
+  :before_destroy    -- only called on destruction, record has not yet been removed
+  :after_destroy     -- only called on destruction, now the db has no record of it</pre>
+  
+  
+  
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="caribou.model/model-render">model-render</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (model-render model content opts)
+</pre>
+  <pre id="var-docstr">render a piece of content according to the fields contained in the model
+and given by the supplied opts</pre>
+  
+  
+  
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="caribou.model/post-update">post-update</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (post-update this content)
+</pre>
+  <pre id="var-docstr">any processing that is required after the content is created/updated</pre>
+  
+  
+  
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="caribou.model/pre-destroy">pre-destroy</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (pre-destroy this content)
+</pre>
+  <pre id="var-docstr">prepare this content item for destruction</pre>
+  
+  
+  
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="caribou.model/progenitors">progenitors</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (progenitors slug id)
+       (progenitors slug id opts)
+</pre>
+  <pre id="var-docstr">if the model given by slug is nested,
+return a list of the item given by this id along with all of its ancestors.</pre>
+  
+  
+  
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="caribou.model/rally">rally</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (rally slug)
+       (rally slug opts)
+</pre>
+  <pre id="var-docstr">pull a set of content up through the model system with the given options.</pre>
+  
+  
+  
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="caribou.model/reconstruct">reconstruct</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (reconstruct mapping node)
+</pre>
+  <pre id="var-docstr">mapping is between parent_ids and collections which share a parent_id.
+node is the item whose descendent tree is to be reconstructed.</pre>
+  
+  
+  
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="caribou.model/render">render</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (render this content opts)
+</pre>
+  <pre id="var-docstr">renders out a single field from this content item</pre>
+  
+  
+  
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="caribou.model/run-hook">run-hook</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (run-hook slug timing env)
+</pre>
+  <pre id="var-docstr">run the hooks for the given model slug given by timing.
+env contains any necessary additional information for the running of the hook</pre>
+  
+  
+  
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="caribou.model/setup-field">setup-field</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (setup-field this spec)
+</pre>
+  <pre id="var-docstr">further processing on creation of field</pre>
+  
+  
+  
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="caribou.model/subfield-names">subfield-names</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (subfield-names this field)
+</pre>
+  <pre id="var-docstr">the names of any additional fields added to the model
+by this field given this name</pre>
+  
+  
+  
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="caribou.model/table-additions">table-additions</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (table-additions this field)
+</pre>
+  <pre id="var-docstr">the set of additions to this db table based on the given name</pre>
+  
+  
+  
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="caribou.model/table-columns">table-columns</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (table-columns slug)
+</pre>
+  <pre id="var-docstr">return a list of all columns for the table corresponding to this model.</pre>
+  
+  
+  
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="caribou.model/target-for">target-for</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (target-for this)
+</pre>
+  <pre id="var-docstr">retrieves the model this field points to, if applicable</pre>
+  
+  
+  
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="caribou.model/update">update</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (update slug id spec)
+</pre>
+  <pre id="var-docstr">slug represents the model to be updated.
+id is the specific row to update.
+the spec contains all information about how to update this row,
+including nested specs which update across associations.</pre>
+  
+  
+  
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="caribou.model/update-values">update-values</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (update-values this content values)
+</pre>
+  <pre id="var-docstr">adds to the map of values that will be committed to the db for this row</pre>
+  
+  
+  
+</div>
+
+
+</div>
+              </div>
+            </div>
+          </div>
+	</div>
+	<div id="foot">
+	  <div style="text-align: center;" id="copyright">No copyright info </div>
+	</div>
+      </div>
+      <div id="DesignedBy">Logo &amp; site design by <a title="Visit Tom Hickey's website." href="http://www.tomhickey.com">Tom Hickey</a>.<br />
+      Clojure auto-documentation system by Tom Faulhaber.</div>
+    </div>
+    <!-- /AllContentContainer -->
+  </body>
+
+</html>
