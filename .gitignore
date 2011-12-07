@@ -1,6 +1,6 @@
-<<<<<<< HEAD
 pom.xml
 *jar
+/autodoc/
 /lib/
 /classes/
 /checkouts/
@@ -13,9 +13,3 @@ pom.xml
 .classpath
 .project
 .settings/
-=======
-.lein-deps-sum
-/classes/
-/lib/
-/nginx/
->>>>>>> d3f2fa02309bb9556984193a00c5406780438676
