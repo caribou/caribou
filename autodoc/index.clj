@@ -72,6 +72,7 @@
    :name "leiningen.migrate",
    :doc nil}),
  :vars
+<<<<<<< HEAD
  ({:arglists ([params]),
    :name "ensure-lists-in",
    :namespace "caribou.api",
@@ -94,6 +95,9 @@
    :line 116,
    :file "src/caribou/api.clj"}
   {:arglists ([env]),
+=======
+ ({:arglists ([env]),
+>>>>>>> 3ac98ee84c568788ebe4811c1ae57d3b786e0eff
    :name "init",
    :namespace "caribou.app.config",
    :source-url nil,
@@ -160,6 +164,7 @@
    :var-type "function",
    :line 32,
    :file "src/caribou/app/template/freemarker.clj"}
+<<<<<<< HEAD
   {:arglists ([table column opts]),
    :name "add-column",
    :namespace "caribou.db",
@@ -408,6 +413,8 @@
    :var-type "function",
    :line 8,
    :file "src/caribou/db.clj"}
+=======
+>>>>>>> 3ac98ee84c568788ebe4811c1ae57d3b786e0eff
   {:arglists ([locals form]),
    :name "eval-with-locals",
    :namespace "caribou.debug",
@@ -439,6 +446,7 @@
    :doc "Starts a REPL with the local bindings available.",
    :var-type "macro",
    :line 25,
+<<<<<<< HEAD
    :file "src/caribou/debug.clj"}
   {:file "src/caribou/model.clj",
    :raw-source-url nil,
@@ -857,3 +865,6 @@
    :var-type "function",
    :line 34,
    :file "src/caribou/page.clj"})}
+=======
+   :file "src/caribou/debug.clj"})}
+>>>>>>> 3ac98ee84c568788ebe4811c1ae57d3b786e0eff
