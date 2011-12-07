@@ -1,8 +1,8 @@
 (ns caribou.db
   (:use [caribou.debug])
-  (:use [clojure.string :only (join split replace)])
-  ;; (:use [clojure.contrib.str-utils])
-  (:require [clojure.java.jdbc :as sql]
+  (:use [clojure.string :only (join split)])
+  (:require [clojure.string :as string]
+            [clojure.java.jdbc :as sql]
             [caribou.app.config :as config]))
 
 (defn zap
@@ -160,8 +160,8 @@
   "given the current db config, change the database but keep the hostname"
   [db-config new-db]
   (assoc db-config
-    :subname (replace (db-config :subname) #"[^/]+$" new-db)))
-    ;; (str "//" (first (split (replace (db-config :subname) "//" "") #"/")) "/" new-db)))
+    :subname (string/replace (db-config :subname) #"[^/]+$" new-db)))
+;; (str "//" (first (split (replace (db-config :subname) "//" "") #"/")) "/" new-db)))
 
 (defn drop-database
   "drop a database of the given name"

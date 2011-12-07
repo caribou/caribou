@@ -1,5 +1,6 @@
 (ns caribou.app.config
-  (:use [caribou.debug])
+  (:use [caribou.debug]
+        [clojure.string :only (join)])
   (:require [clj-yaml.core :as yaml]
             [clojure.java.io :as io]))
 
@@ -11,11 +12,18 @@
           (.getResourceAsStream "caribou.properties"))))))
 
 (def db (ref {}))
+(def root (.getAbsolutePath (io/file "")))
 
 (def file-sep 
   (str (.get (java.lang.System/getProperties) "file.separator")))
 
-(defn process-db-config
+(defn load-yaml
+  [filename]
+  (let [raw (slurp filename)
+        config (yaml/parse-string raw)]
+    config))
+
+(defn load-db-config
   "given the path to a yaml config file, produce the map representing it.
   the config is of the form:
   production:
@@ -25,8 +33,7 @@
       database: caribou
       user: postgres"
   [filename env]
-  (let [raw (slurp filename)
-        config ((yaml/parse-string raw) (keyword env))
+  (let [config ((load-yaml filename) (keyword env))
         host (or (config :host) "localhost")
         subname (or (config :subname) (str "//" host "/" (config :database)))]
     (assoc config :subname subname)))
@@ -34,10 +41,9 @@
 (defn init
   "initialize the app's config.  expects the environment (hard-coded to :production for now)"
   [env]
-  (let [app-path (caribou-properties "applicationPath")
-        db-config-file (str app-path file-sep "config" file-sep "database.yml")
-        yaml-config (process-db-config db-config-file env)]
+  (let [db-config-file (join file-sep [root "config" "database.yml"])
+        db-config (load-db-config db-config-file env)]
     (dosync
-      (alter db merge yaml-config))))
+      (alter db merge db-config))))
 
-(init :production)
+(init (caribou-properties "environment"))
