@@ -2,6 +2,7 @@
   (:use caribou.debug
         compojure.core
         [clojure.string :only (join)]
+        [clojure.walk :only (stringify-keys)]
         [ring.middleware file file-info stacktrace reload])
   (:require [caribou.model :as model]
             [caribou.db :as db]
@@ -39,26 +40,22 @@
         action-key (keyword (page :action))
         action (or (action-key (debug controller)) default-action)
         template (@template/templates (keyword (page :template)))
-        full (fn [params] ((debug template) (action (merge params {"yellow" 555 :page page}))))]
+        full (fn [params] (template (stringify-keys (action (assoc params :page page)))))]
     (dosync
      (alter actions merge {(keyword (page :action)) full}))
     (concat
      [[path action-key]]
-     (apply
-      concat
-      (map #(match-action-to-template % path) (page :children))))))
+     (mapcat #(match-action-to-template % path) (page :children)))))
 
 (defn make-route
   [[path action]]
-  `(GET ~path {~'params :params} ((~'actions ~action) ~'params)))
+  (GET path {params :params} ((actions action) params)))
 
 (defn generate-routes
   "given a tree of pages construct and return a list of corresponding routes."
   [pages]
   (let [routes (apply concat (map #(match-action-to-template % "") pages))]
     (doall (map make-route routes))))
-
-(def all-routes)
 
 (defn invoke-pages
   "call up the pages and arrange them into a tree."
@@ -68,18 +65,18 @@
     (dosync
      (alter pages (fn [a b] b) tree))))
 
-(defmacro invoke-routes
+(defn invoke-routes
   "invoke pages from the db and generate the routes based on them."
   []
   (template/load-templates (join config/file-sep [config/root "app" "templates"]))
   (sql/with-connection @config/db
     (let [_pages (invoke-pages)
-          generated (debug (generate-routes @pages))]
-      `(defroutes all-routes ~@generated))))
+          generated (doall (generate-routes @pages))]
+      (apply routes generated))))
 
 (defn dbinit []
   (model/init)
-  (invoke-routes))
+  (def all-routes (invoke-routes)))
 
 (defn init
   "initialize page related activities"
@@ -105,3 +102,5 @@
 
 (defn -main []
   (go))
+
+
