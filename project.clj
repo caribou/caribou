@@ -17,8 +17,8 @@
                  ;; [sandbar "0.4.0-SNAPSHOT"]
                  ;; [clojure-solr "0.2.0"]
                  ;; [org.clojars.serabe/rinzelight "0.0.3"]
-                 ;; [clj-logging-config "1.7.0"]
                  ;; -------------------------------------------------
+                 [clj-logging-config "1.9.5"]
                  [log4j "1.2.16"]]
   :dev-dependencies [[lein-ring "0.4.5"]
                      [backtype/autodoc "0.9.0-SNAPSHOT"]
@@ -28,9 +28,7 @@
                      [clj-yaml "0.3.0-SNAPSHOT"]
                      [lein-clojars "0.7.0"]
                      [geocoder-clj "0.0.3"]
-                     [lein-eclipse "1.0.0"]
-                     [clj-logging-config "1.7.0"]
-                     [log4j "1.2.16"]]
+                     [lein-eclipse "1.0.0"]]
   :jvm-opts ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n"]
   :aot [caribou.model]
   :ring {:handler caribou.api/app
