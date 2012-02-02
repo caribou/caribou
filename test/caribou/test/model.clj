@@ -15,6 +15,7 @@
 
 (deftest model-lifecycle-test
   (sql/with-connection @config/db
+    (invoke-models)
     (let [model (create :model
                         {:name "yellow"
                          :description "yellowness yellow yellow"
@@ -37,6 +38,7 @@
 
 (deftest model-interaction-test
   (sql/with-connection @config/db
+    (invoke-models)
     (try
       (let [yellow-row (create :model
                                {:name "yellow"
@@ -124,3 +126,7 @@
       (catch Exception e (util/render-exception e))
       (finally (if (db/table? :white) (destroy :model (-> @models :white :id)))))))
 
+;; (deftest migration-test
+;;   (sql/with-connection @config/db
+;;     (invoke-models)))
+    

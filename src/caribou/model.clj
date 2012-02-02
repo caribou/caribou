@@ -5,9 +5,12 @@
   (:require [caribou.db :as db]
             [clojure.java.jdbc :as sql]
             [geocoder.core :as geo]
+            [clojure.java.io :as io]
             [caribou.app.config :as config]))
 
+(import java.util.Date)
 (import java.text.SimpleDateFormat)
+
 (def simple-date-format (java.text.SimpleDateFormat. "MMMMMMMMM dd', 'yyyy HH':'mm"))
 (defn format-date
   "given a date object, return a string representing the canonical format for that date"
@@ -706,7 +709,14 @@
   (add-hook :model :before_create :add_base_fields (fn [env]
     (assoc-in env [:spec :fields] (concat (-> env :spec :fields) base-fields))))
 
-  ;; (add-hook :model :before_save :write_migrations (fn [env]
+  (add-hook :model :before_save :write_migrations (fn [env]
+    (if (and (not (-> env :spec :locked)) (not (= (-> env :opts :op) :migration)))
+      (let [now (.getTime (Date.))
+            code (str "(in-ns 'caribou.migration)\n(use 'caribou.model)\n\n(def migrate (fn []\n  ("
+                      (name (-> env :op)) " :model " (-> env :spec) " {:op :migration}))\n")]
+        (with-open [w (io/writer (str "app/migrations/migration-" now ".clj"))]
+          (.write w code))))
+    env))
                                                     
   (add-hook :model :after_create :invoke (fn [env]
     (if (-> env :content :nested)
@@ -803,20 +813,22 @@
   hence this will automatically forward to update if it finds an id in the spec.
   this means you can use this create method to create or update something,
   using the presence or absence of an id to signal which operation gets triggered."
-  [slug spec]
-  (if (spec :id)
-    (update slug (spec :id) spec)
-    (let [model (models (keyword slug))
-          values (reduce #(update-values %2 spec %1) {} (vals (dissoc (model :fields) :updated_at)))
-          env {:model model :values values :spec spec}
-          _save (run-hook slug :before_save env)
-          _create (run-hook slug :before_create _save)
-          content (db/insert slug (dissoc (_create :values) :updated_at))
-          merged (merge (_create :spec) content)
-          _after (run-hook slug :after_create (merge _create {:content merged}))
-          post (reduce #(post-update %2 %1) (_after :content) (vals (model :fields)))
-          _final (run-hook slug :after_save (merge _after {:content post}))]
-      (_final :content))))
+  ([slug spec]
+     (create slug spec {}))
+  ([slug spec opts]
+     (if (spec :id)
+       (update slug (spec :id) spec opts)
+       (let [model (models (keyword slug))
+             values (reduce #(update-values %2 spec %1) {} (vals (dissoc (model :fields) :updated_at)))
+             env {:model model :values values :spec spec :op :create :opts opts}
+             _save (run-hook slug :before_save env)
+             _create (run-hook slug :before_create _save)
+             content (db/insert slug (dissoc (_create :values) :updated_at))
+             merged (merge (_create :spec) content)
+             _after (run-hook slug :after_create (merge _create {:content merged}))
+             post (reduce #(post-update %2 %1) (_after :content) (vals (model :fields)))
+             _final (run-hook slug :after_save (merge _after {:content post}))]
+         (_final :content)))))
 
 (defn rally
   "pull a set of content up through the model system with the given options."
@@ -834,20 +846,22 @@
   id is the specific row to update.
   the spec contains all information about how to update this row,
   including nested specs which update across associations."
-  [slug id spec]
-  (let [model (models (keyword slug))
-        original (db/choose slug id)
-        values (reduce #(update-values %2 spec %1) {} (vals (model :fields)))
-        env {:model model :values values :spec spec :original original}
-        _save (run-hook slug :before_save env)
-        _update (run-hook slug :before_update _save)
-        success (db/update slug (_update :values) "id = %1" id)
-        content (db/choose slug id)
-        merged (merge (_update :spec) content)
-        _after (run-hook slug :after_update (merge _update {:content merged}))
-        post (reduce #(post-update %2 %1) (_after :content) (vals (model :fields)))
-        _final (run-hook slug :after_save (merge _after {:content post}))]
-    (_final :content)))
+  ([slug id spec]
+     (update slug id spec {}))
+  ([slug id spec opts]
+     (let [model (models (keyword slug))
+           original (db/choose slug id)
+           values (reduce #(update-values %2 spec %1) {} (vals (model :fields)))
+           env {:model model :values values :spec spec :original original :op :update :opts opts}
+           _save (run-hook slug :before_save env)
+           _update (run-hook slug :before_update _save)
+           success (db/update slug (_update :values) "id = %1" id)
+           content (db/choose slug id)
+           merged (merge (_update :spec) content)
+           _after (run-hook slug :after_update (merge _update {:content merged}))
+           post (reduce #(post-update %2 %1) (_after :content) (vals (model :fields)))
+           _final (run-hook slug :after_save (merge _after {:content post}))]
+       (_final :content))))
 
 (defn destroy
   "destroy the item of the given model with the given id."
