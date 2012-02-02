@@ -496,7 +496,7 @@
                     :link_id (row :id)
                     :dependent (row :dependent)})]
         (create :model
-                {:name (join " " (sort (row :name) reciprocal-name))
+                {:name (join-table-name (row :name) reciprocal-name)
                  :slug join-name
                  :join_model true
                  :fields
@@ -515,7 +515,7 @@
   (cleanup-field [this]
     (try
       (let []
-        (destroy :model )
+        (destroy :model ) ;; here is where we stopped
         (destroy :field (-> env :link :id)))
       (catch Exception e (str e))))
 
@@ -687,6 +687,7 @@
 (defn alter-models
   "inserts a single model into the hash of cached model records."
   [model]
+  (debug (model :slug))
   (dosync
    (alter models merge {(model :slug) model (model :id) model})))
 

@@ -11,7 +11,7 @@
   (sql/with-connection @config/db
     (let [model (db/query "select * from model where id = 1")
           invoked (invoke-model (first model))]
-      (is (= "name" (-> (debug invoked) :fields :name :row :slug))))))
+      (is (= "name" (-> invoked :fields :name :row :slug))))))
 
 (deftest model-lifecycle-test
   (sql/with-connection @config/db
@@ -34,7 +34,6 @@
 
       (is (not (db/table? :yellow)))
       (is (not (models :yellow))))))
-
 
 (deftest model-interaction-test
   (sql/with-connection @config/db
@@ -106,9 +105,9 @@
        (if (db/table? :purple) (destroy :model (-> @models :purple :id)))
        (if (db/table? :zap) (destroy :model (-> @models :zap :id)))))))
 
-
 (deftest nested-model-test
   (sql/with-connection @config/db
+    (invoke-models)
     (try
       (let [white (create :model {:name "white" :nested true :fields [{:name "grey" :type "string"}]})
             aaa (create :white {:grey "obobob"})
