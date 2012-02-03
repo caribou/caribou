@@ -1,5 +1,7 @@
 (ns caribou.util
-  (:use [clojure.string :only (split join capitalize)]))
+  (:use caribou.debug)
+  (:require [clojure.string :as string]
+            [clojure.java.io :as io]))
 
 (import java.sql.SQLException)
 (import java.io.File)
@@ -8,10 +10,10 @@
   (reduce #(assoc %1 (f %2) %2) {} q))
 
 (defn slugify [s]
-  (.toLowerCase (join "_" (re-seq #"[a-zA-Z]+" s))))
+  (.toLowerCase (string/join "_" (re-seq #"[a-zA-Z]+" s))))
 
 (defn titleize [s]
-  (join " " (map capitalize (split s #"[^a-zA-Z]+"))))
+  (string/join " " (map string/capitalize (string/split s #"[^a-zA-Z]+"))))
 
 (defn render-exception [e]
   (let [cause (.getCause e)]
@@ -26,3 +28,10 @@
   (let [filename (.getName file)]
   (.toLowerCase (.substring filename (.lastIndexOf filename ".")))
 ))
+
+(defn load-path [path visit]
+  (doseq [file (file-seq (io/file path))]
+    (let [filename (.toString file)
+          subname (string/replace filename (str path "/") "")]
+      (if (.isFile file)
+        (visit file subname)))))

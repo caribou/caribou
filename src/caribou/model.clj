@@ -712,8 +712,8 @@
   (add-hook :model :before_save :write_migrations (fn [env]
     (if (and (not (-> env :spec :locked)) (not (= (-> env :opts :op) :migration)))
       (let [now (.getTime (Date.))
-            code (str "(in-ns 'caribou.migration)\n(use 'caribou.model)\n\n(def migrate (fn []\n  ("
-                      (name (-> env :op)) " :model " (-> env :spec) " {:op :migration}))\n")]
+            code (str "(use 'caribou.model)\n\n(def migrate (fn []\n  ("
+                      (name (-> env :op)) " :model " (-> env :spec) " {:op :migration})))\n")]
         (with-open [w (io/writer (str "app/migrations/migration-" now ".clj"))]
           (.write w code))))
     env))
