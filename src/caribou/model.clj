@@ -230,7 +230,7 @@
     (update :model (row :model_id)
             {:fields [{:name (titleize (str (row :slug) "_id"))
                        :type "integer"
-                       :editable false}]}))
+                       :editable false}]} {:op :migration}))
   (cleanup-field [this]
     (let [fields ((models (row :model_id)) :fields)
           id (keyword (str (row :slug) "_id"))]
@@ -267,7 +267,7 @@
     (update :model (row :model_id)
             {:fields [{:name (titleize (str (row :slug) "_id"))
                        :type "integer"
-                       :editable false}]}))
+                       :editable false}]} {:op :migration}))
   (cleanup-field [this]
     (let [fields ((models (row :model_id)) :fields)
           id (keyword (str (row :slug) "_id"))]
@@ -400,7 +400,7 @@
            :editable false}
           {:name (titleize (str (row :slug) "_position"))
            :type "integer"
-           :editable false}]})))
+           :editable false}]} {:op :migration})))
 
   (cleanup-field [this]
     (let [fields ((models (row :model_id)) :fields)
@@ -445,7 +445,7 @@
         {:fields
          [{:name (titleize (str (row :slug) "_id"))
            :type "integer"
-           :editable false}]})))
+           :editable false}]} {:op :migration})))
 
   (cleanup-field [this]
     (let [fields ((models (row :model_id)) :fields)
@@ -512,7 +512,7 @@
                    :type "part"
                    :dependent true
                    :reciprocal_name (str (spec :name) " Join")
-                   :target_id (row :model_id)}]})
+                   :target_id (row :model_id)}]} {:op :migration})
         (db/update :field {:link_id (-> link :row :id)} "id = %1" (row :id)))))
 
   (cleanup-field [this]
