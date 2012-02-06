@@ -84,8 +84,8 @@
   (sql/with-connection @config/db (dbinit)))
 
 (defn start
-  ([port] (start port {}))
-  ([port user-db]
+  ([port ssl-port] (start port ssl-port {}))
+  ([port ssl-port user-db]
      (let [db (merge @config/db user-db)]
        (sql/with-connection db (dbinit))
        (def app (-> all-routes
@@ -97,8 +97,9 @@
        (ring/run-jetty (var app) {:port port :join? false}))))
 
 (defn go []
-  (let [port (Integer/parseInt (or (@config/app :pages-port) "22212"))]
-    (start port @config/db)))
+  (let [port (Integer/parseInt (or (@config/app :pages-port) "22212"))
+        ssl-port (Integer/parseInt (or (@config/app :pages-ssl-port) "22242"))]
+    (start port ssl-port @config/db)))
 
 (defn -main []
   (go))

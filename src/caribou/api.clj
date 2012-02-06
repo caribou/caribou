@@ -11,6 +11,7 @@
   (:use caribou.debug)
   (:require [caribou.db :as db]
             [caribou.model :as model]
+            [caribou.account :as account]
             [caribou.util :as util]
             [caribou.app.config :as config]
             [ring.adapter.jetty :as ring]
@@ -101,18 +102,20 @@
 (defmacro action [slug path-args expr]
   `(defn ~slug [~(first path-args)]
      (log :action (str ~(name slug) " => " ~(first path-args)))
-     (let ~(vec (apply concat (map (fn [p] [`~p `(~(first path-args) ~(keyword p))]) (rest path-args))))
-       (try
-         (let [result# ~expr
-               format# (~(first path-args) :format)
-               handler# (or (format-handlers (keyword format#)) (format-handlers :json))]
-           (handler# result# ~(first path-args)))
-         (catch Exception e#
-           (log :error (str "error rendering /" (join "/" [~@(rest path-args)]) ": "
-                     (util/render-exception e#)))
-           (generate-string
-           ;; (json-str
-            ~(reduce #(assoc %1 (keyword %2) %2) error path-args)))))))
+     (if (any-role-granted? :admin)
+       (let ~(vec (apply concat (map (fn [p] [`~p `(~(first path-args) ~(keyword p))]) (rest path-args))))
+         (try
+           (let [result# ~expr
+                 format# (~(first path-args) :format)
+                 handler# (or (format-handlers (keyword format#)) (format-handlers :json))]
+             (handler# result# ~(first path-args)))
+           (catch Exception e#
+             (log :error (str "error rendering /" (join "/" [~@(rest path-args)]) ": "
+                              (util/render-exception e#)))
+             (generate-string
+              ;; (json-str
+              ~(reduce #(assoc %1 (keyword %2) %2) error path-args)))))
+       (redirect "/permission-denied"))))
 
 (defn wrap-response [response meta]
   {:meta (merge {:status "200" :msg "OK"} meta)
@@ -226,7 +229,18 @@
         response (render slug content params)]
     (wrap-response response {:type slug})))
 
-(action login [params] {:status "login"})
+(defn permission-denied [params]
+  params)
+
+(defn login [params]
+  (let [account (first (model/rally :account {:where (str "email = '" (db/zap (params :email)) "'")}))
+        crypted (account/crypt (params :password))]
+    (if (and (debug account) (= (debug crypted) (debug (account :crypted_password))))
+      (do
+        (session-put! :current-account account)
+        ;; (str "bobobobobobob" (account :email)))
+        (redirect "/"))
+      (merge error {:error "login failed"}))))
 
 ;; routes --------------------------------------------------
 
@@ -235,7 +249,8 @@
   (GET  "/" {params :params} (home params))
   (POST "/upload" {params :params} (upload params))
 
-  (GET  "/login" {params :params} (login params))
+  (GET  "/permission-denied" {params :params} (permission-denied params))
+  (POST "/login" {params :params} (login params))
   (GET  "/:slug.:format" {params :params} (list-all params))
   (POST "/:slug.:format" {params :params} (create-content params))
   (GET  "/:slug/:id.:format" {params :params} (item-detail params))
@@ -255,7 +270,7 @@
 (defn authorize
   [request]
   (let [uri (:uri request)
-        user (session-get :current-user)]
+        user (session-get :current-account)]
     (if (debug user)
       {:name (user :name) :roles #{:admin}}
       (do
