@@ -1,8 +1,13 @@
 (ns caribou.api
-  (:use compojure.core)
-  (:use [clojure.string :only (join split)])
-  (:use [cheshire.core :only (generate-string encode)])
-  (:use [cheshire.custom :only (add-encoder)])
+  (:use compojure.core
+        [clojure.string :only (join split)]
+        [cheshire.core :only (generate-string encode)]
+        [cheshire.custom :only (add-encoder)]
+        [ring.util.response :only (redirect)]
+        [sandbar.auth :only
+         (ensure-any-role-if any-role-granted? current-username logout! with-security with-secure-channel)]
+        [sandbar.stateful-session :only
+         (wrap-stateful-session session-put! session-get session-delete-key!)])
   (:use caribou.debug)
   (:require [caribou.db :as db]
             [caribou.model :as model]
@@ -221,6 +226,8 @@
         response (render slug content params)]
     (wrap-response response {:type slug})))
 
+(action login [params] {:status "login"})
+
 ;; routes --------------------------------------------------
 
 (defroutes main-routes
@@ -228,6 +235,7 @@
   (GET  "/" {params :params} (home params))
   (POST "/upload" {params :params} (upload params))
 
+  (GET  "/login" {params :params} (login params))
   (GET  "/:slug.:format" {params :params} (list-all params))
   (POST "/:slug.:format" {params :params} (create-content params))
   (GET  "/:slug/:id.:format" {params :params} (item-detail params))
@@ -244,16 +252,43 @@
   (route/resources "/")
   (route/not-found "NONONONONONON"))
 
-(def app (db/wrap-db (handler/site main-routes) @config/db))
+(defn authorize
+  [request]
+  (let [uri (:uri request)
+        user (session-get :current-user)]
+    (if (debug user)
+      {:name (user :name) :roles #{:admin}}
+      (do
+        (session-put! :redirect-uri uri)
+        (redirect "/permission-denied")))))
 
-(defn start [port]
-  (ring/run-jetty (var app) {:port (or port 33333) :join? false}))
+(def security-config
+  [#"/login.*" :ssl
+   #".*.css|.*.png" :any-channel
+   #".*" :nossl])
+
+(def app (-> main-routes
+             (with-security authorize)
+             handler/site
+             wrap-stateful-session
+             (db/wrap-db @config/db)
+             (with-secure-channel security-config (@config/app :api-port) (@config/app :api-ssl-port))))
+
+(defn start [port ssl-port]
+  (ring/run-jetty
+   (var app)
+   {:port port :join? false
+    :ssl? true :ssl-port ssl-port
+    :keystore "caribou.keystore"
+    :key-password "caribou"}))
 
 (defn init [] )
 
 (defn go []
-  (let [port (Integer/parseInt (or (System/getenv "PORT") "33333"))]
-    (start port)))
+  (let [port (Integer/parseInt (or (@config/app :api-port) "22222"))
+        ssl-port (Integer/parseInt (or (@config/app :api-ssl-port) "22223"))]
+    (start port ssl-port)))
 
 (defn -main []
   (go))
+

@@ -1,5 +1,5 @@
-(in-ns 'caribou.migration)
-(use 'caribou.model)
+(require '[caribou.db :as db])
+(require '[caribou.model :as model])
 
 (defn create-model-model []
   (db/insert
@@ -327,12 +327,12 @@
     (db/update :field {:link_id (collection :id) :target_id (model :id)} "id = %1" (part :id))
     (db/update :field {:link_id (part :id) :target_id (field :id)} "id = %1" (collection :id))))
 
-(def migrate (fn []
+(defn migrate
+  []
   (create-model-model)
   (create-model-fields)
   (create-field-model)
   (create-field-fields)
-  (forge-link)
-  (invoke-models)))
+  (forge-link))
 
-
+(migrate)

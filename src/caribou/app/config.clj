@@ -1,15 +1,18 @@
 (ns caribou.app.config
   (:use [caribou.debug]
+        [clojure.walk :only (keywordize-keys)]
         [clojure.string :only (join)])
   (:require [clj-yaml.core :as yaml]
             [clojure.java.io :as io]))
 
-(def caribou-properties 
-  (into {} (doto (java.util.Properties.)
-    (.load
-      (-> (Thread/currentThread)
-          (.getContextClassLoader)
-          (.getResourceAsStream "caribou.properties"))))))
+(def app
+  (ref
+   (keywordize-keys
+    (into {} (doto (java.util.Properties.)
+               (.load
+                (-> (Thread/currentThread)
+                    (.getContextClassLoader)
+                    (.getResourceAsStream "caribou.properties"))))))))
 
 (def db (ref {}))
 (def root (.getAbsolutePath (io/file "")))
@@ -46,4 +49,4 @@
     (dosync
       (alter db merge db-config))))
 
-(init (caribou-properties "environment"))
+(init (app :environment))

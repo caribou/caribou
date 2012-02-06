@@ -1,4 +1,4 @@
-(in-ns 'caribou.migration)
+(require '[caribou.db :as db])
 
 (defn create-migration-table []
   (db/create-table
@@ -50,8 +50,10 @@
    [:created_at "timestamp with time zone" "NOT NULL" "DEFAULT current_timestamp"]
    [:updated_at "timestamp with time zone" "NOT NULL" "DEFAULT current_timestamp"]))
 
-(def migrate (fn []
+(defn migrate
+  []
   (create-migration-table)
   (create-model-table)
-  (create-field-table)))
+  (create-field-table))
 
+(migrate)

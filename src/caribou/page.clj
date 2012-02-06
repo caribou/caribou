@@ -94,10 +94,10 @@
                     (wrap-stacktrace)
                     (handler/site)
                     (db/wrap-db db)))
-       (ring/run-jetty (var app) {:port (or port 22212) :join? false}))))
+       (ring/run-jetty (var app) {:port port :join? false}))))
 
 (defn go []
-  (let [port (Integer/parseInt (or (System/getenv "PORT") "22212"))]
+  (let [port (Integer/parseInt (or (@config/app :pages-port) "22212"))]
     (start port @config/db)))
 
 (defn -main []

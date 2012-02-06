@@ -1,6 +1,4 @@
-(in-ns 'caribou.migration)
-
-(invoke-models)
+(require '[caribou.model :as model])
 
 (defn lock [fields]
   (map #(assoc % :locked true) fields))
@@ -17,9 +15,19 @@
                           {:name "Action" :type "string"}
                           {:name "Template" :type "string"}])})
 
+(def account {:name "Account"
+              :description "representation of a person with a role and privileges"
+              :position 4
+              :locked true
+              :fields (lock [{:name "First Name" :type "string"}
+                             {:name "Last Name" :type "string"}
+                             {:name "Handle" :type "string"}
+                             {:name "Email" :type "string"}
+                             {:name "Crypted Password" :type "string"}])})
+
 (def view {:name "View"
            :description "a composition of content facets"
-           :position 4
+           :position 5
            :locked true
            :fields (lock [{:name "Name" :type "string"}
                           {:name "Description" :type "text"}])})
@@ -74,12 +82,14 @@
                               {:name "Lng" :type "decimal"}])})
 
 (def incubating
-  [page view locale asset site domain location])
+  [page account view locale asset site domain location])
 
 (defn spawn-models []
   (doall (map #(model/create :model %) incubating)))
 
-(def migrate
-  (fn []
-    (spawn-models)))
+(defn migrate
+  []
+  (spawn-models))
+
+(migrate)
 

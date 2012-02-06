@@ -1,6 +1,4 @@
-(in-ns 'caribou.migration)
 (use 'caribou.model)
-(use 'caribou.debug)
 
 (defn build-links []
   (invoke-models)
@@ -10,8 +8,12 @@
                      :target_id ((models :domain) :id)}
                     {:name "Pages"
                      :type "collection"
-                     :target_id ((models :page) :id)}]}))
+                     :target_id ((models :page) :id)}]}
+          {:op :migration}))
 
-(def migrate (fn []
-               (build-links)))
+(defn migrate
+  []
+  (build-links))
+
+(migrate)
 
