@@ -102,7 +102,7 @@
 (defmacro action [slug path-args expr]
   `(defn ~slug [~(first path-args)]
      (log :action (str ~(name slug) " => " ~(first path-args)))
-     (if (any-role-granted? :admin)
+     ;; (if (any-role-granted? :admin)
        (let ~(vec (apply concat (map (fn [p] [`~p `(~(first path-args) ~(keyword p))]) (rest path-args))))
          (try
            (let [result# ~expr
@@ -115,7 +115,10 @@
              (generate-string
               ;; (json-str
               ~(reduce #(assoc %1 (keyword %2) %2) error path-args)))))
-       (redirect "/permission-denied"))))
+       ))
+       ;; (generate-string
+       ;;  (assoc error :meta {:status 403 :msg "you do not have access to this resource"})))))
+       ;; (redirect "/permission-denied"))))
 
 (defn wrap-response [response meta]
   {:meta (merge {:status "200" :msg "OK"} meta)
@@ -125,7 +128,7 @@
   "if given a map, convert to a seq containing only its values.
   otherwise, leave it alone"
   [col]
-  (try 
+  (try
     (cond
      (map? col) (let [int-test (doall (map #(Integer/parseInt (name %)) (keys col)))]
                   (vals col))
