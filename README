@@ -1,7 +1,3 @@
-# Interface mark III ----------
-
-model relation interaction kernel
-
 ## Setup ----------------------
 
 Download and install postgresql: http://www.postgresql.org/download/
