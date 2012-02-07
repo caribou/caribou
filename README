@@ -6,14 +6,13 @@ model relation interaction kernel
 
 Download and install postgresql: http://www.postgresql.org/download/
 Download and install leiningen: https://github.com/technomancy/leiningen
-Download and install nginx: http://nginx.org/en/download.html
 
 ## Usage ----------------------
 
 At the command line:
 
   lein deps
-  lein migrate
-  lein run -m caribou.core
+  lein bootstrap caribou
+  lein run -m caribou.api
 
 
