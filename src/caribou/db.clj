@@ -189,6 +189,10 @@
   (drop-database name)
   (create-database name))
 
+(defn call
+  [f]
+  (sql/with-connection @config/db (f)))
+
 (defn wrap-db
   [handler db & [opts]]
   (fn [request]

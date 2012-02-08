@@ -28,12 +28,10 @@
 (defn load-user-migrations [path]
   (util/load-path path (fn [file filename]
     (load-file (.toString file))
-    (migrate)
     (db/insert :migration {:name filename}))))
 
 (defn run-migration [migration]
-  (load (str "caribou/migrations/" migration))
-  (migrate)
+  (load-file (str "src/caribou/migrations/" migration ".clj"))
   (db/insert :migration {:name migration}))
 
 (defn run-migrations [db-name]

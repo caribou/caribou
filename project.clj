@@ -12,9 +12,9 @@
                  [geocoder-clj "0.0.3"]
                  [clojure-csv/clojure-csv "1.3.2"]
                  [org.freemarker/freemarker "2.3.18"]
+                 [antler/sandbar "0.4.0-SNAPSHOT"]
                  ;; --------- THESE DEPS ARE NOT ON 1.3 -------------
                  ;; [aleph "0.2.0-rc2"]
-                 ;; [sandbar "0.4.0-SNAPSHOT"]
                  ;; [clojure-solr "0.2.0"]
                  ;; [org.clojars.serabe/rinzelight "0.0.3"]
                  ;; -------------------------------------------------

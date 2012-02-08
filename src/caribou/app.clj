@@ -3,9 +3,14 @@
             [caribou.page :as page]))
 
 (defn run-api
-  [port]
-  (api/start port))
+  []
+  (api/go))
 
 (defn run-pages
-  [port]
-  (page/start port))
+  []
+  (page/go))
+
+(defn launch
+  []
+  (run-api)
+  (run-pages))

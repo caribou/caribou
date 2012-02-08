@@ -1,11 +1,17 @@
 (ns caribou.api
-  (:use compojure.core)
-  (:use [clojure.string :only (join split)])
-  (:use [cheshire.core :only (generate-string encode)])
-  (:use [cheshire.custom :only (add-encoder)])
+  (:use compojure.core
+        [clojure.string :only (join split)]
+        [cheshire.core :only (generate-string encode)]
+        [cheshire.custom :only (add-encoder)]
+        [ring.util.response :only (redirect)]
+        [sandbar.auth :only
+         (ensure-any-role-if any-role-granted? current-username logout! with-security with-secure-channel)]
+        [sandbar.stateful-session :only
+         (wrap-stateful-session session-put! session-get session-delete-key!)])
   (:use caribou.debug)
   (:require [caribou.db :as db]
             [caribou.model :as model]
+            [caribou.account :as account]
             [caribou.util :as util]
             [caribou.app.config :as config]
             [ring.adapter.jetty :as ring]
@@ -96,18 +102,23 @@
 (defmacro action [slug path-args expr]
   `(defn ~slug [~(first path-args)]
      (log :action (str ~(name slug) " => " ~(first path-args)))
-     (let ~(vec (apply concat (map (fn [p] [`~p `(~(first path-args) ~(keyword p))]) (rest path-args))))
-       (try
-         (let [result# ~expr
-               format# (~(first path-args) :format)
-               handler# (or (format-handlers (keyword format#)) (format-handlers :json))]
-           (handler# result# ~(first path-args)))
-         (catch Exception e#
-           (log :error (str "error rendering /" (join "/" [~@(rest path-args)]) ": "
-                     (util/render-exception e#)))
-           (generate-string
-           ;; (json-str
-            ~(reduce #(assoc %1 (keyword %2) %2) error path-args)))))))
+     ;; (if (any-role-granted? :admin)
+       (let ~(vec (apply concat (map (fn [p] [`~p `(~(first path-args) ~(keyword p))]) (rest path-args))))
+         (try
+           (let [result# ~expr
+                 format# (~(first path-args) :format)
+                 handler# (or (format-handlers (keyword format#)) (format-handlers :json))]
+             (handler# result# ~(first path-args)))
+           (catch Exception e#
+             (log :error (str "error rendering /" (join "/" [~@(rest path-args)]) ": "
+                              (util/render-exception e#)))
+             (generate-string
+              ;; (json-str
+              ~(reduce #(assoc %1 (keyword %2) %2) error path-args)))))
+       ))
+       ;; (generate-string
+       ;;  (assoc error :meta {:status 403 :msg "you do not have access to this resource"})))))
+       ;; (redirect "/permission-denied"))))
 
 (defn wrap-response [response meta]
   {:meta (merge {:status "200" :msg "OK"} meta)
@@ -117,7 +128,7 @@
   "if given a map, convert to a seq containing only its values.
   otherwise, leave it alone"
   [col]
-  (try 
+  (try
     (cond
      (map? col) (let [int-test (doall (map #(Integer/parseInt (name %)) (keys col)))]
                   (vals col))
@@ -221,6 +232,19 @@
         response (render slug content params)]
     (wrap-response response {:type slug})))
 
+(defn permission-denied [params]
+  params)
+
+(defn login [params]
+  (let [account (first (model/rally :account {:where (str "email = '" (db/zap (params :email)) "'")}))
+        crypted (account/crypt (params :password))]
+    (if (and (debug account) (= (debug crypted) (debug (account :crypted_password))))
+      (do
+        (session-put! :current-account account)
+        ;; (str "bobobobobobob" (account :email)))
+        (redirect "/"))
+      (merge error {:error "login failed"}))))
+
 ;; routes --------------------------------------------------
 
 (defroutes main-routes
@@ -228,6 +252,8 @@
   (GET  "/" {params :params} (home params))
   (POST "/upload" {params :params} (upload params))
 
+  (GET  "/permission-denied" {params :params} (permission-denied params))
+  (POST "/login" {params :params} (login params))
   (GET  "/:slug.:format" {params :params} (list-all params))
   (POST "/:slug.:format" {params :params} (create-content params))
   (GET  "/:slug/:id.:format" {params :params} (item-detail params))
@@ -244,16 +270,43 @@
   (route/resources "/")
   (route/not-found "NONONONONONON"))
 
-(def app (db/wrap-db (handler/site main-routes) @config/db))
+(defn authorize
+  [request]
+  (let [uri (:uri request)
+        user (session-get :current-account)]
+    (if (debug user)
+      {:name (user :name) :roles #{:admin}}
+      (do
+        (session-put! :redirect-uri uri)
+        (redirect "/permission-denied")))))
 
-(defn start [port]
-  (ring/run-jetty (var app) {:port (or port 33333) :join? false}))
+(def security-config
+  [#"/login.*" :ssl
+   #".*.css|.*.png" :any-channel
+   #".*" :nossl])
+
+(def app (-> main-routes
+             (with-security authorize)
+             handler/site
+             wrap-stateful-session
+             (db/wrap-db @config/db)
+             (with-secure-channel security-config (@config/app :api-port) (@config/app :api-ssl-port))))
+
+(defn start [port ssl-port]
+  (ring/run-jetty
+   (var app)
+   {:port port :join? false
+    :ssl? true :ssl-port ssl-port
+    :keystore "caribou.keystore"
+    :key-password "caribou"}))
 
 (defn init [] )
 
 (defn go []
-  (let [port (Integer/parseInt (or (System/getenv "PORT") "33333"))]
-    (start port)))
+  (let [port (Integer/parseInt (or (@config/app :api-port) "22222"))
+        ssl-port (Integer/parseInt (or (@config/app :api-ssl-port) "22223"))]
+    (start port ssl-port)))
 
 (defn -main []
   (go))
+

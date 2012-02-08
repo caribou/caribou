@@ -712,8 +712,8 @@
   (add-hook :model :before_save :write_migrations (fn [env]
     (if (and (not (-> env :spec :locked)) (not (= (-> env :opts :op) :migration)))
       (let [now (.getTime (Date.))
-            code (str "(use 'caribou.model)\n\n(def migrate (fn []\n  ("
-                      (name (-> env :op)) " :model " (-> env :spec) " {:op :migration})))\n")]
+            code (str "(use 'caribou.model)\n\n(defn migrate []\n  ("
+                      (name (-> env :op)) " :model " (-> env :spec) " {:op :migration}))\n(migrate)\n")]
         (with-open [w (io/writer (str "app/migrations/migration-" now ".clj"))]
           (.write w code))))
     env))
@@ -838,8 +838,9 @@
            order (or (opts :order) "asc")
            order-by (or (opts :order_by) "position")
            limit (str (or (opts :limit) 30))
-           offset (str (or (opts :offset) 0))]
-       (doall (map #(from model % opts) (db/query "select * from %1 order by %2 %3 limit %4 offset %5" slug order-by order limit offset))))))
+           offset (str (or (opts :offset) 0))
+           where (str (or (opts :where) "1=1"))]
+       (doall (map #(from model % opts) (db/query "select * from %1 where %2 order by %3 %4 limit %5 offset %6" slug where order-by order limit offset))))))
 
 (defn update
   "slug represents the model to be updated.
