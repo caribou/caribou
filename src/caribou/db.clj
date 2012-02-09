@@ -97,7 +97,9 @@
 (defn choose
   "pull just the record with the given id from the given table"
   [table id]
-  (first (query "select * from %1 where id = %2" (zap (name table)) (zap (str id)))))
+  (if id
+    (first (query "select * from %1 where id = %2" (zap (name table)) (zap (str id))))
+    nil))
 
 ;; table operations -------------------------------------------
 

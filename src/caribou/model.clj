@@ -15,7 +15,8 @@
 (defn format-date
   "given a date object, return a string representing the canonical format for that date"
   [date]
-  (.format simple-date-format date))
+  (if date
+    (.format simple-date-format date)))
 
 (defprotocol Field
   "a protocol for expected behavior of all model fields"
@@ -196,7 +197,8 @@
   (post-update [this content] content)
   (pre-destroy [this content] content)
   (field-from [this content opts] (content (keyword (row :slug))))
-  (render [this content opts] (format-date (field-from this content opts))))
+  (render [this content opts]
+    (format-date (field-from this content opts))))
 
 ;; forward reference for Fields that need them
 (def make-field)
@@ -240,9 +242,12 @@
   (post-update [this content] content)
   (pre-destroy [this content] content)
   (field-from [this content opts]
-    (let [asset (or (db/choose :asset (content (keyword (str (row :slug) "_id")))) {})]
+    (let [asset-id (content (keyword (str (row :slug) "_id")))
+          asset (or (db/choose :asset asset-id) {})]
       (assoc asset :path (asset-path asset))))
-  (render [this content opts] (model-render (models :asset) (field-from this content opts) {})))
+  (render [this content opts]
+    (let [asset (field-from this content opts)]
+      (model-render (models :asset) asset {}))))
 
 (defn full-address [address]
   (join " " [(address :address)

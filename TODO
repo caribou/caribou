@@ -2,7 +2,7 @@
 
 migrate and bootstrap don't work from project
 empty strings save as NULL
-
+remove need to reload server!
 AUTH
 enable links between models
 add image/file handling (image cache)
