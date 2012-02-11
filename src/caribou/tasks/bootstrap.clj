@@ -1,4 +1,4 @@
-(ns leiningen.bootstrap
+(ns caribou.tasks.bootstrap
   (:require [clojure.java.jdbc :as sql]
             [caribou.db :as db]
             [caribou.app.config :as config]
@@ -8,3 +8,6 @@
   (db/rebuild-database name)
   (sql/with-connection @config/db
     (mm/run-migrations name)))
+
+(defn -main [name]
+  (bootstrap name))

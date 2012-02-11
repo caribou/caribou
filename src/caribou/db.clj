@@ -173,7 +173,10 @@
       (with-open [s (.createStatement (sql/connection))]
         (.addBatch s (str "drop database " (zap name)))
         (seq (.executeBatch s))))
-    (catch Exception e (println (str "database " name " doesn't exist: " (.getNextException e))))))
+    (catch Exception e
+      (try
+        (println (str "database " name " doesn't exist: " (.getNextException (debug e))))
+        (catch Exception e (println e))))))
 
 (defn create-database
   "create a database of the given name"

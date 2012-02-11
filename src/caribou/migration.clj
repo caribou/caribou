@@ -31,7 +31,7 @@
     (db/insert :migration {:name filename}))))
 
 (defn run-migration [migration]
-  (load-file (str "src/caribou/migrations/" migration ".clj"))
+  (load-file (str "caribou/migrations/" migration ".clj"))
   (db/insert :migration {:name migration}))
 
 (defn run-migrations [db-name]

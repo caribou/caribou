@@ -1,10 +1,11 @@
 * BASICS *
 
-migrate and bootstrap don't work from project
+when loading templates or controllers, check for errors!
 empty strings save as NULL
-remove need to reload server!
+move migrate and bootstrap to caribou shell command
 AUTH
-enable links between models
+remove need to reload server!
+enable links between models (mostly done)
 add image/file handling (image cache)
 search
 
