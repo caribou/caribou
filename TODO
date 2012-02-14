@@ -2,6 +2,7 @@
 
 when loading templates or controllers, check for errors!
 empty strings save as NULL
+empty images write out empty path!
 move migrate and bootstrap to caribou shell command
 AUTH
 remove need to reload server!

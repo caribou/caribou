@@ -718,7 +718,7 @@
     (if (and (not (-> env :spec :locked)) (not (= (-> env :opts :op) :migration)))
       (let [now (.getTime (Date.))
             code (str "(use 'caribou.model)\n\n(defn migrate []\n  ("
-                      (name (-> env :op)) " :model " (-> env :spec) " {:op :migration}))\n(migrate)\n")]
+                      (name (-> env :op)) " :model " (list 'quote (-> env :spec)) " {:op :migration}))\n(migrate)\n")]
         (with-open [w (io/writer (str "app/migrations/migration-" now ".clj"))]
           (.write w code))))
     env))
