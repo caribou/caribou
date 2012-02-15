@@ -222,7 +222,10 @@
   (str "assets/" (pad-break-id (asset :id))))
 
 (defn asset-path [asset]
-  (str (asset-dir asset) "/" (asset :filename)))
+  (if (and asset (asset :filename))
+    (str (asset-dir asset) "/"
+         (asset :filename))
+    ""))
 
 (defrecord AssetField [row env]
   Field
