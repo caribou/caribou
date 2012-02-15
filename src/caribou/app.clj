@@ -14,3 +14,6 @@
   []
   (run-api)
   (run-pages))
+
+(defn -main []
+  (launch))
