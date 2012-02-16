@@ -3,6 +3,8 @@
   :dependencies [[org.clojure/clojure "1.3.0"]
                  [org.clojure/java.jdbc "0.0.6"]
                  [postgresql/postgresql "8.4-702.jdbc4"]
+                 [clj-time "0.3.6"]
+                 [clj-http "0.3.2"]
                  [compojure "0.6.4"]
                  [hiccup "0.3.6"]
                  [cheshire "2.0.2"]
