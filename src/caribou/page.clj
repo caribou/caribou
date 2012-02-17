@@ -6,7 +6,7 @@
         [ring.middleware file file-info stacktrace reload])
   (:require [caribou.model :as model]
             [caribou.db :as db]
-            [caribou.app.controller :as app]
+            [caribou.app.controller :as controller]
             [caribou.app.template :as template]
             [caribou.app.view :as view]
             [clojure.string :as string]
@@ -32,15 +32,31 @@
   (let [template (or (@template/templates (keyword (env :template))) default-template)]
     (template env)))
 
+(defn retrieve-action
+  [controller-key action-key]
+  (let [controller (@controller/controllers controller-key)
+        action (or (action-key controller) default-action)]
+    action))
+
+(defn generate-action
+  [page template controller-key action-key]
+  (if (= (@config/app :environment) "development")
+    (fn [params]
+      (do
+        (controller/load-controllers "app/controllers")
+        (let [action (retrieve-action controller-key action-key)]
+          (template (stringify-keys (action (assoc params :page page)))))))
+    (let [action (retrieve-action controller-key action-key)]
+      (fn [params] (template (stringify-keys (action (assoc params :page page))))))))
+
 (defn match-action-to-template
   "make a single route for a single page, given its overarching path (above-path)"
   [page above-path]
   (let [path (str above-path "/" (name (page :path)))
-        controller (@app/controllers (keyword (page :controller)))
+        controller-key (keyword (page :controller))
         action-key (keyword (page :action))
-        action (or (action-key (debug controller)) default-action)
         template (@template/templates (keyword (page :template)))
-        full (fn [params] (template (stringify-keys (action (assoc params :page page)))))]
+        full (generate-action page template controller-key action-key)]
     (dosync
      (alter actions merge {(keyword (page :action)) full}))
     (concat
@@ -74,20 +90,21 @@
           generated (doall (generate-routes @pages))]
       (apply routes generated))))
 
-(defn dbinit []
+(defn page-init []
   (model/init)
+  (controller/load-controllers "app/controllers")
   (def all-routes (invoke-routes)))
 
 (defn init
   "initialize page related activities"
   []
-  (sql/with-connection @config/db (dbinit)))
+  (sql/with-connection @config/db (page-init)))
 
 (defn start
   ([port ssl-port] (start port ssl-port {}))
   ([port ssl-port user-db]
      (let [db (merge @config/db user-db)]
-       (sql/with-connection db (dbinit))
+       (sql/with-connection db (page-init))
        (def app (-> all-routes
                     (wrap-file (join config/file-sep [config/root "public"]))
                     (wrap-file-info)
