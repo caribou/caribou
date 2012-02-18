@@ -5,6 +5,8 @@
             [clojure.java.jdbc :as sql]
             [caribou.app.config :as config]))
 
+(import java.util.regex.Matcher)
+
 (defn zap
   "quickly sanitize a potentially dirty string in preparation for a sql query"
   [s]
@@ -18,10 +20,11 @@
   [pred args]
   (letfn [(rep [s i] (.replaceAll s (str "%" (inc i))
                                   (let [item (nth args i)]
-                                    (cond
-                                     (keyword? item) (name item)
-                                     :else
-                                     (str item)))))]
+                                    (Matcher/quoteReplacement
+                                     (cond
+                                      (keyword? item) (name item)
+                                      :else
+                                      (str item))))))]
     (if (empty? args)
       pred
       (loop [i 0 retr pred]

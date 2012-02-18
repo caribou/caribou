@@ -33,12 +33,14 @@
     (template env)))
 
 (defn retrieve-action
+  "Given the controller-key and action-key, return the function that is correspondingly defined by a controller."
   [controller-key action-key]
   (let [controller (@controller/controllers controller-key)
         action (or (action-key controller) default-action)]
     action))
 
 (defn generate-action
+  "Depending on the application environment, reload controller files (or not)."
   [page template controller-key action-key]
   (if (= (@config/app :environment) "development")
     (fn [params]
@@ -50,7 +52,7 @@
       (fn [params] (template (stringify-keys (action (assoc params :page page))))))))
 
 (defn match-action-to-template
-  "make a single route for a single page, given its overarching path (above-path)"
+  "Make a single route for a single page, given its overarching path (above-path)"
   [page above-path]
   (let [path (str above-path "/" (name (page :path)))
         controller-key (keyword (page :controller))
@@ -68,13 +70,13 @@
   (GET path {params :params} ((actions action) params)))
 
 (defn generate-routes
-  "given a tree of pages construct and return a list of corresponding routes."
+  "Given a tree of pages construct and return a list of corresponding routes."
   [pages]
   (let [routes (apply concat (map #(match-action-to-template % "") pages))]
     (doall (map make-route routes))))
 
 (defn invoke-pages
-  "call up the pages and arrange them into a tree."
+  "Call up the pages and arrange them into a tree."
   []
   (let [rows (db/query "select * from page")
         tree (model/arrange-tree rows)]
@@ -82,7 +84,7 @@
      (alter pages (fn [a b] b) tree))))
 
 (defn invoke-routes
-  "invoke pages from the db and generate the routes based on them."
+  "Invoke pages from the db and generate the routes based on them."
   []
   (template/load-templates (join config/file-sep [config/root "app" "templates"]))
   (sql/with-connection @config/db
@@ -96,7 +98,7 @@
   (def all-routes (invoke-routes)))
 
 (defn init
-  "initialize page related activities"
+  "Initialize page related activities"
   []
   (sql/with-connection @config/db (page-init)))
 
