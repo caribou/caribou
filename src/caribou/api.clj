@@ -292,7 +292,7 @@
              (db/wrap-db @config/db)
              (with-secure-channel security-config (@config/app :api-port) (@config/app :api-ssl-port))))
 
-(def header-buffer-size 1048576)
+(def header-buffer-size 8388608)
 
 (defn start [port ssl-port]
   (ring/run-jetty
