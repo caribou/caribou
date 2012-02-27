@@ -64,9 +64,7 @@
       (if (contains? content key)
         (try
           (let [value (content key)
-                tval (if (isa? (type value) String)
-                       (Integer/parseInt value)
-                       value)]
+                tval (Integer. value)]
             (assoc values key tval))
           (catch Exception e values))
         values)))
@@ -325,7 +323,7 @@
                     :target_id (row :model_id)
                     :link_id (row :id)
                     :dependent (row :dependent)})]
-        (db/update :field ["id = ?" (row :id)] {:link_id (-> part :row :id)}))))
+        (db/update :field ["id = ?" (Integer. (row :id))] {:link_id (-> part :row :id)}))))
 
   (cleanup-field [this]
     (try
@@ -337,7 +335,7 @@
   (update-values [this content values]
     (let [removed (keyword (str "removed_" (row :slug)))]
       (if (content removed)
-        (let [ex (map #(Integer/parseInt %) (split (content removed) #","))
+        (let [ex (map #(Integer. %) (split (content removed) #","))
               part (env :link)
               part-key (keyword (str (part :slug) "_id"))
               target ((models (row :target_id)) :slug)]
@@ -399,7 +397,7 @@
                             :model_id (row :target_id)
                             :target_id model_id
                             :link_id (row :id)})]
-          (db/update :field ["id = ?" (row :id)] {:link_id (-> collection :row :id)})))
+          (db/update :field ["id = ?" (Integer. (row :id))] {:link_id (-> collection :row :id)})))
 
       (update :model model_id
         {:fields
@@ -521,7 +519,7 @@
                    :dependent true
                    :reciprocal_name (str (spec :name) " Join")
                    :target_id (row :model_id)}]} {:op :migration})
-        (db/update :field ["id = ?" (row :id)] {:link_id (-> link :row :id)}))))
+        (db/update :field ["id = ?" (Integer. (row :id))] {:link_id (-> link :row :id)}))))
 
   (cleanup-field [this]
     (try
@@ -535,7 +533,7 @@
   (update-values [this content values]
     (let [removed (keyword (str "removed_" (row :slug)))]
       (if (content removed)
-        (let [ex (map #(Integer/parseInt %) (split (content removed) #","))
+        (let [ex (map #(Integer. %) (split (content removed) #","))
               part (env :link)
               part-key (keyword (str (part :slug) "_id"))
               target ((models (row :target_id)) :slug)]
@@ -864,7 +862,7 @@
            env {:model model :values values :spec spec :original original :op :update :opts opts}
            _save (run-hook slug :before_save env)
            _update (run-hook slug :before_update _save)
-           success (db/update slug ["id = ?" id] (_update :values))
+           success (db/update slug ["id = ?" (Integer. id)] (_update :values))
            content (db/choose slug id)
            merged (merge (_update :spec) content)
            _after (run-hook slug :after_update (merge _update {:content merged}))

@@ -2,5 +2,19 @@ production:
     classname:    org.postgresql.Driver
     subprotocol:  postgresql
     host:         localhost
-    database:     caribou
+    database:     caribou_production
+    user:         postgres
+
+development:
+    classname:    org.postgresql.Driver
+    subprotocol:  postgresql
+    host:         localhost
+    database:     caribou_development
+    user:         postgres
+
+test:
+    classname:    org.postgresql.Driver
+    subprotocol:  postgresql
+    host:         localhost
+    database:     caribou_test
     user:         postgres

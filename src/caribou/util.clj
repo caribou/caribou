@@ -15,6 +15,10 @@
 (defn titleize [s]
   (string/join " " (map string/capitalize (string/split s #"[^a-zA-Z]+"))))
 
+(defn map-vals
+  [f m]
+  (into {} (for [[k v] m] [k (f v)])))
+
 (defn render-exception [e]
   (let [cause (.getCause e)]
     (if cause

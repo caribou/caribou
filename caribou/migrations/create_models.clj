@@ -324,8 +324,8 @@
         field (first (db/fetch :model "slug = '%1'" "field"))
         collection (first (db/fetch :field "slug = '%1' and model_id = %2" "fields" (model :id)))
         part (first (db/fetch :field "slug = '%1' and model_id = %2" "model" (field :id)))]
-    (db/update :field {:link_id (collection :id) :target_id (model :id)} "id = %1" (part :id))
-    (db/update :field {:link_id (part :id) :target_id (field :id)} "id = %1" (collection :id))))
+    (db/update :field ["id = ?" (part :id)] {:link_id (collection :id) :target_id (model :id)})
+    (db/update :field ["id = ?" (collection :id)] {:link_id (part :id) :target_id (field :id)})))
 
 (defn migrate
   []

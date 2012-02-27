@@ -8,13 +8,13 @@
             [caribou.app.config :as config]))
 
 (deftest invoke-model-test
-  (sql/with-connection @config/db
+  (sql/with-connection (@config/all-db :test)
     (let [model (db/query "select * from model where id = 1")
           invoked (invoke-model (first model))]
       (is (= "name" (-> invoked :fields :name :row :slug))))))
 
 (deftest model-lifecycle-test
-  (sql/with-connection @config/db
+  (sql/with-connection (@config/all-db :test)
     (invoke-models)
     (let [model (create :model
                         {:name "yellow"
@@ -37,7 +37,7 @@
       (is (not (models :yellow))))))
 
 (deftest model-interaction-test
-  (sql/with-connection @config/db
+  (sql/with-connection (@config/all-db :test)
     (invoke-models)
     (try
       (let [yellow-row (create :model
@@ -108,7 +108,7 @@
        (if (db/table? :zap) (destroy :model (-> @models :zap :id)))))))
 
 (deftest nested-model-test
-  (sql/with-connection @config/db
+  (sql/with-connection (@config/all-db :test)
     (invoke-models)
     (try
       (let [white (create :model {:name "white" :nested true :fields [{:name "grey" :type "string"}]})
@@ -127,6 +127,6 @@
       (finally (if (db/table? :white) (destroy :model (-> @models :white :id)))))))
 
 ;; (deftest migration-test
-;;   (sql/with-connection @config/db
+;;   (sql/with-connection (@config/all-db :test)
 ;;     (invoke-models)))
     

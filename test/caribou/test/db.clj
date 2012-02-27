@@ -27,12 +27,12 @@
 ;; TODO: test database...
 ;; query
 (deftest query-test
-  (sql/with-connection @config/db
+  (sql/with-connection (@config/all-db :test)
     (let [q (db/query "select * from model")]
       (is (not (empty? q))))))
 
 (deftest query2-exception-test
-  (sql/with-connection @config/db
+  (sql/with-connection (@config/all-db :test)
     (try 
       (db/query "select * from modelz")
       (catch Exception e 
@@ -54,17 +54,17 @@
 ;; TODO: insert / update / delete / fetch
 
 (deftest choose-test
-  (sql/with-connection @config/db
+  (sql/with-connection (@config/all-db :test)
     (is (= (get (db/choose :model 1) :name) "Model"))
     (is (= (get (db/choose :model 0) :name) nil))))
 
 (deftest table-test
-  (sql/with-connection @config/db
+  (sql/with-connection (@config/all-db :test)
     (is (db/table? "model"))
     (is (not (db/table? "modelzzzz")))))
 
 (deftest create-new-table-drop-table-test
-  (sql/with-connection @config/db
+  (sql/with-connection (@config/all-db :test)
     (let [tmp-table "veggies"]
       (try
         (do
@@ -74,7 +74,7 @@
         (finally (db/drop-table tmp-table))))))
 
 (deftest create-existing-table-test
-  (sql/with-connection @config/db
+  (sql/with-connection (@config/all-db :test)
     (try
       (db/create-table "model")
       (catch Exception e 
@@ -82,7 +82,7 @@
 
                                         ; TODO: test to ensure options applied to column
 (deftest add-column-test
-  (sql/with-connection @config/db
+  (sql/with-connection (@config/all-db :test)
     (let [tmp-table "fruit"]
       (try
         (do

@@ -9,20 +9,23 @@
             [clojure.data.json :as json]))
 
 (deftest content-list-test
-  (sql/with-connection @config/db
+  (sql/with-connection (@config/all-db :test)
+    (model/invoke-models)
     (is (> (count (content-list "model" {})) 0))))
 
 (deftest content-item-test
-  (sql/with-connection @config/db
+  (sql/with-connection (@config/all-db :test)
+    (model/invoke-models)
     (is (> (count (content-item "model" 1)) 0))))
 
 (deftest content-field-test
-  (sql/with-connection @config/db
+  (sql/with-connection (@config/all-db :test)
+    (model/invoke-models)
     (is (= "model" (content-field "model" 1 :slug)))))
 
 ;; TODO: test timestamp fields
 ;; (deftest render-test
-;;   (sql/with-connection @config/db
+;;   (sql/with-connection (@config/all-db :test)
 ;;     (let [model (render :model (db/fetch) {})]
 ;;       (is (not (model nil)))
 ;;       (is (= (model :name) "Foo"))
@@ -33,7 +36,8 @@
 ;;       (is (= (model :ancestor_id) 0)))))
 
 (deftest render-field-test
-  (sql/with-connection @config/db
+  (sql/with-connection (@config/all-db :test)
+    (model/invoke-models)
     (is (= "yayay" (render-field "model" {:description "yayay"} "description" {})))))
 
 ;; actions ------------------------------------------------
@@ -41,13 +45,15 @@
 
 ;; GET home
 (deftest home-action-test
-  (sql/with-connection @config/db
+  (sql/with-connection (@config/all-db :test)
+    (model/invoke-models)
     (let [response (json/read-json (home {}))]
       (is (not (response nil))))))
 
 ;; GET list-all
 (deftest list-all-action-test
-  (sql/with-connection @config/db
+  (sql/with-connection (@config/all-db :test)
+    (model/invoke-models)
     (let [response (json/read-json (list-all {:slug "model"}))]
       (is (> (count response) 0)))))
 
@@ -57,13 +63,15 @@
 
 ;; GET model-spec
 (deftest model-spec-action-test
-  (sql/with-connection @config/db
+  (sql/with-connection (@config/all-db :test)
+    (model/invoke-models)
     (let [response (json/read-json (model-spec {:slug "model"}))]
       (is (> (count response) 0)))))
 
 ;; GET item-detail
 (deftest item-detail-action-test
-  (sql/with-connection @config/db
+  (sql/with-connection (@config/all-db :test)
+    (model/invoke-models)
     (let [response (json/read-json (item-detail {:slug "model" :id 1}))]
       (is (> (count response) 0)))))
 
@@ -77,6 +85,6 @@
 
 ;; GET field-detail
 ;; (deftest field-detail-action-test
-;;   (sql/with-connection @config/db
+;;   (sql/with-connection (@config/all-db :test)
 ;;     (let [response (json/read-json (field-detail {:slug "model" :id 1 :field "name"}))]
 ;;       (is (= "model" response)))))
