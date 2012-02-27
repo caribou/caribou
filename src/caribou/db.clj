@@ -11,7 +11,7 @@
   "quickly sanitize a potentially dirty string in preparation for a sql query"
   [s]
   (cond
-   (string? s) (.replaceAll (re-matcher #"[\\\";#%]" (.replaceAll (str s) "'" "''")) "")
+   (string? s) (.replaceAll (re-matcher #"[\\\"]" (.replaceAll (str s) "'" "''")) "")
    (keyword? s) (zap (name s))
    :else s))
 
