@@ -81,7 +81,12 @@
   [table where values]
   (log :db (str "UPDATE: " values))
   (if (not (empty? values))
-    (sql/update-values table where values)))
+    (try
+      (sql/update-values table where values)
+      (catch Exception e
+        (try
+          (println (str "update " table " failed: " (.getNextException (debug e))))
+          (catch Exception e (println e)))))))
 
 ;; (defn update
 ;;   "update the given row with the given values"
