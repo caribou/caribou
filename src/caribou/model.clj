@@ -191,7 +191,7 @@
   (update-values [this content values]
     (let [key (keyword (row :slug))]
       (cond
-       (= key :updated_at) (assoc values key :current_timestamp)
+       ;; (= key :updated_at) (assoc values key :current_timestamp)
        (contains? content key) (assoc values key (content key))
        :else values)))
   (post-update [this content] content)
@@ -325,7 +325,7 @@
                     :target_id (row :model_id)
                     :link_id (row :id)
                     :dependent (row :dependent)})]
-        (db/update :field {:link_id (-> part :row :id)} "id = %1" (row :id)))))
+        (db/update :field ["id = ?" (row :id)] {:link_id (-> part :row :id)}))))
 
   (cleanup-field [this]
     (try
@@ -399,7 +399,7 @@
                             :model_id (row :target_id)
                             :target_id model_id
                             :link_id (row :id)})]
-          (db/update :field {:link_id (-> collection :row :id)} "id = %1" (row :id))))
+          (db/update :field ["id = ?" (row :id)] {:link_id (-> collection :row :id)})))
 
       (update :model model_id
         {:fields
@@ -521,7 +521,7 @@
                    :dependent true
                    :reciprocal_name (str (spec :name) " Join")
                    :target_id (row :model_id)}]} {:op :migration})
-        (db/update :field {:link_id (-> link :row :id)} "id = %1" (row :id)))))
+        (db/update :field ["id = ?" (row :id)] {:link_id (-> link :row :id)}))))
 
   (cleanup-field [this]
     (try
@@ -864,7 +864,7 @@
            env {:model model :values values :spec spec :original original :op :update :opts opts}
            _save (run-hook slug :before_save env)
            _update (run-hook slug :before_update _save)
-           success (db/update slug (_update :values) "id = %1" id)
+           success (db/update slug ["id = ?" id] (_update :values))
            content (db/choose slug id)
            merged (merge (_update :spec) content)
            _after (run-hook slug :after_update (merge _update {:content merged}))

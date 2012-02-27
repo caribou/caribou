@@ -78,12 +78,19 @@
 
 (defn update
   "update the given row with the given values"
-  [table values & where]
-  (let [v (value-map values)
-        q (clause "update %1 set %2 where " [(zap (name table)) v])
-        w (clause (first where) (rest where))
-        t (str q w)]
-    (sql/do-commands (log :db t))))
+  [table where values]
+  (log :db (str "UPDATE: " values))
+  (if (not (empty? values))
+    (sql/update-values table where values)))
+
+;; (defn update
+;;   "update the given row with the given values"
+;;   [table values & where]
+;;   (let [v (value-map values)
+;;         q (clause "update %1 set %2 where " [(zap (name table)) v])
+;;         w (clause (first where) (rest where))
+;;         t (str q w)]
+;;     (sql/do-commands (log :db t))))
 
 (defn delete
   "delete out of the given table according to the supplied where clause"
