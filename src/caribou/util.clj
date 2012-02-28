@@ -19,6 +19,13 @@
   [f m]
   (into {} (for [[k v] m] [k (f v)])))
 
+(defn re-replace
+  [r s f]
+  (let [between (string/split s r)
+        inside (re-seq r s)
+        transformed (concat (map f inside) [""])]
+    (apply str (interleave between transformed))))
+
 (defn render-exception [e]
   (let [cause (.getCause e)]
     (if cause

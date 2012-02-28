@@ -1,5 +1,6 @@
 * BASICS *
 
+adding a page reloads frontend routes!
 when loading templates or controllers, check for errors!
 empty strings save as NULL
 empty images write out empty path!

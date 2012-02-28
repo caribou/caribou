@@ -54,7 +54,7 @@
   [env]
   (let [db-config-file (join file-sep [root "config" "database.yml"])
         db-config (load-db-config db-config-file)
-        env-config (db-config env)]
+        env-config (db-config (keyword env))]
     (dosync
      (alter all-db merge db-config))
     (dosync
