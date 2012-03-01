@@ -1,15 +1,17 @@
 * BASICS *
 
 adding a page reloads frontend routes!
+DEPLOYMENT
+database sync from dev to server and back
 when loading templates or controllers, check for errors!
 empty strings save as NULL
 empty images write out empty path!
 move migrate and bootstrap to caribou shell command
 AUTH
-remove need to reload server!
+remove need to reload server! (done for controllers)
 enable links between models (mostly done)
 add image/file handling (image cache)
-search
+SEARCH
 
 
 DONE --------------

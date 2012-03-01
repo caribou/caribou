@@ -57,17 +57,23 @@
   (let [path (str above-path "/" (name (page :path)))
         controller-key (keyword (page :controller))
         action-key (keyword (page :action))
+        method-key (page :method)
         template (@template/templates (keyword (page :template)))
         full (generate-action page template controller-key action-key)]
     (dosync
      (alter actions merge {(keyword (page :action)) full}))
     (concat
-     [[path action-key]]
+     [[path action-key method-key]]
      (mapcat #(match-action-to-template % path) (page :children)))))
 
 (defn make-route
-  [[path action]]
-  (GET path {params :params} ((actions action) params)))
+  [[path action method]]
+  (cond
+   (= method "GET")    (GET path {params :params} ((actions action) params))
+   (= method "POST")   (POST path {params :params} ((actions action) params))
+   (= method "PUT")    (PUT path {params :params} ((actions action) params))
+   (= method "DELETE") (DELETE path {params :params} ((actions action) params))
+   :else               (GET path {params :params} ((actions action) params))))
 
 (defn generate-routes
   "Given a tree of pages construct and return a list of corresponding routes."
