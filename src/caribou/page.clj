@@ -46,15 +46,27 @@
     (fn [params]
       (do
         (controller/load-controllers "app/controllers")
-        (let [action (retrieve-action controller-key action-key)]
-          (template (stringify-keys (action (assoc params :page page)))))))
+        (template/load-templates (join config/file-sep [config/root "app" "templates"]))
+        (let [action (retrieve-action controller-key action-key)
+              found-template
+              (or template
+                  (do
+                    (template/load-templates (join config/file-sep [config/root "app" "templates"]))
+                    (@template/templates (keyword (page :template)))))]
+          (if found-template
+            (found-template (stringify-keys (action (assoc params :page page))))
+            (str "No template by the name " (page :template))))))
     (let [action (retrieve-action controller-key action-key)]
-      (fn [params] (template (stringify-keys (action (assoc params :page page))))))))
+      (if template
+        (fn [params]
+          (template (stringify-keys (action (assoc params :page page)))))
+        (fn [params] (str "No template by the name " (page :template)))))))
 
 (defn match-action-to-template
   "Make a single route for a single page, given its overarching path (above-path)"
   [page above-path]
-  (let [path (str above-path "/" (name (page :path)))
+  (let [page-path (page :path)
+        path (str above-path "/" (if page-path (name page-path) ""))
         controller-key (keyword (page :controller))
         action-key (keyword (page :action))
         method-key (page :method)
@@ -98,8 +110,14 @@
           generated (doall (generate-routes @pages))]
       (apply routes generated))))
 
+(declare reload-routes)
+
 (defn page-init []
   (model/init)
+  (model/add-hook :page :after_save :reload-routes
+    (fn [env]
+      (reload-routes @config/db)
+      env))
   (controller/load-controllers "app/controllers")
   (def all-routes (invoke-routes)))
 
@@ -108,17 +126,21 @@
   []
   (sql/with-connection @config/db (page-init)))
 
+(defn reload-routes
+  [db]
+  (sql/with-connection db (page-init))
+  (def app (-> all-routes
+               (wrap-file (join config/file-sep [config/root "public"]))
+               (wrap-file-info)
+               (wrap-stacktrace)
+               (handler/site)
+               (db/wrap-db db))))
+
 (defn start
   ([port ssl-port] (start port ssl-port {}))
   ([port ssl-port user-db]
      (let [db (merge @config/db user-db)]
-       (sql/with-connection db (page-init))
-       (def app (-> all-routes
-                    (wrap-file (join config/file-sep [config/root "public"]))
-                    (wrap-file-info)
-                    (wrap-stacktrace)
-                    (handler/site)
-                    (db/wrap-db db)))
+       (reload-routes db)
        (ring/run-jetty (var app) {:port port :join? false}))))
 
 (defn go []

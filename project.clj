@@ -15,9 +15,9 @@
                  [clojure-csv/clojure-csv "1.3.2"]
                  [org.freemarker/freemarker "2.3.18"]
                  [antler/sandbar "0.4.0-SNAPSHOT"]
+                 ;; [antler/clojure-solr "0.3.0-SNAPSHOT"]
                  ;; --------- THESE DEPS ARE NOT ON 1.3 -------------
                  ;; [aleph "0.2.0-rc2"]
-                 ;; [clojure-solr "0.2.0"]
                  ;; [org.clojars.serabe/rinzelight "0.0.3"]
                  ;; -------------------------------------------------
                  [clj-logging-config "1.9.5"]
