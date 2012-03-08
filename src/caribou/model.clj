@@ -1,8 +1,11 @@
 (ns caribou.model
   (:use caribou.debug)
   (:use caribou.util)
-  (:use [clojure.string :only (join split)])
+  (:use [clojure.string :only (join split trim)])
   (:require [caribou.db :as db]
+            [clj-time.core :as timecore]
+            [clj-time.format :as format]
+            [clj-time.coerce :as coerce]
             [clojure.java.jdbc :as sql]
             [geocoder.core :as geo]
             [clojure.java.io :as io]
@@ -17,6 +20,51 @@
   [date]
   (if date
     (.format simple-date-format date)))
+
+(def custom-formatters
+  (map #(format/formatter %)
+       ["MM/dd/yy"
+        "MM/dd/yyyy"
+        "MMMMMMMMM dd, yyyy"
+        "MMMMMMMMM dd, yyyy HH:mm"
+        "MMMMMMMMM dd, yyyy HH:mm:ss"
+        "MMMMMMMMM dd yyyy"
+        "MMMMMMMMM dd yyyy HH:mm"
+        "MMMMMMMMM dd yyyy HH:mm:ss"]))
+
+(def time-zone-formatters
+  (map #(format/formatter %)
+       ["MM/dd/yy Z"
+        "MM/dd/yyyy Z"
+        "MMMMMMMMM dd, yyyy Z"
+        "MMMMMMMMM dd, yyyy HH:mm Z"
+        "MMMMMMMMM dd, yyyy HH:mm:ss Z"
+        "MMMMMMMMM dd yyyy Z"
+        "MMMMMMMMM dd yyyy HH:mm Z"
+        "MMMMMMMMM dd yyyy HH:mm:ss Z"]))
+
+(defn try-formatter
+  [date-string formatter]
+  (try
+    (format/parse formatter date-string)
+    (catch Exception e nil)))
+
+(defn impose-time-zone
+  [timestamp]
+  (timecore/from-time-zone timestamp (timecore/default-time-zone)))
+
+(defn read-date
+  [date-string]
+  (let [trimmed (trim date-string)
+        default (coerce/from-string trimmed)]
+    (if (empty? default)
+      (let [custom (some #(try-formatter trimmed %) time-zone-formatters)]
+        (if custom
+          (coerce/to-timestamp custom)
+          (let [custom (some #(try-formatter trimmed %) custom-formatters)]
+            (if custom
+              (coerce/to-timestamp (impose-time-zone custom))))))
+      (coerce/to-timestamp (impose-time-zone default (timecore/default-time-zone))))))
 
 (defprotocol Field
   "a protocol for expected behavior of all model fields"
@@ -190,7 +238,12 @@
     (let [key (keyword (row :slug))]
       (cond
        ;; (= key :updated_at) (assoc values key :current_timestamp)
-       (contains? content key) (assoc values key (content key))
+       (contains? content key)
+       (let [value (content key)
+             timestamp (if (string? value) (read-date value) value)]
+         (if timestamp
+           (assoc values key timestamp)
+           values))
        :else values)))
   (post-update [this content] content)
   (pre-destroy [this content] content)

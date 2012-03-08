@@ -31,6 +31,7 @@
                      ;[lein-clojars "0.7.0"]
                      ;[geocoder-clj "0.0.3"]
                      ;[lein-eclipse "1.0.0"]]
+  :main caribou.core
   :jvm-opts ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n"]
   :aot [caribou.model]
   :ring {:handler caribou.api/app
