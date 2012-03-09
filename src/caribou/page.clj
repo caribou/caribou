@@ -90,8 +90,12 @@
 (defn generate-routes
   "Given a tree of pages construct and return a list of corresponding routes."
   [pages]
-  (let [routes (apply concat (map #(match-action-to-template % "") pages))]
-    (doall (map make-route routes))))
+  (let [routes (apply concat (map #(match-action-to-template % "") pages))
+        direct (map make-route routes)
+        unslashed (filter #(empty? (re-find #"/$" (first %))) routes)
+        slashed (map #(cons (str (first %) "/") (rest %)) unslashed)
+        indirect (map make-route slashed)]
+    (concat direct indirect)))
 
 (defn invoke-pages
   "Call up the pages and arrange them into a tree."

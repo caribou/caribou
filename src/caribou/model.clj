@@ -318,6 +318,13 @@
       {:lat (-> (first code) :location :latitude)
        :lng (-> (first code) :location :longitude)})))
 
+(defn geocode-address [address]
+  (let [code (geo/geocode address)]
+    (if (empty? code)
+      {}
+      {:lat (-> (first code) :location :latitude)
+       :lng (-> (first code) :location :longitude)})))
+
 (defrecord AddressField [row env]
   Field
   (table-additions [this field] [])
