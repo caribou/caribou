@@ -1,4 +1,4 @@
-(defproject antler/caribou "0.3.2-SNAPSHOT"
+(defproject antler/caribou "0.3.4-SNAPSHOT"
   :description "caribou: type structure interaction api"
   :dependencies [[org.clojure/clojure "1.3.0"]
                  [org.clojure/java.jdbc "0.0.6"]

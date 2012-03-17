@@ -298,6 +298,7 @@
   (ring/run-jetty
    (var app)
    {:port port :join? false
+    :host "127.0.0.1"
     :configurator
     (fn [jetty]
       (doseq [connector (.getConnectors jetty)]

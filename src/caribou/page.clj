@@ -145,7 +145,7 @@
   ([port ssl-port user-db]
      (let [db (merge @config/db user-db)]
        (reload-routes db)
-       (ring/run-jetty (var app) {:port port :join? false}))))
+       (ring/run-jetty (var app) {:port port :join? false :host "127.0.0.1"}))))
 
 (defn go []
   (let [port (Integer/parseInt (or (@config/app :pages-port) "22212"))
