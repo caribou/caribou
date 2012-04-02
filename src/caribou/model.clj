@@ -990,6 +990,12 @@
         roots (by-parent nil)]
     (doall (map #(reconstruct by-parent %) roots))))
 
+(defn load-model-hooks
+  []
+  (load-path "app/models"
+   (fn [file filename]
+     (load-file (.toString file)))))
+
 (defn init
   "run any necessary initialization for the model environment."
   [])

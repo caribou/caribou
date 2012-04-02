@@ -37,8 +37,7 @@
 
 (defn get-file-extension [file]
   (let [filename (.getName file)]
-  (.toLowerCase (.substring filename (.lastIndexOf filename ".")))
-))
+  (.toLowerCase (.substring filename (.lastIndexOf filename ".")))))
 
 (defn load-path [path visit]
   (doseq [file (file-seq (io/file path))]
