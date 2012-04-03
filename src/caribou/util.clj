@@ -26,6 +26,18 @@
         transformed (concat (map f inside) [""])]
     (apply str (interleave between transformed))))
 
+(defn re-replace-first
+  [r s f]
+  (let [between (string/split s r)
+        inside (re-seq r s)
+        transformed (concat [(f (first inside))] (rest inside) [""])]
+    (apply str (interleave between transformed))))
+
+(defn re-replace-beginning
+  [r s]
+  (let [[_ after] (re-find r s)]
+    after))
+
 (defn render-exception [e]
   (let [cause (.getCause e)]
     (if cause

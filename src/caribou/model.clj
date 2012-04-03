@@ -992,9 +992,11 @@
 
 (defn load-model-hooks
   []
-  (load-path "app/models"
-   (fn [file filename]
-     (load-file (.toString file)))))
+  (try
+    (load-path "app/models"
+               (fn [file filename]
+                 (load-file (.toString file))))
+    (catch Exception e (println (str "No app/models dir: " e)))))
 
 (defn init
   "run any necessary initialization for the model environment."
