@@ -1,19 +1,19 @@
-(ns caribou.app
-  (:require [caribou.api :as api]
-            [caribou.page :as page]))
+(ns caribou.app)
+;;   (:require [caribou.api :as api]
+;;             [caribou.page :as page]))
 
-(defn run-api
-  []
-  (api/go))
+;; (defn run-api
+;;   []
+;;   (api/go))
 
-(defn run-pages
-  []
-  (page/go))
+;; (defn run-pages
+;;   []
+;;   (page/go))
 
-(defn launch
-  []
-  (run-api)
-  (run-pages))
+;; (defn launch
+;;   []
+;;   (run-api)
+;;   (run-pages))
 
-(defn -main []
-  (launch))
+;; (defn -main []
+;;   (launch))

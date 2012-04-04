@@ -1,4 +1,4 @@
-(defproject antler/caribou "0.3.4-SNAPSHOT"
+(defproject antler/caribou "0.4.0-SNAPSHOT"
   :description "caribou: type structure interaction api"
   :dependencies [[org.clojure/clojure "1.3.0"]
                  [org.clojure/java.jdbc "0.0.6"]
@@ -15,8 +15,7 @@
                  ;; -------------------------------------------------
                  [clj-logging-config "1.9.5"]
                  [log4j "1.2.16"]]
-  :dev-dependencies [[lein-ring "0.4.5"]
-                     ; [autodoc "0.9.0"]
+  :dev-dependencies [; [autodoc "0.9.0"]
                      [swank-clojure "1.4.0-SNAPSHOT"]
                      [lein-eclipse "1.0.0"]]
   :main caribou.core
