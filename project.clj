@@ -5,7 +5,7 @@
                  [postgresql/postgresql "8.4-702.jdbc4"]
                  [clj-time "0.3.6"]
                  [clj-http "0.3.2"]
-                 [clj-yaml "0.3.0-SNAPSHOT"]
+                 [clj-yaml "0.3.1"]
                  [geocoder-clj "0.0.3"]
                  [org.freemarker/freemarker "2.3.18"]
                  ;; [antler/clojure-solr "0.3.0-SNAPSHOT"]
