@@ -1,4 +1,4 @@
-(defproject antler/caribou "0.3.4-SNAPSHOT"
+(defproject antler/caribou "0.3.4"
   :description "caribou: type structure interaction api"
   :dependencies [[org.clojure/clojure "1.3.0"]
                  [org.clojure/java.jdbc "0.0.6"]
@@ -8,13 +8,14 @@
                  [compojure "0.6.4"]
                  [hiccup "0.3.6"]
                  [cheshire "2.0.2"]
-                 [org.clojars.ninjudd/data.xml "0.0.1-SNAPSHOT"]
                  [ring/ring-jetty-adapter "0.3.10"]
-                 [clj-yaml "0.3.0-SNAPSHOT"]
+                 [org.clojure/data.xml "0.0.3"]
+                 [clj-yaml "0.3.1"]
                  [geocoder-clj "0.0.3"]
                  [clojure-csv/clojure-csv "1.3.2"]
                  [org.freemarker/freemarker "2.3.18"]
-                 [antler/sandbar "0.4.0-SNAPSHOT"]
+                 [org.clojars.cjschroed/sandbar "0.4.0"]
+                 ;; [antler/sandbar "0.4.0-SNAPSHOT"]
                  ;; [antler/clojure-solr "0.3.0-SNAPSHOT"]
                  ;; --------- THESE DEPS ARE NOT ON 1.3 -------------
                  ;; [aleph "0.2.0-rc2"]
