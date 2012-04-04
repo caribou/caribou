@@ -1,4 +1,4 @@
-(defproject antler/caribou "0.4.0-SNAPSHOT"
+(defproject antler/caribou-core "0.4.0-SNAPSHOT"
   :description "caribou: type structure interaction api"
   :dependencies [[org.clojure/clojure "1.3.0"]
                  [org.clojure/java.jdbc "0.0.6"]
@@ -22,7 +22,7 @@
   :jvm-opts ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n"]
   :aot [caribou.model]
   :autodoc {:name "Caribou" :page-title "Caribou API Documentation"}
-  :repositories {"sonatype-oss-public" "https://oss.sonatype.org/content/groups/public/"
-                 "battlecat" "http://battlecat:8080/nexus/content/groups/public"
-                 "snapshots" "http://battlecat:8080/nexus/content/repositories/snapshots"
-                 "releases" "http://battlecat:8080/nexus/content/repositories/releases"})
+  :repositories {"sonatype-oss-public" "https://oss.sonatype.org/content/groups/public/"})
+                 ;; "battlecat" "http://battlecat:8080/nexus/content/groups/public"
+                 ;; "snapshots" "http://battlecat:8080/nexus/content/repositories/snapshots"
+                 ;; "releases" "http://battlecat:8080/nexus/content/repositories/releases"})
