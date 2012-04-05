@@ -17,16 +17,16 @@
   (sql/with-connection (@config/all-db :test)
     (invoke-models)
     (let [model (create :model
-                        {:name "yellow"
+                        {:name "Yellow"
                          :description "yellowness yellow yellow"
                          :position 3
-                         :fields [{:name "gogon" :type "string"}
-                                  {:name "wibib" :type "boolean"}]})
+                         :fields [{:name "Gogon" :type "string"}
+                                  {:name "Wibib" :type "boolean"}]})
           yellow (create :yellow {:gogon "obobo" :wibib true})]
 
       (is (<= 8 (count (model :fields))))
-      (is (= (model :name) "yellow"))
-      (is ((models :yellow) :name "yellow"))
+      (is (= (model :name) "Yellow"))
+      (is ((models :yellow) :name "Yellow"))
       (is (db/table? :yellow))
       (is (yellow :wibib))
       (is (= 1 (count (db/query "select * from yellow"))))
@@ -41,19 +41,19 @@
     (invoke-models)
     (try
       (let [yellow-row (create :model
-                               {:name "yellow"
+                               {:name "Yellow"
                                 :description "yellowness yellow yellow"
                                 :position 3
-                                :fields [{:name "gogon" :type "string"}
-                                         {:name "wibib" :type "boolean"}]})
+                                :fields [{:name "Gogon" :type "string"}
+                                         {:name "Wibib" :type "boolean"}]})
 
             zap-row (create :model
-                            {:name "zap"
+                            {:name "Zap"
                              :description "zap zappity zapzap"
                              :position 3
-                             :fields [{:name "ibibib" :type "string"}
-                                      {:name "yobob" :type "slug" :link_slug "ibibib"}
-                                      {:name "yellows" :type "collection" :dependent true :target_id (yellow-row :id)}]})
+                             :fields [{:name "Ibibib" :type "string"}
+                                      {:name "Yobob" :type "slug" :link_slug "ibibib"}
+                                      {:name "Yellows" :type "collection" :dependent true :target_id (yellow-row :id)}]})
 
             yellow (models :yellow)
             zap (models :zap)
@@ -76,11 +76,11 @@
           (is (= 4 (count ((from zap zap-reload {:include {:yellows {}}}) :yellows))))
 
           (update :model (zap :id) {:fields [{:id (-> zap :fields :ibibib :row :id)
-                                              :name "okokok"}]})
+                                              :name "Okokok"}]})
 
-          (update :model (yellow :id) {:name "purple"
+          (update :model (yellow :id) {:name "Purple"
                                        :fields [{:id (-> yellow :fields :zap :row :id)
-                                                 :name "green"}]})
+                                                 :name "Green"}]})
 
           (let [zappo (db/choose :zap (zzzap :id))
                 purple (db/choose :purple (yyy :id))]
@@ -107,11 +107,39 @@
        (if (db/table? :purple) (destroy :model (-> @models :purple :id)))
        (if (db/table? :zap) (destroy :model (-> @models :zap :id)))))))
 
+(deftest model-link-test
+  (sql/with-connection (@config/all-db :test)
+    (invoke-models)
+    (try
+      (let [chartreuse-row
+            (create :model
+                    {:name "Chartreuse"
+                     :description "chartreusey reuse chartreuse"
+                     :position 3
+                     :fields [{:name "Ondondon" :type "string"}
+                              {:name "Kokok" :type "boolean"}]})
+
+            fuchsia-row
+            (create :model
+                    {:name "Fuchsia"
+                     :description "fuchfuchsia siasiasia fuchsia"
+                     :position 3
+                     :fields [{:name "Zozoz" :type "string"}
+                              {:name "Chartreusii" :type "link" :dependent true :target_id (chartreuse-row :id)}]})
+
+            chartreuse (models :chartreuse)
+            fuchsia (models :fuchsia)]
+        (println (str fuchsia)))
+      (catch Exception e (util/render-exception e))
+      (finally
+       (if (db/table? :chartreuse) (destroy :model (-> @models :chartreuse :id)))
+       (if (db/table? :fuchsia) (destroy :model (-> @models :fuchsia :id)))))))
+
 (deftest nested-model-test
   (sql/with-connection (@config/all-db :test)
     (invoke-models)
     (try
-      (let [white (create :model {:name "white" :nested true :fields [{:name "grey" :type "string"}]})
+      (let [white (create :model {:name "White" :nested true :fields [{:name "Grey" :type "string"}]})
             aaa (create :white {:grey "obobob"})
             bbb (create :white {:grey "ininin" :parent_id (aaa :id)})
             ccc (create :white {:grey "kkukku" :parent_id (aaa :id)})

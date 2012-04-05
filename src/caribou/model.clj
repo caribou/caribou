@@ -565,7 +565,7 @@
                     :link_id (row :id)
                     :dependent (row :dependent)})]
         (create :model
-                {:name (join-table-name (row :name) reciprocal-name)
+                {:name (str (row :name) " " reciprocal-name)
                  :slug join-name
                  :join_model true
                  :fields
