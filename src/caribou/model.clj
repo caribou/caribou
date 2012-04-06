@@ -545,6 +545,13 @@
   [a b]
   (join "_" (sort (map slugify [a b]))))
 
+(defn link-cleanup-field [row]
+  (let [from-name (row :name)
+        to-name ((db/choose :field (row :link_id)) :name)
+        join-name (debug (keyword (join-table-name from-name to-name)))]
+    (destroy :model (debug (-> @models join-name :id)))
+    (destroy :field (row :link_id))))
+
 (defrecord LinkField [row env]
   Field
 
@@ -583,9 +590,11 @@
 
   (cleanup-field [this]
     (try
-      (let []
-        (destroy :model ) ;; here is where we stopped
-        (destroy :field (-> env :link :id)))
+      (let [from-name (row :name)
+            to-name ((db/choose :field (row :link_id)) :name)
+            join-name (keyword (join-table-name from-name to-name))]
+        (destroy :model (-> @models join-name :id))
+        (destroy :field (row :link_id)))
       (catch Exception e (str e))))
 
   (target-for [this] (models (row :target_id)))
@@ -849,11 +858,13 @@
     (assoc env :content (make-field (env :content)))))
 
   (add-hook :field :after_destroy :drop_columns (fn [env]
-    (let [model (models (-> env :content :model_id))
-          field ((model :fields) (keyword (-> env :content :slug)))]
-      (do (cleanup-field field))
-      (doall (map #(db/drop-column ((models (-> field :row :model_id)) :slug) (first %)) (table-additions field (-> env :content :slug))))
-      env))))
+    (try                                                  
+      (let [model (models (-> env :content :model_id))
+            field ((model :fields) (keyword (-> env :content :slug)))]
+        (do (cleanup-field field))
+        (doall (map #(db/drop-column ((models (-> field :row :model_id)) :slug) (first %)) (table-additions field (-> env :content :slug))))
+        env)
+      (catch Exception e env)))))
 
 (defn invoke-models
   "call to populate the application model cache in model/models.

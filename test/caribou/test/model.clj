@@ -128,8 +128,19 @@
                               {:name "Chartreusii" :type "link" :dependent true :target_id (chartreuse-row :id)}]})
 
             chartreuse (models :chartreuse)
-            fuchsia (models :fuchsia)]
-        (println (str fuchsia)))
+            fuchsia (models :fuchsia)
+            charfuch (models :chartreusii_fuchsia)
+
+            ccc (create :chartreuse {:ondondon "obobob"})
+            cdc (create :chartreuse {:ondondon "ikkik"})
+            cbc (create :chartreuse {:ondondon "zozoozozoz"})
+
+            fff (create :fuchsia {:zozoz "glowing"})
+            fgf (create :fuchsia {:zozoz "torpid"})
+            fef (create :fuchsia {:zozoz "bluish"})
+
+            ]
+        (println (str charfuch)))
       (catch Exception e (util/render-exception e))
       (finally
        (if (db/table? :chartreuse) (destroy :model (-> @models :chartreuse :id)))
