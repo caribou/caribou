@@ -19,6 +19,26 @@
 (def db (ref {}))
 (def all-db (ref {}))
 
+(def default-db-config
+  {:production
+   {:classname "org.postgresql.Driver"
+    :subprotocol "postgres"
+    :host "localhost"
+    :database "caribou"
+    :user "postgres"}
+   :development
+   {:classname "org.postgresql.Driver"
+    :subprotocol "postgres"
+    :host "localhost"
+    :database "caribou_development"
+    :user "postgres"}
+   :test
+   {:classname "org.postgresql.Driver"
+    :subprotocol "postgres"
+    :host "localhost"
+    :database "caribou_test"
+    :user "postgres"}})
+
 (def file-sep 
   (str (.get (java.lang.System/getProperties) "file.separator")))
 
@@ -33,7 +53,10 @@
   (let [host (or (config :host) "localhost")
         subname (or (config :subname) (str "//" host "/" (config :database)))]
     (assoc config :subname subname)))
-  
+
+(defn assoc-subnames
+  [configs]
+  (util/map-vals assoc-subname configs))
 
 (defn load-db-config
   "Given the path to a yaml config file, produce the map representing it.
@@ -47,13 +70,31 @@
       user: postgres"
 
   [filename]
-  (util/map-vals assoc-subname (load-yaml filename)))
+  (assoc-subnames (load-yaml filename)))
+
+(defn pathify
+  [paths]
+  (join file-sep paths))
+
+(defn file-exists?
+  [path]
+  (.exists (io/file path)))
+
+(defn caribou-home
+  []
+  (pathify [(System/getProperty "user.home") ".caribou"]))
 
 (defn init
   "initialize the app's config.  expects the environment"
   [env]
-  (let [db-config-file (join file-sep [root "config" "database.yml"])
-        db-config (load-db-config db-config-file)
+  (let [db-config-paths ["config" "database.yml"]
+        db-config-root (pathify (cons root db-config-paths))
+        db-config-home (pathify (cons (caribou-home) db-config-paths))
+        db-config
+        (cond
+         (file-exists? db-config-root) (load-db-config db-config-root)
+         (file-exists? db-config-home) (load-db-config db-config-home)
+         :else (assoc-subnames default-db-config))
         env-config (db-config (keyword env))]
     (dosync
      (alter all-db merge db-config))
