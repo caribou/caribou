@@ -5,6 +5,7 @@
             [clojure.string :as string]
             [caribou.db :as db]
             [caribou.app.config :as config]
+            [caribou.migrations.premigrations :as premigrations]
             [caribou.model :as model]
             [caribou.util :as util]))
 
@@ -38,9 +39,10 @@
   (try
     (sql/with-connection (merge @config/db {:subname (str "//localhost/" db-name)})
       (if (not (db/table? "migration"))
-        (doall (map run-migration premigration-list)))
-      (doall (map #(if (not (some #{%} (migration-names))) (run-migration %))
-                  @migration-list))
+        (premigrations/migrate))
+        ;; (doall (map run-migration premigration-list)))
+      ;; (doall (map #(if (not (some #{%} (migration-names))) (run-migration %))
+      ;;             @migration-list))
       (load-user-migrations "app/migrations"))
     (catch Exception e
       (println "Caught an exception attempting to run migrations: " (.getMessage e) (.printStackTrace e)))))

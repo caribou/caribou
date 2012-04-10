@@ -28,7 +28,7 @@
 
 (defn pull-resource
   [path]
-  (.getFile (io/resource path)))
+  (io/resource path))
 
 (defn map-vals
   [f m]
