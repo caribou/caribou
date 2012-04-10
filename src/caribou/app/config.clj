@@ -1,7 +1,8 @@
 (ns caribou.app.config
   (:use [caribou.debug]
         [clojure.walk :only (keywordize-keys)]
-        [clojure.string :only (join)])
+        [clojure.string :only (join)]
+        [caribou.util :only (map-vals pathify file-exists?)])
   (:require [clj-yaml.core :as yaml]
             [clojure.java.io :as io]
             [caribou.util :as util]))
@@ -39,9 +40,6 @@
     :database "caribou_test"
     :user "postgres"}})
 
-(def file-sep 
-  (str (.get (java.lang.System/getProperties) "file.separator")))
-
 (defn load-yaml
   [filename]
   (let [raw (slurp filename)
@@ -56,7 +54,7 @@
 
 (defn assoc-subnames
   [configs]
-  (util/map-vals assoc-subname configs))
+  (map-vals assoc-subname configs))
 
 (defn load-db-config
   "Given the path to a yaml config file, produce the map representing it.
@@ -71,14 +69,6 @@
 
   [filename]
   (assoc-subnames (load-yaml filename)))
-
-(defn pathify
-  [paths]
-  (join file-sep paths))
-
-(defn file-exists?
-  [path]
-  (.exists (io/file path)))
 
 (defn caribou-home
   []

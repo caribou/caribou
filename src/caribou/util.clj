@@ -15,6 +15,21 @@
 (defn titleize [s]
   (string/join " " (map string/capitalize (string/split s #"[^a-zA-Z]+"))))
 
+(def file-separator
+  (str (.get (java.lang.System/getProperties) "file.separator")))
+
+(defn pathify
+  [paths]
+  (string/join file-separator paths))
+
+(defn file-exists?
+  [path]
+  (.exists (io/file path)))
+
+(defn pull-resource
+  [path]
+  (.getFile (io/resource path)))
+
 (defn map-vals
   [f m]
   (into {} (for [[k v] m] [k (f v)])))
