@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+
+<html>
+
+  <head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+    <title>Interface 3.0</title>
+    <link href="/favicon.ico" rel="icon" type="image/x-icon" />
+    <script src="/js/easyXDM.js" type="text/javascript"></script>
+    <script src="/js/json2.js" type="text/javascript"></script>
+    <script src="/js/jquery.js" type="text/javascript"></script>
+    <script src="/js/jquery-ui-1.8.2/jquery-ui.min.js" type="text/javascript"></script>
+    <script src="/js/jquery.tmpl.js" type="text/javascript"></script>
+    <script src="/js/underscore.js" type="text/javascript"></script>
+    <script src="/js/amplify.store.js" type="text/javascript"></script>
+    <script src="/js/history.adapter.jquery.js" type="text/javascript"></script>
+    <script src="/js/history.js" type="text/javascript"></script>
+    <script src="/js/sherpa.js" type="text/javascript"></script>
+    <script src="/js/caribou.js" type="text/javascript"></script>
+    <script src="/js/admin.js" type="text/javascript"></script>
+    <link href="/stylesheets/active_admin.css" rel="stylesheet" type="text/css" media="screen" />
+  </head>
+  
+  <body class="logged_in admin_model show">
+    
+    <div id="wrapper">
+      
+      <div id="header">
+        <h1 id="site_title">Interface 3.0</h1>
+        <ul class="tabbed_navigation" id="tabs"></ul>
+        <p id="utility_nav"><span class="current_user">justin@weareinstrument.com</span> <a href="#">Logout</a></p>
+      </div>
+      
+      <div id="title_bar">
+        <span class="breadcrumb">&nbsp;</span>
+        <h2 id="page_title">&nbsp;</h2>
+        <div class="action_items">&nbsp;</div>
+      </div>
+      
+      <div class="flashes"></div>
+      
+      <div class="with_sidebar" id="active_admin_content">
+        
+        <div id="main_content_wrapper">
+          <div id="main_content">&nbsp;</div>
+        </div>
+        
+        <div id="sidebar">&nbsp;</div>
+        
+      </div>
+      
+      <div id="footer">
+        <p>Powered by <a href="http://www.activeadmin.info">Active Admin</a> 0.3.1</p>
+      </div>
+      
+      <div id="upload_dialog">
+        <form accept-charset="UTF-8" target="upload_target" action="${caribou.remoteAPI}/upload" class="formtastic ${model.slug} content_form" id="file_upload" method="post" enctype="multipart/form-data">
+          <input type="hidden" id="upload_context" name="context" value="" />
+          <input type="file" name="upload" />
+          <input type="submit" value="Upload File">
+        </form>
+      </div>
+
+    </div>
+    
+  </body>
+  
+</html>
+
+<script type="text/javascript">$(document).ready(caribou.admin.init)</script>
+
+<!-- 
+
+HEADER TEMPLATES
+
+-->
+
+<script id="tabbedNavigation" type="text/x-jquery-tmpl">
+  {{each(i, choice) choices}}
+  <li id="${choice.title}" class="${chosen === choice.title ? 'current' : ''}"><a href="javascript:;" onclick="caribou.admin.nav.select('${choice.title}', '${choice.url}')">${choice.title}</a></li>
+  {{/each}}
+  <li id="content" class="current has_nested"><a href="">Content</a>
+    <ul>
+      <li id="pages" class="current"><a href="">Pages</a></li>
+    </ul>
+  </li>
+</script>
+
+<!-- 
+
+BREADCRUMB AND PAGE TITLE TEMPLATES
+
+-->
+
+<script id="breadcrumb" type="text/x-jquery-tmpl">
+  <a href="/">Admin</a>
+  <span class="breadcrumb_sep">/</span>
+  {{each(i, item) items}}
+  <a href="${item.url}">${item.title}</a>
+  <span class="breadcrumb_sep">/</span>
+  {{/each}}
+</script>
+
+<script id="pageTitle" type="text/x-jquery-tmpl">
+  ${title}
+</script>
+
+<!-- 
+
+FLASH TEMPLATES
+
+-->
+
+<script id="flashNotice" type="text/x-jquery-tmpl">
+  <div class="flash flash_notice">${message}</div>
+</script>
+
+<script id="flashError" type="text/x-jquery-tmpl">
+  <div class="flash flash_error">${message}</div>
+</script>
+
+<!-- 
+
+AUTHORIZATION TEMPLATES
+
+-->
+
+<script id="loginForm" type="text/x-jquery-tmpl">
+  <form accept-charset="UTF-8"  action="${caribou.remoteAPI}/login" class="formtastic content_form" id="login_form" method="post">
+    <label>Email</label>
+    <input type="text" name="account[email]" value="">
+    <label>Password</label>
+    <input type="password" name="account[password]" value="">
+  </form>
+</script>
+
+<!-- 
+
+ACTION ITEM TEMPLATES
+
+-->
+
+<script id="actionItemsForGenericList" type="text/x-jquery-tmpl">
+  <span class="action_item"><a href="javascript:;" onclick="caribou.go('/${model.slug}/new')">New ${model.name}</a></span>
+</script>
+
+<script id="actionItemsForGenericEdit" type="text/x-jquery-tmpl">
+  <span class="action_item"><a href="javascript:;" onclick="caribou.go('/${model.slug}/new')">New ${model.name}</a></span>
+</script>
+
+<script id="actionItemsForGenericView" type="text/x-jquery-tmpl">
+  <span class="action_item"><a href="javascript:;" onclick="caribou.go('/${model.slug}/${content.id}/edit')">Edit ${model.name}</a></span>
+  <span class="action_item"><a href="/${model.slug}/${content.id}" data-confirm="Are you sure you want to delete this?" data-method="delete" rel="nofollow">Delete ${model.name}</a></span>
+</script>
+
+<!-- 
+
+SIDEBAR TEMPLATES
+
+-->
+
+<script id="sidebarForGenericList" type="text/x-jquery-tmpl">
+  <!-- <div class="panel sidebar_section" id="filters_sidebar_section"> -->
+  <!--   <h3>Filters</h3> -->
+  <!--   <div class="panel_contents"> -->
+  <!--     <form accept-charset="UTF-8" action="/admin/customers" class="filter_form" id="q_search" method="get"> -->
+  <!--       <div style="margin:0;padding:0;display:inline"> -->
+  <!--         <input name="utf8" type="hidden" value="&#x2713;" /> -->
+  <!--       </div> -->
+  <!--       <div class="filter_form_field filter_string"> -->
+  <!--         <label for="q_username_contains">Search Text</label> -->
+  <!--         <input id="q_username_contains" name="q[username_contains]" size="30" type="text" /> -->
+  <!--       </div> -->
+  <!--       <div class="filter_form_field filter_date_range"> -->
+  <!--         <label for="q_created_at_gte">Created at</label> -->
+  <!--         <input class="datepicker" id="q_created_at_gte" max="10" name="q[created_at_gte]" size="12" type="text" value="" /> -->
+  <!--         <span class="seperator">-</span> -->
+  <!--         <input class="datepicker" id="q_created_at_lte" max="10" name="q[created_at_lte]" size="12" type="text" value="" /> -->
+  <!--       </div> -->
+  <!--       <div class="buttons"> -->
+  <!--         <input id="q_submit" name="commit" type="submit" value="Filter" /> -->
+  <!--         <a href="#" class="clear_filters_btn">Clear Filters</a> -->
+  <!--         <input id="order" name="order" type="hidden" value="id_desc" /> -->
+  <!--         <input id="scope" name="scope" type="hidden" /> -->
+  <!--       </div> -->
+  <!--     </form> -->
+  <!--   </div> -->
+  <!-- </div>  -->
+</script>
+
+<script id="sidebarForGenericView" type="text/x-jquery-tmpl">
+  <div class="panel sidebar_section" id="filters_sidebar_section">
+  </div> 
+</script>
+
+<script id="sidebarForModelView" type="text/x-jquery-tmpl">
+  <div class="panel sidebar_section" id="filters_sidebar_section">
+    <h3>Model Details</h3>
+    <div class="panel_contents">
+      <div class="${model.slug} attributes_table" id="attributes_table_${model.slug}_${content.id}">
+        <table border="0" cellspacing="0" cellpadding="0">
+          {{each(i, field) model.fields}}
+          {{if field.slug != "fields"}}
+          <tr>
+            <th>${field.name}</th>
+            <td>{{if $data.content[field.slug] === null || $data.content[field.slug] === ""}}<span class="empty">Empty</span>{{else}}${$data.content[field.slug]}{{/if}}</td>
+          </tr>
+          {{/if}}
+          {{/each}}
+        </table>
+      </div>
+    </div>
+  </div> 
+</script>
+
+<script id="sidebarForGenericEdit" type="text/x-jquery-tmpl">
+  <div class="panel sidebar_section" id="filters_sidebar_section">
+    <h3>Model Details</h3>
+    <div class="panel_contents">
+      <div class="${model.slug} attributes_table" id="attributes_table_${model.slug}_${content.id}">
+        <table border="0" cellspacing="0" cellpadding="0">
+          {{each(i, field) model.fields}}
+          {{if !field.editable}}
+          <tr>
+            <th>${field.name}</th>
+            <td>{{if $data.content[field.slug] === null || $data.content[field.slug] === ""}}<span class="empty">Empty</span>{{else}}${$data.content[field.slug]}{{/if}}</td>
+          </tr>
+          {{/if}}
+          {{/each}}
+        </table>
+      </div>
+    </div>
+  </div> 
+</script>
+
+<script id="sidebarForModelEdit" type="text/x-jquery-tmpl">
+  <div class="panel sidebar_section" id="filters_sidebar_section">
+    <h3>Model Details</h3>
+    <div class="panel_contents">
+      <div class="${model.slug} attributes_table" id="attributes_table_${model.slug}_${content.id}">
+        <table border="0" cellspacing="0" cellpadding="0">
+          {{each(i, field) model.fields}}
+          {{if !field.editable || field.slug === 'position'}}
+          <tr>
+            <th>${field.name}</th>
+            <td>{{if $data.content[field.slug] === null || $data.content[field.slug] === ""}}<span class="empty">Empty</span>{{else}}${$data.content[field.slug]}{{/if}}</td>
+          </tr>
+          {{/if}}
+          {{/each}}
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="panel sidebar_section" id="fields_sidebar_section">
+    <h3>Model Builder</h3>
+    <div class="panel_contents">
+      {{each(i, type) _.keys(fieldTypes)}}
+      <div onclick="caribou.admin.modelView.edit.newField('${$data.content.slug}', '${type}')" class="type">${$data.fieldTypes[type].name}</div>
+      {{/each}}
+      <!-- <a href="">Single Line Text</a> -->
+      <!-- <a href="">Paragraph Text</a> -->
+      <!-- <a href="">Slug</a> -->
+      <!-- <a href="">Asset</a> -->
+      <!-- <a href="">Related Data</a> -->
+      <!-- <a href="">Drop Down</a> -->
+      <!-- <a href="">Multiple Choice</a> -->
+      <!-- <a href="">Checkbox</a> -->
+      <!-- <br><br> -->
+      <!-- <a href="">Number</a> -->
+      <!-- <a href="">Date / Time</a> -->
+      <!-- <a href="">Duration</a> -->
+      <!-- <a href="">Calculation</a> -->
+      <!-- <a href="">Price</a> -->
+      <!-- <a href="">Automatic Counter</a> -->
+      <!-- <a href="">Rating</a> -->
+      <!-- <a href="">Encrypted</a> -->
+      <!-- <br><br> -->
+      <!-- <a href="">Address</a> -->
+      <!-- <a href="">Phone Number</a> -->
+      <!-- <a href="">Email Address</a> -->
+      <!-- <a href="">URL</a> -->
+      <!-- <a href="">IM Account</a> -->
+      <!-- <br><br> -->
+    </div>
+  </div>
+</script>
+
+<!-- 
+
+LIST TEMPLATES
+
+-->
+
+<script id="mainContentForGenericRow" type="text/x-jquery-tmpl">
+  {{each(i, field) model.fields}}
+  <td>{{if i==0}}<a href="javascript:;" onclick="caribou.go('/${$data.model.slug}/${content.id}')">{{/if}}${content[field.slug]}{{if i==0}}</a>{{/if}}</td>
+  {{/each}}
+  <td>
+    <a href="javascript:;" onclick="caribou.go('/${model.slug}/${content.id}')" class="member_link view_link">View</a>
+    <a href="javascript:;" onclick="caribou.go('/${model.slug}/${content.id}/edit')" class="member_link edit_link">Edit</a>
+    {{if !content.locked}}
+    <a href="javascript:;" onclick="caribou.admin.delete('${model.slug}', ${content.id})" class="member_link delete_link" data-confirm="Are you sure you want to delete this?" data-method="delete" rel="nofollow">Delete</a>
+    {{/if}}
+  </td>
+</script>
+
+<script id="mainContentForGenericList" type="text/x-jquery-tmpl">
+  {{if content.length > 0}}
+  <div class="scopes">
+    <span class="scope all selected">
+      <em>All</em>
+      <span class="count">(${meta.total_items})</span>
+    </span>
+    <!-- <span class="scope in_progress"> -->
+    <!--   <a href="/admin/orders?order=id_desc&amp;page=1&amp;scope=in_progress">In Progress</a> -->
+    <!--   <span class="count">(32)</span> -->
+    <!-- </span> -->
+    <!-- <span class="scope complete"> -->
+    <!--   <a href="/admin/orders?order=id_desc&amp;page=1&amp;scope=complete">Complete</a> -->
+    <!--   <span class="count">(265)</span> -->
+    <!-- </span> -->
+  </div>
+  <div class="paginated_collection">
+    <div class="pagination_information">Displaying ${model.name} <b>${(meta.page-1)*(meta.page_size)+1}&nbsp;-&nbsp;${(meta.page-1)*(meta.page_size)+meta.count}</b> of <b>${meta.total_items}</b> in total</div>
+    <div class="paginated_collection_contents">
+      <div class="index_content">
+        <div class="index_as_table">
+          <table class="index_table" border="0" cellspacing="0" cellpadding="0" id="${model.slug}">
+            <thead>
+              <tr>
+                {{each(i, field) model.fields}}
+                <th class="{{if field.slug === meta.order_by}}sorted-${meta.order}{{/if}} sortable">
+                  <a href="javascript:;" onclick="caribou.go('/${$data.model.slug}?page=${meta.page}&page_size=${meta.page_size}&order_by=${field.slug}&order=${meta.order === 'asc' ? 'desc' : 'asc'}')">${field.name}</a>
+                </th>
+                {{/each}}
+                <th>&nbsp;</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{each(i, item) content}}
+              <tr id="${$data.model.slug}_${item.id}" class="{{if i%2==0}}odd{{else}}even{{/if}}">
+                {{tmpl({model: $data.model, content: item}) "#mainContentForGenericRow"}}
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div id="index_footer">
+      Download:&nbsp;<a href="${caribou.remoteAPI}/${model.slug}.csv">CSV</a>&nbsp;<a href="#{caribou.remoteAPI}/${model.slug}.xml">XML</a>&nbsp;<a href="#{caribou.remoteAPI}/${model.slug}.json">JSON</a>
+      <nav class="pagination">
+        {{if meta.page > 1}}
+        <span class="first">
+          <a href="javascript:;" onclick="caribou.go('/${model.slug}?page=1&page_size=${meta.page_size}&order_by=${meta.order_by}&order=${meta.order}')">First &laquo;</a>
+        </span>
+        {{/if}}
+        {{if meta.page > 1}}
+        <span class="previous">
+          <a href="javascript:;" onclick="caribou.go('/${model.slug}?page=${meta.page-1}&page_size=${meta.page_size}&order_by=${meta.order_by}&order=${meta.order}')" rel="previous">Previous &lsaquo;</a>
+        </span>
+        {{/if}}
+        {{each(i, page) _.range(1, meta.total_pages+1)}}
+        {{if page === $data.meta.page}}
+        <span class="page current">${$data.meta.page}</span>
+        {{else}}
+        <span class="page">
+          <a href="javascript:;" onclick="caribou.go('/${model.slug}?page=${page}&page_size=${$data.meta.page_size}&order_by=${$data.meta.order_by}&order=${$data.meta.order}')">${page}</a>
+        </span>
+        {{/if}}
+        {{/each}}
+        <!--<span class="page gap">...</span>-->
+        {{if meta.page < meta.total_pages}}
+        <span class="next">
+          <a href="javascript:;" onclick="caribou.go('/${model.slug}?page=${meta.page+1}&page_size=${meta.page_size}&order_by=${meta.order_by}&order=${meta.order}')" rel="next">Next &rsaquo;</a>
+        </span>
+        {{/if}}
+        {{if meta.page < meta.total_pages}}
+        <span class="last">
+          <a href="javascript:;" onclick="caribou.go('/${model.slug}?page=${meta.total_pages}&page_size=${meta.page_size}&order_by=${meta.order_by}&order=${meta.order}')">Last &raquo;</a>
+        </span>
+        {{/if}}
+      </nav>
+    </div>
+  </div>
+  {{else}}
+  <div class="blank_slate_container">
+    <span class="blank_slate">There are no ${model.name} yet. <a href="/${model.slug}/new">Create one</a></span>
+  </div>
+  {{/if}}
+</script>
+
+<!-- 
+
+EDIT TEMPLATES
+
+-->
+
+<script id="mainContentForGenericEdit" type="text/x-jquery-tmpl">
+  <form accept-charset="UTF-8" target="upload_target" action="${caribou.remoteAPI}/upload" class="formtastic ${model.slug} content_form" id="${model.slug}_edit" method="post" enctype="multipart/form-data">
+    <div style="margin:0;padding:0;display:inline">
+      {{if content.id}}
+      <input type="hidden" name="${model.slug}[id]" value="${content.id}" />
+      {{/if}}
+    </div>
+    <fieldset class="inputs">
+      <ol>
+        {{each(i, field) model.fields}}
+        <li class="${field.type} required" id="${$data.model.slug}_${field.slug}_input">
+          {{if field.editable}}
+          {{tmpl({model: $data.model, content: $data.content, field: field}) "#"+field.type+"Field"}}
+          {{else}}
+          <label>${field.name}</label>
+          ${$data.content[field.slug]}
+          {{/if}}
+        </li>
+        {{/each}}
+      </ol>
+    </fieldset>
+    <fieldset class="buttons">
+      <ol>
+        <li class="commit">
+          <div class="update" onclick="caribou.admin.${action}('${model.slug}')">${action} ${model.name}</div>
+        </li>
+        <li class="cancel">
+          <a href="/${model.slug}">Cancel</a>
+        </li>
+      </ol>
+    </fieldset>
+  </form>
+</script>
+
+<script id="mainContentForModelEdit" type="text/x-jquery-tmpl">
+  <form accept-charset="UTF-8" action="/${model.slug}/${content.id}" class="formtastic ${model.slug}" id="${model.slug}_edit" method="post">
+    <div style="margin:0;padding:0;display:inline">
+      <input type="hidden" name="${model.slug}[id]" value="${content.id}" />
+    </div>
+    <fieldset class="inputs">
+      <legend><span>Model Settings</span></legend>
+      <ol>
+        {{each(i, field) model.fields}}
+        {{if field.editable && field.slug != 'position'}}
+        <li class="${field.type} required" id="${$data.model.slug}_${field.slug}_input">
+          {{tmpl({model: $data.model, content: $data.content, field: field}) "#"+field.type+"Field"}}
+        </li>
+        {{/if}}
+        {{/each}}
+      </ol>
+    </fieldset>
+    
+    <div class="panel">
+      <h3>Model Fields</h3>
+      <div class="panel_contents model_fields_edit_table">
+        <input id="removed_fields" type="hidden" name="${model.slug}[removed_fields]" value="">
+        <table border="0" cellspacing="0" cellpadding="0">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Type</th>
+              <th>Options</th>
+              <th>&nbsp;</th>
+              <th>&nbsp;</th>
+            </tr>
+          </thead>
+          <tbody class="sortable">
+            {{each(i, field) content.fields}}
+            {{tmpl({model: $data.model, content: $data.content, field: field, index: i, fieldTypes: $data.fieldTypes}) "#abstractFieldForModelEdit"}}
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <fieldset class="buttons">
+      <ol>
+        <li class="commit">
+          <div class="update" onclick="caribou.admin.${action}('${model.slug}')">${action} ${model.name}</div>
+        </li>
+        <li class="cancel">
+          <a href="/${model.slug}">Cancel</a>
+        </li>
+      </ol>
+    </fieldset>
+  </form>
+</script>
+
+<!-- 
+
+MODEL FIELD FORM TEMPLATES
+
+-->
+
+<!--ABSTRACT-->
+<script id="abstractFieldForModelEdit" type="text/x-jquery-tmpl">
+  <tr>
+    <td class="name"><input type="text" class="{{if field.type === 'string'}}string_field{{/if}}" name="model[fields][${index}][name]" value="${field.name}" /></td>
+    <td class="type">
+      <input type="hidden" name="model[fields][${index}][type]" value="${field.type}" />
+      <input class="model_id" type="hidden" name="model[fields][${index}][id]" value="${field.id}" />
+      <input class="model_position" type="hidden" name="model[fields][${index}][model_position]" value="${field.model_position}" />
+      <span>${fieldTypes[field.type].name}</span>
+    </td>
+    <td class="options">
+      {{each(i, option) fieldTypes[field.type].options}}
+      {{tmpl({model: $data.model, content: $data.content, field: $data.field, index: $data.index}) "#"+option+"FieldOptions"}}
+      {{/each}}
+    </td>
+    <td class="options"><label><input type="checkbox"> Required field?</label></td>
+    <td class="actions">{{if !field.locked}}<a href="javascript:;" class="member_link delete_link">Delete</a> {{/if}}<a href="javascript:;" class="member_link handle_link">Drag</a></td>
+  </tr>
+</script>
+<!--ABSTRACT-->
+
+<script id="defaultStringFieldOptions" type="text/x-jquery-tmpl">
+  <div class="field"><label for="">Default value</label><input type="text" name="model[fields][${index}][default_value]" value="${field.default_value}" /></div>
+</script>
+
+<script id="defaultBooleanFieldOptions" type="text/x-jquery-tmpl">
+  <div class="field">
+    <label for="">Default value</label>
+    <select name="model[fields][${index}][default_value]">
+      <option{{if field.default_value}} selected="selected"{{/if}}>true</option>
+      <option{{if !field.default_value}} selected="selected"{{/if}}>false</option>
+    </select>
+  </div>
+</script>
+
+<script id="slugLinkFieldOptions" type="text/x-jquery-tmpl">
+  <div class="field">
+    <label for="">Linked field</label>
+    <select name="model[fields][${index}][link_slug]" class="slug_options">{{html caribou.admin.slugOptions(content, field.link)}}</select>
+  </div>
+</script>
+
+<script id="linkFieldOptions" type="text/x-jquery-tmpl">
+</script>
+
+<!-- 
+
+VIEW TEMPLATES
+
+-->
+
+<script id="mainContentForGenericView" type="text/x-jquery-tmpl">
+  <div class="panel">
+    <h3>${model.name} Details</h3>
+    <div class="panel_contents">
+      <div class="${model.slug} attributes_table" id="attributes_table_${model.slug}_${content.id}">
+        <table border="0" cellspacing="0" cellpadding="0">
+          {{each(i, field) model.fields}}
+          <tr>
+            <th><label class="label">${field.name}</label></th>
+            <td>{{if $data.content[field.slug] == null}}<span class="empty">Empty</span>{{else}}${$data.content[field.slug]}{{/if}}</td>
+          </tr>
+          {{/each}}
+        </table>
+      </div>
+    </div>
+  </div>
+</script>
+
+<script id="mainContentForModelView" type="text/x-jquery-tmpl">
+  <div class="panel">
+    <h3>Fields (${content.fields.length})</h3>
+    <div class="panel_contents">
+      <table border="0" cellspacing="0" cellpadding="0">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{each(i, field) content.fields}}
+          <tr class="{{if i%2==0}}odd{{else}}even{{/if}}">
+            <td>${field.name}</td>
+            <td>${field.type}</td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</script>
+
+<!-- 
+
+FIELD INPUT TEMPLATES
+
+-->
+
+<script id="booleanField" type="text/x-jquery-tmpl">
+  <label for="${model.slug}_${field.slug}">
+    <input type="checkbox" id="${model.slug}_${field.slug}" name="${model.slug}[${field.slug}]" value="true" {{if content[field.slug]}}checked{{/if}} />
+    ${field.name}
+  </label>
+</script>
+
+<script id="stringField" type="text/x-jquery-tmpl">
+  <label for="${$data.model.slug}_${field.slug}">${field.name}<abbr title="required">*</abbr></label>
+  <input type="text" id="${model.slug}_${field.slug}" name="${model.slug}[${field.slug}]" maxlength="255" value="${content[field.slug]}" />
+</script>
+
+<script id="slugField" type="text/x-jquery-tmpl">
+  <label for="${$data.model.slug}_${field.slug}">${field.name}<abbr title="required">*</abbr></label>
+  <input type="text" name="${model.slug}[${field.slug}]" value="${content[field.slug]}" />
+</script>
+
+<script id="integerField" type="text/x-jquery-tmpl">
+  <label for="${$data.model.slug}_${field.slug}">${field.name}<abbr title="required">*</abbr></label>
+  <input type="text" name="${model.slug}[${field.slug}]" value="${content[field.slug]}" />
+</script>
+
+<script id="decimalField" type="text/x-jquery-tmpl">
+  <label for="${$data.model.slug}_${field.slug}">${field.name}<abbr title="required">*</abbr></label>
+  <input type="text" name="${model.slug}[${field.slug}]" value="${content[field.slug]}" />
+</script>
+
+<script id="textField" type="text/x-jquery-tmpl">
+  <label for="${$data.model.slug}_${field.slug}">${field.name}<abbr title="required">*</abbr></label>
+  <textarea name="${model.slug}[${field.slug}]">${content[field.slug]}</textarea>
+</script>
+
+<script id="timestampField" type="text/x-jquery-tmpl">
+  <label for="${$data.model.slug}_${field.slug}">${field.name}<abbr title="required">*</abbr></label>
+  <input type="text" name="${model.slug}[${field.slug}]" value="${content[field.slug]}" />
+</script>
+
+<script id="addressField" type="text/x-jquery-tmpl">
+  <input type="hidden" name="${model.slug}[${field.slug}_id]" value="{{if content[field.slug+'_id']}}${content[field.slug+'_id']}{{/if}}" />
+  <label for="${$data.model.slug}_${field.slug}">${field.name}<abbr title="required">*</abbr></label>
+  <input type="text" name="${model.slug}[${field.slug}][address]" value="{{if content[field.slug]}}${content[field.slug].address}{{/if}}" />
+  <input type="text" name="${model.slug}[${field.slug}][address_two]" value="{{if content[field.slug]}}${content[field.slug].address_two}{{/if}}" />
+  <input type="text" name="${model.slug}[${field.slug}][city]" value="{{if content[field.slug]}}${content[field.slug].city}{{/if}}" />
+  <input type="text" name="${model.slug}[${field.slug}][state]" value="{{if content[field.slug]}}${content[field.slug].state}{{/if}}" />
+  <input type="text" name="${model.slug}[${field.slug}][postal_code]" value="{{if content[field.slug]}}${content[field.slug].postal_code}{{/if}}" />
+  <input type="text" name="${model.slug}[${field.slug}][country]" value="{{if content[field.slug]}}${content[field.slug].country}{{/if}}" />
+</script>
+
+<script id="collectionField" type="text/x-jquery-tmpl">
+  
+</script>
+
+<script id="collectionFieldOld" type="text/x-jquery-tmpl">
+  {{tmpl({model: field.target(), content: content[field.slug], meta: {}}) "#mainContentForList"}}
+</script>
+
+<script id="partField" type="text/x-jquery-tmpl">
+  <label for="${$data.model.slug}_${field.slug}">${field.name}<abbr title="required">*</abbr></label>
+  <input type="text" name="${model.slug}[${field.slug}]" value="${content[field.slug]}" />
+</script>
+
+<script id="linkField" type="text/x-jquery-tmpl">
+  <label for="${$data.model.slug}_${field.slug}">${field.name}<abbr title="required">*</abbr></label>
+  <input type="text" name="${model.slug}[${field.slug}]" value="${content[field.slug]}" />
+</script>
+
+<script id="assetField" type="text/x-jquery-tmpl">
+  <div>
+    <label for="${$data.model.slug}_${field.slug}" class="fileinput-button">
+      <span>${field.name}</span>
+    </label>
+    <input id="${field.slug}_asset" name="${model.slug}[${field.slug}_id]" type="hidden" value="${content[field.slug+'_id']}"/>
+    <span class="update" onclick="caribou.admin.showUploadForm('${field.slug}')">Choose Asset</span>
+    <span id="${field.slug}_thumbnail">
+      {{if content[field.slug] && content[field.slug].path}}
+      <a target="_blank" href="${caribou.remoteAPI}/${content[field.slug].path}">
+        <img src="${caribou.remoteAPI}/${content[field.slug].path}" height="100" /></a>
+      {{/if}}
+    </span>
+  </div>
+</script>
+

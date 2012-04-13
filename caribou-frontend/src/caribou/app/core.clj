@@ -3,19 +3,18 @@
         [clojure.string :only (join)]
         [clojure.walk :only (stringify-keys)]
         [ring.middleware file file-info stacktrace reload])
-  (:require [caribou.model :as model]
+  (:require [clojure.string :as string]
+            [clojure.java.jdbc :as sql]
+            [clojure.java.io :as io]
+            [caribou.model :as model]
             [caribou.util :as util]
             [caribou.db :as db]
             [caribou.config :as config]
             [caribou.app.controller :as controller]
             [caribou.app.template :as template]
             [caribou.app.view :as view]
-            [clojure.string :as string]
-            [clojure.java.jdbc :as sql]
             [compojure.route :as route]
-            [ring.adapter.jetty :as ring]
-            [compojure.handler :as handler]
-            [clojure.java.io :as io]))
+            [compojure.handler :as handler]))
 
 (import (java.io File))
 

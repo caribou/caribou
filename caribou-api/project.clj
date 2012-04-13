@@ -11,8 +11,6 @@
                  [clojure-csv/clojure-csv "1.3.2"]
                  [org.clojars.cjschroed/sandbar "0.4.0"]]
                  ;; [antler/sandbar "0.4.0-SNAPSHOT"]]
-  ;; :dev-dependencies [[lein-ring "0.6.3"]
-  ;;                    [swank-clojure "1.4.0-SNAPSHOT"]]
   :jvm-opts ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n"]
   :ring {:handler caribou.api.core/app
          :servlet-name "caribou-api"
