@@ -4,16 +4,14 @@
             [compojure.handler :as handler]))
 
 (defn render-index
-  [params]
+  []
   (slurp "public/caribou.html"))
 
 (defroutes admin-routes
   (route/files "/" {:root "public"})
-  (GET "/" {params :params} (render-index params))
-  (GET "/:splat" {params :params} (render-index params) :splat #".*"))
+  (route/not-found (render-index)))
 
-(def app
-  (handler/site admin-routes))
+(def app (handler/site admin-routes))
 
 (defn init
   [])

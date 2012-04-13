@@ -6,5 +6,6 @@
   :dependencies [[antler/caribou-frontend "0.1.0-SNAPSHOT"]]
   :ring {:handler caribou.admin.core/app
          :servlet-name "caribou-admin"
-         :init caribou.admin.core/init})
+         :init caribou.admin.core/init
+         :port 33553})
 

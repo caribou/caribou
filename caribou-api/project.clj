@@ -14,4 +14,5 @@
   :jvm-opts ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n"]
   :ring {:handler caribou.api.core/app
          :servlet-name "caribou-api"
-         :init caribou.api.core/init})
+         :init caribou.api.core/init
+         :port 33443})
