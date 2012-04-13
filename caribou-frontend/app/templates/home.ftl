@@ -1,0 +1,1 @@
+${dojo.bindo} -------------- ${dojo.jojo.path}
