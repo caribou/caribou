@@ -1,4 +1,4 @@
-(defproject antler/caribou "0.4.4"
+(defproject antler/caribou "0.4.5"
   :description
   "caribou: type structure interaction medium"
 
