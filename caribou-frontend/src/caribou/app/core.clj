@@ -2,7 +2,7 @@
   (:use compojure.core
         [clojure.string :only (join)]
         [clojure.walk :only (stringify-keys)]
-        [ring.middleware file file-info stacktrace reload])
+        [ring.middleware file file-info])
   (:require [clojure.string :as string]
             [clojure.java.jdbc :as sql]
             [clojure.java.io :as io]
@@ -137,7 +137,6 @@
   (def app (-> all-routes
                (wrap-file (util/pathify [config/root "public"]))
                (wrap-file-info)
-               (wrap-stacktrace)
                (handler/site)
                (db/wrap-db db))))
 

@@ -3,10 +3,10 @@
   "caribou: type structure interaction medium"
 
   :dependencies
-  [[antler/caribou-core "0.4.3"]
-   [antler/caribou-api "0.1.0-SNAPSHOT"]
-   [antler/caribou-frontend "0.1.0-SNAPSHOT"]
-   [antler/caribou-admin "0.1.0-SNAPSHOT"]]
+  [[antler/caribou-core "0.4.4"]
+   [antler/caribou-api "0.2.0"]
+   [antler/caribou-frontend "0.2.0"]
+   [antler/caribou-admin "0.2.0"]]
 
   :sub
   ["caribou-core"
