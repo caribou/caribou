@@ -66,6 +66,12 @@
   (let [filename (.getName file)]
   (.toLowerCase (.substring filename (.lastIndexOf filename ".")))))
 
+(defn load-resource
+  [resource-name]
+  (let [thr (Thread/currentThread)
+        ldr (.getContextClassLoader thr)]
+    (.getResourceAsStream ldr resource-name)))
+
 (defn load-path [path visit]
   (doseq [file (file-seq (io/file path))]
     (let [filename (.toString file)

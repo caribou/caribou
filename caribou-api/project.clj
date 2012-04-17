@@ -1,7 +1,7 @@
-(defproject antler/caribou-api "0.2.1"
+(defproject antler/caribou-api "0.2.2"
   :description "The api ring handler for caribou"
   :dependencies [[org.clojure/clojure "1.3.0"]
-                 [antler/caribou-core "0.4.4"]
+                 [antler/caribou-core "0.4.5"]
                  [compojure "1.0.1"]
                  [ring/ring-core "1.0.2"
                   :exclusions [org.clojure/clojure
@@ -18,3 +18,4 @@
          :servlet-name "caribou-api"
          :init caribou.api.core/init
          :port 33443})
+
