@@ -14,7 +14,7 @@
                  [org.clojars.cjschroed/sandbar "0.4.0"]]
                  ;; [antler/sandbar "0.4.0-SNAPSHOT"]]
   :jvm-opts ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n"]
-  :ring {:handler caribou.app.core/app
+  :ring {:handler caribou.app.core/handler
          :servlet-name "caribou-frontend"
          :init caribou.app.core/init
          :port 33333})
