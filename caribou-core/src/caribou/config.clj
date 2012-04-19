@@ -16,6 +16,10 @@
                     (.getContextClassLoader)
                     (.getResourceAsStream "caribou.properties"))))))))
 
+(defn app-value-eq
+  [kw value]
+  (= (@app kw) value))
+
 (def root (.getAbsolutePath (io/file "")))
 (def db (ref {}))
 (def all-db (ref {}))

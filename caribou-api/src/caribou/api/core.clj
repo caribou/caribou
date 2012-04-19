@@ -19,7 +19,8 @@
             [clojure.java.jdbc :as sql]
             [clojure.java.io :as io]
             [clojure-csv.core :as csv]
-            [clojure.data.xml :as xml]))
+            [clojure.data.xml :as xml]
+            [clj-http.client :as http-client]))
 
 (def error
   {:meta {:status "500"
@@ -290,7 +291,21 @@
              (db/wrap-db @config/db)
              (with-secure-channel security-config (@config/app :api-port) (@config/app :api-ssl-port))))
 
-(defn init [] )
+(defn halo-endpoint
+  [route-str]
+  (str (config/app :halo-host) (config/app :halo-prefix) "/" route-str))
+
+(def halo-headers
+  {"X-Halo-Key" (config/app :halo-key)})
+
+(defn reload-routes
+  [env]
+  (let [halo-endpoint (halo-endpoint "reload-routes")]
+    (http-client/get halo-endpoint {:headers halo-headers}))
+  env)
+
+(defn init [] 
+  (model/add-hook :page :after_save :reload-routes reload-routes))
 
 ;; (def header-buffer-size 8388608)
 

@@ -2,6 +2,7 @@
   :description "The api ring handler for caribou"
   :dependencies [[org.clojure/clojure "1.3.0"]
                  [antler/caribou-core "0.4.5"]
+                 [clj-http "0.3.6"]
                  [compojure "1.0.1"]
                  [ring/ring-core "1.0.2"
                   :exclusions [org.clojure/clojure

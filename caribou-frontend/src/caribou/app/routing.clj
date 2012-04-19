@@ -10,6 +10,7 @@
             [caribou.app.controller :as controller]
             [caribou.app.halo :as halo]
             [caribou.app.template :as template]
+            [caribou.app.util :as app-util]
             [caribou.config :as config]
             [caribou.db :as db]
             [caribou.model :as model]
@@ -17,17 +18,6 @@
 
 (def pages (ref ()))
 (def actions (ref {}))
-
-(defn memoize-visible-atom [f]
-  (let [mem (atom {})]
-    (with-meta
-      (fn [& args]
-        (if-let [e (find @mem args)]
-          (val e)
-          (let [ret (apply f args)]
-            (swap! mem assoc args ret)
-            ret)))
-      {:memoize-atom mem})))
 
 (declare dynamic-handler)
 
@@ -52,7 +42,7 @@
 (defn generate-action
   "Depending on the application environment, reload controller files (or not)."
   [page template controller-key action-key]
-  (if (= (@config/app :environment) "development")
+  (if (config/app-value-eq :environment1 "development")
     (fn [params]
       (do
         (controller/load-controllers "app/controllers")
@@ -144,9 +134,9 @@
       (handler/site)
       (db/wrap-db @config/db)))
 
-(def dynamic-handler (memoize-visible-atom _dynamic-handler))
+(def dynamic-handler (app-util/memoize-visible-atom _dynamic-handler))
 
 (defn reset-handler 
   "clears the memoize atom in the metadata for dynamic-handler, which causes it to 'un-memoize'"
   []
-  (reset! (:memoize-atom (meta dynamic-handler)) {}))
+  (app-util/memoize-reset dynamic-handler))
