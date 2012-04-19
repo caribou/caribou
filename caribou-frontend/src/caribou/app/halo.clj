@@ -22,10 +22,16 @@
   [request]
   (route-reloader))
 
+(defn reload-models
+  "reloads the models in this Caribou app"
+  [request]
+  (model/invoke-models))
+
 (def halo-routes
   ; we need a better way to do this so we don't have to wrap each one in check-key
   (list
-    (GET (str (config/app :halo-prefix) "/" "reload-routes") [] (fn [request] (check-key request reload-routes)))))
+    (GET (str (config/app :halo-prefix) "/" "reload-routes") [] (fn [request] (check-key request reload-routes)))
+    (GET (str (config/app :halo-prefix) "/" "reload-models") [] (fn [request] (check-key request reload-models)))))
 
 (defn generate-routes
   [_route-reloader]

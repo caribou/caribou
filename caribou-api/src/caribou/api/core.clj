@@ -304,8 +304,15 @@
     (http-client/get halo-endpoint {:headers halo-headers}))
   env)
 
-(defn init [] 
-  (model/add-hook :page (list :after_destroy :after_save) :reload-routes reload-routes))
+(defn reload-models
+  [env]
+  (let [halo-endpoint (halo-endpoint "reload-models")]
+    (http-client/get halo-endpoint {:headers halo-headers}))
+  env)
+
+(defn init []
+  (model/add-hook :page (list :after_destroy :after_save) :halo-reload-routes reload-routes)
+  (model/add-hook :model (list :after_destory :after_save) :halo-reload-models reload-models))
 
 ;; (def header-buffer-size 8388608)
 
