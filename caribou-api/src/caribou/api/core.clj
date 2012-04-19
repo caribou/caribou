@@ -305,7 +305,7 @@
   env)
 
 (defn init [] 
-  (model/add-hook :page :after_save :reload-routes reload-routes))
+  (model/add-hook :page (list :after_destroy :after_save) :reload-routes reload-routes))
 
 ;; (def header-buffer-size 8388608)
 

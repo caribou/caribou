@@ -747,10 +747,12 @@
 (defn add-hook
   "add a hook for the given model slug for the given timing.
   each hook must have a unique id, or it overwrites the previous hook at that id."
-  [slug timing id hook]
-  (dosync
-   (alter ((lifecycle-hooks (keyword slug)) (keyword timing))
-          merge {id hook})))
+  [slug timings id hook]
+  (let [timings (if (keyword? timings) (list timings) timings)]
+    (doseq [timing timings]
+      (dosync
+       (alter ((lifecycle-hooks (keyword slug)) (keyword timing))
+              merge {id hook})))))
 
 (defn invoke-model
   "translates a row from the model table into a nested hash with references
