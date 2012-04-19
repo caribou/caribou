@@ -42,7 +42,7 @@
 (defn generate-action
   "Depending on the application environment, reload controller files (or not)."
   [page template controller-key action-key]
-  (if (config/app-value-eq :environment1 "development")
+  (if (config/app-value-eq :environment "development")
     (fn [params]
       (do
         (controller/load-controllers "app/controllers")
@@ -68,15 +68,16 @@
   [page above-path]
   (let [page-path (page :path)
         path (str above-path "/" (if page-path (name page-path) ""))
+        page-id (keyword (str (page :id)))
         controller-key (keyword (page :controller))
         action-key (keyword (page :action))
         method-key (page :method)
         template (@template/templates (keyword (page :template)))
         full (generate-action page template controller-key action-key)]
     (dosync
-     (alter actions merge {(keyword (page :action)) full}))
+     (alter actions merge {(keyword (str (page :id))) full}))
     (concat
-     [[path action-key method-key]]
+     [[path page-id method-key]]
      (mapcat #(match-action-to-template % path) (page :children)))))
 
 (defn make-route
