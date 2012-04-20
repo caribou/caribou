@@ -27,19 +27,19 @@
 (def default-db-config
   {:production
    {:classname "org.postgresql.Driver"
-    :subprotocol "postgres"
+    :subprotocol "postgresql"
     :host "localhost"
     :database "caribou"
     :user "postgres"}
    :development
    {:classname "org.postgresql.Driver"
-    :subprotocol "postgres"
+    :subprotocol "postgresql"
     :host "localhost"
     :database "caribou_development"
     :user "postgres"}
    :test
    {:classname "org.postgresql.Driver"
-    :subprotocol "postgres"
+    :subprotocol "postgresql"
     :host "localhost"
     :database "caribou_test"
     :user "postgres"}})
