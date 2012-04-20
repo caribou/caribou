@@ -190,7 +190,7 @@
         (seq (.executeBatch s))))
     (catch Exception e
       (try
-        (println (str "database " name " doesn't exist: " (.getNextException (debug e))))
+        (println (str "database " name " doesn't exist: " (.getNextException (.getCause (debug e)))))
         (catch Exception e (println e))))))
 
 (defn create-database
@@ -201,7 +201,7 @@
       (with-open [s (.createStatement (sql/connection))]
         (.addBatch s (str "create database " (zap name)))
         (seq (.executeBatch s))))
-    (catch Exception e (println (str "database " name " already exists: " (.getNextException e))))))
+    (catch Exception e (println (str "database " name " already exists: " (.getNextException (.getCause e)))))))
 
 (defn rebuild-database
   "drop and recreate the given database"
