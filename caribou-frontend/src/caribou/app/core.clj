@@ -12,8 +12,7 @@
             [caribou.app.controller :as controller]
             [caribou.app.routing :as routing]
             [caribou.app.template :as template]
-            [caribou.app.view :as view]
-            [compojure.route :as route]))
+            [caribou.app.view :as view]))
 
 (import (java.io File))
 
@@ -26,12 +25,11 @@
 
 (defn page-init []
   (model/init)
-  (controller/load-controllers "app/controllers"))
 
-(defn handler
-  [request]
-  ; put app-level middleware here
-  (routing/dispatcher request))
+(defn configure
+  [app-config]
+  (template/load-templates (util/pathify [config/root "app" "templates"])))
+  (controller/load-controllers "app/controllers"))
 
 (defn init
   []

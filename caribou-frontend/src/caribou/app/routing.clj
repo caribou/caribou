@@ -1,143 +1,99 @@
 (ns caribou.app.routing
-  (:use compojure.core
-        [clojure.walk :only (stringify-keys)]
+  (:use 
+        [clj-time.core :only (now)]
+        [clj-time.format :only (unparse formatters)]
+        [compojure.core :only (routes)]
         [ring.middleware file file-info]
         [caribou.debug])
   (:require 
-            [clojure.java.jdbc :as sql]
-            [compojure.handler :as handler]
+            [clojure.string :as string]
+            [compojure.handler :as compojure-handler]
 
             [caribou.app.controller :as controller]
             [caribou.app.halo :as halo]
             [caribou.app.template :as template]
             [caribou.app.util :as app-util]
             [caribou.config :as config]
-            [caribou.db :as db]
-            [caribou.model :as model]
             [caribou.util :as util]))
 
-(def pages (ref ()))
-(def actions (ref {}))
+;; Routing borrowed heavily (stolen) from Noir
 
-(declare dynamic-handler)
+(defonce route-funcs (atom {}))
+(defonce caribou-routes (atom {}))
 
-(defn dispatcher
-  [request]
-  ((dynamic-handler) request))
+(defn- keyword->symbol [namesp kw]
+  (symbol namesp (string/upper-case (name kw))))
+
+(defn- route->key [action rte]
+  (let [action (string/replace (str action) #".*/" "")]
+    (str action (-> rte
+                    (string/replace #"\." "!dot!")
+                    (string/replace #"/" "--")
+                    (string/replace #":" ">")
+                    (string/replace #"\*" "<")))))
+
+(defn- parse-route [[{:keys [fn-name] :as result} [cur :as all]] default-action]
+  (let [cur (if (symbol? cur)
+              (try
+                (deref (resolve cur))
+                (catch Exception e
+                  (app-util/throwf "Symbol given for route has no value")))
+              cur)]
+    (when-not (or (vector? cur) (string? cur))
+      (app-util/throwf "Routes must either be a string or vector, not a %s" (type cur)))
+    (let [[action url] (if (vector? cur)
+                         [(keyword->symbol "compojure.core" (first cur)) (second cur)]
+                         [default-action cur])
+          final (-> result
+                    (assoc :fn-name (if fn-name
+                                      fn-name
+                                      (symbol (route->key action url))))
+                    (assoc :url url)
+                    (assoc :action action))]
+      [final (rest all)])))
+
+(defn- parse-destruct-body [[result [cur :as all]]]
+  (when-not (some true? (map #(% cur) [vector? map? symbol?]))
+    (app-util/throwf "Invalid destructuring param: %s" cur))
+  (-> result
+      (assoc :destruct cur)
+      (assoc :body (rest all))))
+
+(defn parse-fn-name [[cur :as all]]
+  (let [[fn-name remaining] (if (and (symbol? cur)
+                                     (or (@route-funcs (keyword (name cur)))
+                                         (not (resolve cur))))
+                              [cur (rest all)]
+                              [nil all])]
+    [{:fn-name fn-name} remaining]))
+
+(defn parse-args
+  "parses the arguments to defpage. Returns a map containing the keys :name :action :url :destruct :body"
+  [args & [default-action]]
+  (-> args
+      (parse-fn-name)
+      (parse-route (or default-action 'compojure.core/GET))
+      (parse-destruct-body)))
+
+(defn add-route
+  [route func]
+  (let [[{:keys [action url fn-name]}] (parse-route [{} [route]] 'compojure.core/GET)
+        fn-key (keyword fn-name)]
+    (log :routing (format "adding route %s %s, name %s" action url fn-name))
+    (swap! route-funcs assoc fn-key func)
+    (swap! caribou-routes assoc fn-key (eval `(~action ~url {params# :params} (~func params#))))))
 
 (defn default-action 
   "if a page doesn't have a defined action, we just send the params"
   [params]
   (assoc params :result (str params)))
 
-(defn retrieve-action
-  "Given the controller-key and action-key, return the function that is correspondingly defined by a controller."
-  [controller-key action-key]
-  (let [controller (@controller/controllers controller-key)
-        action (if (empty? controller)
-                   default-action
-                   (action-key controller))]
-    action))
-
-(defn generate-action
-  "Depending on the application environment, reload controller files (or not)."
-  [page template controller-key action-key]
-  (if (config/app-value-eq :environment "development")
-    (fn [params]
-      (do
-        (controller/load-controllers "app/controllers")
-        (template/load-templates (util/pathify [config/root "app" "templates"]))
-        (let [action (retrieve-action controller-key action-key)
-              found-template
-              (or template
-                  (do
-                    (template/load-templates (util/pathify [config/root "app" "templates"]))
-                    (@template/templates (keyword (page :template)))))]
-          (if found-template
-            (found-template (stringify-keys (action (assoc params :page page))))
-            (str "No template by the name " (page :template))))))
-    (let [action (retrieve-action controller-key action-key)]
-      (if template
-        (fn [params]
-          (template (stringify-keys (action (assoc params :page page)))))
-        (fn [params] (str "No template by the name " (page :template)))))))
-
-
-(defn match-action-to-template
-  "Make a single route for a single page, given its overarching path (above-path)"
-  [page above-path]
-  (let [page-path (page :path)
-        path (str above-path "/" (if page-path (name page-path) ""))
-        page-id (keyword (str (page :id)))
-        controller-key (keyword (page :controller))
-        action-key (keyword (page :action))
-        method-key (page :method)
-        template (@template/templates (keyword (page :template)))
-        full (generate-action page template controller-key action-key)]
-    (dosync
-     (alter actions merge {(keyword (str (page :id))) full}))
-    (concat
-     [[path page-id method-key]]
-     (mapcat #(match-action-to-template % path) (page :children)))))
-
-(defn make-route
-  [[path action method]]
-  (cond
-   (= method "GET")    (GET path {params :params} ((actions action) params))
-   (= method "POST")   (POST path {params :params} ((actions action) params))
-   (= method "PUT")    (PUT path {params :params} ((actions action) params))
-   (= method "DELETE") (DELETE path {params :params} ((actions action) params))
-   :else               (GET path {params :params} ((actions action) params))))
-
-(defn generate-page-routes
-  "Given a tree of pages construct and return a list of corresponding routes."
-  [pages]
-  (let [routes (apply concat (map #(match-action-to-template % "") pages))
-        direct (map make-route routes)
-        unslashed (filter #(empty? (re-find #"/$" (first %))) routes)
-        slashed (map #(cons (str (first %) "/") (rest %)) unslashed)
-        indirect (map make-route slashed)]
-    (concat direct indirect)))
-
-(defn invoke-pages
-  "Call up the pages and arrange them into a tree."
-  []
-  (let [rows (db/query "select * from page")
-        tree (model/arrange-tree rows)]
-    (dosync
-     (alter pages (fn [a b] b) tree))))
+(def built-in-formatter (formatters :basic-date-time))
 
 (defn default-index
-  [request]
-  (str "Welcome to Caribou! Please add some pages, you foolish person."))
+  [& args]
+  (log :routing "Called default-index")
+  (format "Welcome to Caribou! Please add some pages, you foolish person.<br /> %s" (unparse built-in-formatter (now))))
 
-(def default-routes (list (GET "/" [] default-index)))
-
-(declare reset-handler)
-
-(defn invoke-routes
-  "Invoke pages from the db and generate the routes based on them."
-  []
-  (log :frontend-routing "loading routes")
-  (template/load-templates (util/pathify [config/root "app" "templates"]))
-  (sql/with-connection @config/db
-    (let [_pages (invoke-pages)
-          generated (doall (generate-page-routes @pages))]
-      ; we have to pass the reset-handler into halo, this smells
-      (concat generated (halo/generate-routes reset-handler) default-routes))))
-
-(defn _dynamic-handler
-  "calls the dynamic route generation functions and returns a composite handler"
-  []
-  (-> (apply routes (invoke-routes))
-      (wrap-file (util/pathify [config/root "public"]))
-      (wrap-file-info)
-      (handler/site)
-      (db/wrap-db @config/db)))
-
-(def dynamic-handler (app-util/memoize-visible-atom _dynamic-handler))
-
-(defn reset-handler 
-  "clears the memoize atom in the metadata for dynamic-handler, which causes it to 'un-memoize'"
-  []
-  (app-util/memoize-reset dynamic-handler))
+; default route
+(add-route "/" default-index)
