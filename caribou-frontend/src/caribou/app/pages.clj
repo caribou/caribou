@@ -46,9 +46,9 @@
 
 (defn make-route
   [[path action method]]
-   (log :pages (format "Making route for %s %s" path action))
+   (log :pages (format "Making route for %s %s %s" path action method))
    (let [this-action (actions action)]
-     (routing/add-route path this-action)))
+     (routing/add-route method path this-action)))
 
 (defn match-action-to-template
   "Make a single route for a single page, given its overarching path (above-path)"
@@ -94,4 +94,4 @@
           generated (doall (generate-page-routes @pages))]
       generated)))
 
-(routing/add-route "/test" (fn [& args] (str "blah")))
+(routing/add-route "GET" "/test" (fn [& args] (str "blah")))

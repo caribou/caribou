@@ -2,13 +2,12 @@
   (:use 
         [clj-time.core :only (now)]
         [clj-time.format :only (unparse formatters)]
-        [compojure.core :only (routes)]
+        [compojure.core :only (routes GET POST PUT DELETE ANY)]
         [ring.middleware file file-info]
         [caribou.debug])
   (:require 
             [clojure.string :as string]
             [compojure.handler :as compojure-handler]
-
             [caribou.app.controller :as controller]
             [caribou.app.halo :as halo]
             [caribou.app.template :as template]
@@ -75,13 +74,22 @@
       (parse-route (or default-action 'compojure.core/GET))
       (parse-destruct-body)))
 
+(defn resolve-method
+  [method path func]
+  (condp = method
+    "GET" (GET path {params :params} func)
+    "POST" (POST path {params :params} func)
+    "PUT" (PUT path {params :params} func)
+    "DELETE" (DELETE path {params :params} func)
+    (ANY path {params :params} func)))
+
 (defn add-route
-  [route func]
+  [method route func]
   (let [[{:keys [action url fn-name]}] (parse-route [{} [route]] 'compojure.core/GET)
         fn-key (keyword fn-name)]
     (log :routing (format "adding route %s %s, name %s" action url fn-name))
     (swap! route-funcs assoc fn-key func)
-    (swap! caribou-routes assoc fn-key (eval `(~action ~url {params# :params} (~func params#))))))
+    (swap! caribou-routes assoc fn-key (resolve-method method url func))))
 
 (defn default-action 
   "if a page doesn't have a defined action, we just send the params"
@@ -96,4 +104,4 @@
   (format "Welcome to Caribou! Please add some pages, you foolish person.<br /> %s" (unparse built-in-formatter (now))))
 
 ; default route
-(add-route "/" default-index)
+(add-route "GET" "/" default-index)
