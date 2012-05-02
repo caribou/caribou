@@ -39,7 +39,9 @@
          :servlet-name "caribou"
          :init caribou.api/init}
   :autodoc {:name "Caribou" :page-title "Caribou API Documentation"}
-  :repositories {"sonatype-oss-public" "https://oss.sonatype.org/content/groups/public/"})
-                 ;; "battlecat" "http://battlecat:8080/nexus/content/groups/public"
-                 ;; "snapshots" "http://battlecat:8080/nexus/content/repositories/snapshots"
-                 ;; "releases" "http://battlecat:8080/nexus/content/repositories/releases"})
+  :repositories {"sonatype-oss-public" "https://oss.sonatype.org/content/groups/public/"
+                 "snapshots" {:url "http://battlecat:8080/nexus/content/repositories/snapshots" 
+                              :username "deployment" :password "deployment"}
+                 "releases"  {:url "http://battlecat:8080/nexus/content/repositories/releases" 
+                              :username "deployment" :password "deployment"}})
+
