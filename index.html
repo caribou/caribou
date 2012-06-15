@@ -7,64 +7,178 @@
 
     <style type="text/css">
       body {
-      margin-top: 1.0em;
-      background: #f2d2b2 url('caribou_alpha.png') no-repeat center;
-      font-family: Helvetica, Arial, FreeSans, san-serif;
-      color: #000000;
+        margin-top: 1.0em;
+        background: #f2d2b2;# url('caribou_alpha.png') no-repeat center;
+        font-family: Helvetica, Arial, FreeSans, san-serif;
+        color: #000000;
       }
       #container {
-      margin: 0 auto;
-      width: 700px;
+        margin: 0 auto;
+        width: 700px;
       }
-      h1 { font-size: 3.8em; color: #774433; margin-bottom: 3px; }
+      h1 { font-size: 3.8em; color: #432; margin-bottom: 3px; }
       h1 .small { font-size: 0.4em; }
-      h1 a { text-decoration: none }
-      h2 { font-size: 1.5em; color: #774433; }
-      h3 { text-align: center; color: #774433; }
-      a { color: #774433; }
+      h1 a { text-decoration: none; color #432; }
+      h2 { font-size: 1.5em; color: #000; }
+      h3 { text-align: center; color: #000; }
+      a { color: #222266; }
       .description { font-size: 1.2em; margin-bottom: 30px; margin-top: 30px; font-style: italic;}
       .download { float: right; }
-      pre { background: #000; opacity: 0.6; color: #fff; padding: 15px;}
+      pre { background: #000; opacity: 0.65; color: #fff; padding: 15px;}
       hr { border: 0; width: 80%; border-bottom: 1px solid #aaa}
       .footer { text-align:center; padding-top:30px; font-style: italic; }
     </style>
   </head>
 
   <body>
-    <a href="https://github.com/antler/caribou"><img style="position: absolute; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub" /></a>
-
     <div id="container">
 
-      <h1><a href="https://github.com/antler/caribou">caribou</a></h1>
+      <h1><a href="https://github.com/antler/lein-caribou">caribou</a></h1>
 
       <div class="description">
         Caribou is a dynamic web application generator with antlers
       </div>
       
-      <p>Caribou was designed to remove the extraneous effort usually required to develop a web application.  By focusing all effort into developing features that can be reused over and over, you need only specify what your application is supposed to do.</p>
-      
-      <h2>Dependencies</h2>
-      <p>Caribou depends on:</br>
-        <a href="http://github.com/richhickey/clojure">clojure</a></br>
-        <a href="http://github.com/technomancy/leiningen">leiningen</a></br>
-      </p>
-      
-      <h2>Download</h2>
       <p>
-        You can download this project in either
-        <a href="https://github.com/antler/caribou/zipball/master">zip</a> or
-        <a href="https://github.com/antler/caribou/tarball/master">tar formats.</a>
-      </p>
-      <p>You can also clone the project with <a href="http://git-scm.com">Git</a>
-        by running:
-        <pre>$ git clone git://github.com/antler/caribou</pre>
+        Caribou was designed to remove the extraneous effort usually required to 
+        develop a web application.  Born from the daily toil of building real sites,
+        this project collects a variety of useful functionality and forges it under
+        a small set of powerful concepts into a coherent, cooperating system.  
       </p>
 
+      <p>
+        One overriding design philosophy has been the creation of small modules that 
+        do one thing extremely well, and stay out of everyone else's way.  This entire
+        process has been informed by witnessing the suffering inflicted by countless
+        other frameworks on ourselves and our own friends and family.  
+        The result is that there are a number of modules you may choose to wield 
+        or not, as your needs dictate.
+      </p>
+
+      <h2>Core</h2>
+
+      <p> 
+        <a href="http://github.com/antler/caribou-core">Caribou Core</a> lays the 
+        foundation for all of the other libraries by capturing the data model of a site
+        <em>as data!</em>  A data model is traditionally only an implicitly defined
+        being, existing as a conglomeration of migrations and tables whose relationships
+        are only formed through happy accidents within application code.  
+        <a href="http://github.com/antler/caribou-core">Caribou Core</a> structures
+        the data model in a way that allows it to serve a variety of other purposes,
+        including the construction of queries that filter and order based on the 
+        relationships between models, as well as everything yet to come.  
+      </p>
+
+      <h2>API</h2>
+
+      <p> 
+        <a href="http://github.com/antler/caribou-api">Caribou API</a> provides a
+        free, working, out of the box api for every model you create.  You can retrieve
+        data across HTTP in a variety of formats (JSON, XML, CSV) and with an endless
+        degree of refinement and expressiveness, all without laying a finger!  Enjoy
+        some tea instead, get some sunshine.  
+      </p>
+
+      <h2>Frontend</h2>
+
+      <p> 
+        <a href="http://github.com/antler/caribou-frontend">Caribou Frontend</a> 
+        is the basis for a fully functional web application, with everything done
+        except for <em>what the site actually is</em>, the whole point of you 
+        undertaking this endeavor.  It provides routing based on a tree of pages 
+        you define, once again benefiting from turning what was previously a 
+        hard-coded consequence of application design into an infinitely malleable 
+        medium at your control.  A Page forms a mapping between
+        a route and an action, defined by you, which is simply whatever 
+        you want it to do.  Here is where the *code* goes, if you require any.  
+        In case that turns out to be rendering responses, 
+        <a href="http://github.com/antler/caribou-frontend">Caribou Frontend</a> 
+        provides templates in the form of 
+        <a href="http://mustache.github.com/mustache.5.html">Mustache</a>, 
+        which are a graceful way of getting the point across.
+      </p>
+
+      <h2>Admin</h2>
+
+      <p>
+        Last but not least, 
+        <a href="http://github.com/antler/caribou-admin">Caribou Admin</a> 
+        allows you to govern everything from behind a swift and capable web 
+        interface.  Build models, link them, add pages, create content, link that,
+        do anything (currently allowable).  No tacked on admin thrown together at 
+        the last minute.  Let us handle that.
+      </p>
+
+      <h2>Supporting Libraries</h2>
+      
+      <p>
+        There are a number of supporting libraries in the Caribou family, 
+        (part of the <a href="http://github.com/antler">Antler</a>, if you will), 
+        which contribute to Caribou but which also stand on their own as useful, 
+        usable libraries.  
+      </p>
+
+      <p>
+        Here is a current list of associated projects:
+      </p>
+
+      <ul>
+        <li><a href="http://github.com/ralfonso/tugboat">Tugboat</a>, 
+        task queue and sturdy friend.</li>
+        <li><a href="http://github.com/antler/taxidermy">Taxidermy</a>, 
+        form construction and validation made easy.</li>
+        <li><a href="http://github.com/antler/lichen">Lichen</a>, 
+        image manipulation on the tundra.</li>
+        <li><a href="http://github.com/antler/zippix">Zippix</a>, 
+        harnessing zip files from resources, so that no one ever has to do that again.</li>
+      </ul>
+
+      <h2>Dependencies</h2>
+
+      <p>
+        Caribou is written in <a href="http://clojure.org/rationale">Clojure</a>, 
+        a fast, flexible language designed from the bottom up to be highly concurrent.
+        If you are used to single-threaded interpreting languages like Ruby or Python,
+        the performance increase can arrive as quite a shock.  Clojure finds the 
+        sweet spot of deep expressiveness and raw animal speed, while gracefully 
+        hurdling the problem of concurrency that have brought down so many before it.
+        In other words, the Language of the Future.
+      </p>
+
+      <p>
+        If you have never heard of it, then this is the perfect opportunity to 
+        <a href="http://java.ociweb.com/mark/clojure/article.html">learn</a>!
+      </p>
+
+      <p> 
+        Caribou also uses 
+        <a href="http://github.com/technomancy/leiningen">Leiningen</a> as a build tool
+        and command line utility.
+      </p>
+
+      <p> 
+        That's it!  Unless you would also like to harness the most powerful open
+        source database available today: 
+        <a href="http://www.postgresql.org/">Postgresql</a>, which Caribou supports 
+        but does not require (though highly recommends!)
+      </p>
+      
       <h2>Install</h2>
-      <p>Install Java >= 1.6</br>
-        Install <a href="http://github.com/technomancy/leiningen">leiningen</a></br>
+
+      <p>
+        Install Java >= 1.6</br></br>
+        Install <a href="http://github.com/technomancy/leiningen">Leiningen 2</a></br></br>
+        Add Caribou as a Leiningen plugin (add this line to your ~/.lein/profiles.clj):</br>
+        <pre>{:user {:plugins [[antler/lein-caribou "1.4.6"]]}}</pre>
+
         Create a new Caribou project:</br>
-        <pre>$ lein caribou new $sitename</pre>
+        <pre>$ lein caribou create tundra</pre>
+
+        Bootstrap and start the new project:</br>
+        <pre>$ cd tundra</br>$ lein caribou bootstrap resources/config/development.clj</br>$ lein caribou start
+        </pre>
+        
+        Now navigate to your <a href="http://localhost:33333">new site</a>, and embark!
       </p>
       
       <h2>Learn</h2>
@@ -73,11 +187,11 @@
       
       <h2>Authors</h2>
       <p>
-        ryan spangler (spangler@weareinstrument.com)<br/>
         justin lewis (justin@weareinstrument.com)<br/>
-        eric feigner (eric@weareinstrument.com)<br/>
+        ryan spangler (spangler@weareinstrument.com)<br/>
         phong ho (phong@weareinstrument.com)<br/>
-        ryan roemmich (ryan.roemmich@weareinstrument.com)<br/>
+        ryan roemmich (ryan@weareinstrument.com)<br/>
+        eric feigner (eric@weareinstrument.com)<br/>
       </p>
 
       <h2>License</h2>
