@@ -16,15 +16,16 @@
         margin: 0 auto;
         width: 700px;
       }
-      h1 { font-size: 3.8em; color: #432; margin-bottom: 3px; }
+      h1 { font-size: 3.8em; color: #000; margin-bottom: 3px; }
       h1 .small { font-size: 0.4em; }
-      h1 a { text-decoration: none; color #432; }
+      h1 a { text-decoration: none; color #000; }
       h2 { font-size: 1.5em; color: #000; }
       h3 { text-align: center; color: #000; }
       a { color: #222266; }
       .description { font-size: 1.2em; margin-bottom: 30px; margin-top: 30px; font-style: italic;}
       .download { float: right; }
-      pre { background: #000; opacity: 0.65; color: #fff; padding: 15px;}
+      .icon {float: right;}
+      pre { background: #000; color: #fff; padding: 15px;}
       hr { border: 0; width: 80%; border-bottom: 1px solid #aaa}
       .footer { text-align:center; padding-top:30px; font-style: italic; }
     </style>
@@ -33,7 +34,7 @@
   <body>
     <div id="container">
 
-      <h1><a href="https://github.com/antler/lein-caribou">caribou</a></h1>
+      <h1><a href="https://github.com/antler/lein-caribou">caribou</a>      <img id="icon" src="caribou_alpha.png" width=100 height=130></h1>
 
       <div class="description">
         Caribou is a dynamic web application generator with antlers
@@ -153,7 +154,8 @@
       <p> 
         Caribou also uses 
         <a href="http://github.com/technomancy/leiningen">Leiningen</a> as a build tool
-        and command line utility.
+        and command line utility, with its own leiningen plugin, 
+        <a href="http://github.com/antler/lein-caribou">Lein Caribou</a>. 
       </p>
 
       <p> 
@@ -182,7 +184,14 @@
       </p>
       
       <h2>Learn</h2>
-      <p><a href="http://antler.github.com/caribou/autodoc/">API Documentation</a>
+      <p>
+        For building something with Caribou, check out the various API Docs:
+        <ul>
+          <li><a href="http://antler.github.com/caribou-core/">Caribou Core</a></li>
+          <li><a href="http://antler.github.com/caribou-api/">Caribou API</a></li>
+          <li><a href="http://antler.github.com/caribou-frontend/">Caribou Frontend</a></li>
+          <li><a href="http://antler.github.com/caribou-admin/">Caribou Admin</a></li>
+        </ul>
       </p>
       
       <h2>Authors</h2>
