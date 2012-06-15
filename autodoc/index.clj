@@ -727,7 +727,7 @@
    :doc
    "given a tree of pages construct and return a list of corresponding routes.",
    :var-type "function",
-   :line 76,
+   :line 54,
    :file "src/caribou/page.clj"}
   {:arglists ([]),
    :name "init",
@@ -737,7 +737,7 @@
    :wiki-url "/caribou.page-api.html#caribou.page/init",
    :doc "initialize page related activities",
    :var-type "function",
-   :line 109,
+   :line 81,
    :file "src/caribou/page.clj"}
   {:arglists ([]),
    :name "invoke-pages",
@@ -747,7 +747,7 @@
    :wiki-url "/caribou.page-api.html#caribou.page/invoke-pages",
    :doc "call up the pages and arrange them into a tree.",
    :var-type "function",
-   :line 88,
+   :line 60,
    :file "src/caribou/page.clj"}
   {:arglists ([]),
    :name "invoke-routes",
@@ -757,8 +757,8 @@
    :wiki-url "/caribou.page-api.html#caribou.page/invoke-routes",
    :doc
    "invoke pages from the db and generate the routes based on them.",
-   :var-type "macro",
-   :line 96,
+   :var-type "function",
+   :line 68,
    :file "src/caribou/page.clj"}
   {:arglists ([page above-path]),
    :name "match-action-to-template",
@@ -770,7 +770,7 @@
    :doc
    "make a single route for a single page, given its overarching path (above-path)",
    :var-type "function",
-   :line 58,
+   :line 35,
    :file "src/caribou/page.clj"}
   {:arglists ([env]),
    :name "init",
