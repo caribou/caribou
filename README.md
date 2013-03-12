@@ -14,7 +14,7 @@ It is easier to get started with the caribou eco-system now.
 Follow these instructions to get yourself up and running
 faster than you can say "antidisestablishmentarianism":
 
-[caribou](https://antler.github.com/caribou)
+[caribou](http://antler.github.com/caribou)
 
 
 # LICENSE
