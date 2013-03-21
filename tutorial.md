@@ -200,7 +200,7 @@ step will happen automatically in the future).
 
 Navigate to your new *Presentation* page, at [http://localhost:33333/presentation/Mountains]
 
-![Presentation page](images/tutorial/Screenshot_3_21_13_3_45_PM.png "Presentation Page")
+![Presentation page](images/tutorial/Screenshot_3_21_13_4_00_PM-2.png "Presentation Page")
 
 Oh no!  Your controller action doesn't exist yet.  We need to build it!
 Open the file _src/pictograph/controllers/home.clj_ and add the following code:
