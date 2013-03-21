@@ -203,7 +203,7 @@ Navigate to your new *Presentation* page, at [http://localhost:33333/presentatio
 ![Presentation page](images/tutorial/Screenshot_3_21_13_4_00_PM-2.png "Presentation Page")
 
 Oh no!  Your controller action doesn't exist yet.  We need to build it!
-Open the file _src/pictograph/controllers/home.clj_ and add the following code:
+Open the file _site/src/pictograph/controllers/home.clj_ and add the following code:
 
 ```clj
 (defn presentation
@@ -217,6 +217,26 @@ Open the file _src/pictograph/controllers/home.clj_ and add the following code:
               :presentation presentation))))
 ```
 
+This is what a simple action looks like.  It grabs the title of presentation from the URL,
+and then retrieves that presentation.  Finally, it renders the page, adding in the newly-fetched
+presentation, making it available to the template(s).
+
+Now, if you refresh your browser, you'll see this:
+
+![Presentation page](images/tutorial/Screenshot_3_21_13_4_07_PM.png "Presentation Page")
+
+Oh no! Now there's no template.  But the application is telling you what's missing, so you know
+exactly what to do.   Let's create a new template for the page in _resources/templates/presentation.html_.
+
+```html
+{{< templates/layout.html}}
+{{%body}}
+<h1>{{presentation.title}}</h1>
+{{#presentation.slides}}
+<a href="{{route-for :slide {:title presentation.title :slide title} }}"><img src="{{resize image {:height 200} }}" /></a>
+{{/presentation.slides}}
+{{/body}}
+```
 
 
 
