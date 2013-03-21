@@ -151,13 +151,18 @@ associated presentation!
 ## 7. Create Some Content!
 
 From the *Presentation* dropdown at the top, choose "Create New" to make a new
-presentation:
+presentation, then click "Save then continue editing".
 
+![Models page](images/tutorial/Screenshot_3_21_13_12_09_PM-3.png "Models")
 
+Once you've saved it, you can now add slides to the _slides_ collection.
 
-* Create one slide for this presentation
+![Models page](images/tutorial/Screenshot_3_21_13_12_17_PM.png "Models")
 
-8. Go to Model "Slide", and create a new slide
+## 8. Create one slide for this presentation
+
+Go to the Model "Slide" and create a new slide.  Call 
+Go to Model "Slide", and create a new slide
 
 * Add it to the presentation "Caribou"
 
