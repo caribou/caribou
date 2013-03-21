@@ -228,7 +228,7 @@ Now, if you refresh your browser, you'll see this:
 Oh no! Now there's no template.  But the application is telling you what's missing, so you know
 exactly what to do.   Let's create a new template for the page in _resources/templates/presentation.html_.
 
-```mustache
+```html+mustache
 {{< templates/layout.html}}
 {{%body}}
 <h1>{{presentation.title}}</h1>
