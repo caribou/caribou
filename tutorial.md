@@ -159,15 +159,28 @@ Once you've saved it, you can now add slides to the _slides_ collection.
 
 ![Models page](images/tutorial/Screenshot_3_21_13_12_17_PM.png "Models")
 
-## 8. Create one slide for this presentation
+so click on _Edit_ and you'll move to a screen to add a slide:
 
-Go to the Model "Slide" and create a new slide.  Call 
-Go to Model "Slide", and create a new slide
+![Add a slide](images/tutorial/Screenshot_3_21_13_12_20_PM.png "Add a slide")
 
-* Add it to the presentation "Caribou"
+As you can see, there are no *Slides* associated with this *Presentation* yet,
+so you can click *"+ new"* to create a new *Slide* within this *Presentation*:
 
-   9. Demo: Positioning
-  10. Demo: Bulk Edit
+![New slide](images/tutorial/Screenshot_3_21_13_12_22_PM.png "New slide")
+
+Be sure to upload an image too by clicking on *"Choose/Edit"* and selecting an image.
+
+Go ahead and create a couple more slides, so you end up with something like this:
+
+![slides](images/tutorial/Screenshot_3_21_13_12_34_PM.png "Slides")
+
+
+## 8. Make some pages!
+
+Now we're going to create user-facing pages to show our presentations.
+
+
+
   11. Create Page "Presentation"
   12. Create Page "Slide"
   13. Test page URLs in address bar
