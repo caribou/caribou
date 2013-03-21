@@ -7,6 +7,8 @@ the purposes of this tutorial, we will call it *pictograph*.
 
 ## 1. Create your app
 
+To create your app, you only need to run one command:
+
     lein caribou create pictograph
 
 This will create your application, with a working configuration
@@ -42,30 +44,7 @@ pictograph
 │   ├── project.clj
 │   ├── resources
 │   │   ├── public
-│   │   │   ├── css
-│   │   │   │   ├── bootstrap-responsive.css
-│   │   │   │   └── bootstrap.css
-│   │   │   ├── favicon.ico
-│   │   │   ├── ico
-│   │   │   │   ├── apple-touch-icon-114-precomposed.png
-│   │   │   │   ├── apple-touch-icon-57-precomposed.png
-│   │   │   │   ├── apple-touch-icon-72-precomposed.png
-│   │   │   │   └── favicon.ico
-│   │   │   └── js
-│   │   │       ├── application.js
-│   │   │       ├── bootstrap-alert.js
-│   │   │       ├── bootstrap-button.js
-│   │   │       ├── bootstrap-carousel.js
-│   │   │       ├── bootstrap-collapse.js
-│   │   │       ├── bootstrap-dropdown.js
-│   │   │       ├── bootstrap-modal.js
-│   │   │       ├── bootstrap-popover.js
-│   │   │       ├── bootstrap-scrollspy.js
-│   │   │       ├── bootstrap-tab.js
-│   │   │       ├── bootstrap-tooltip.js
-│   │   │       ├── bootstrap-transition.js
-│   │   │       ├── bootstrap-typeahead.js
-│   │   │       └── jquery.js
+│   │   │   └── ... twitter bootstrap files ...
 │   │   └── templates
 │   │       └── home.html
 │   └── src
@@ -90,7 +69,9 @@ pictograph
 
 ## 2. Run your app
 
-    cd picto
+Now that your application exists, you can start it:
+
+    cd pictograph
     lein caribou start
 
 Your Caribou application is now running on port 33333.
@@ -108,7 +89,7 @@ models:
 
 Click the "New Model" button to start creating
 your own custom content.  We'll start by creating a model
-called "Presentation".
+called *Presentation*.
 
 ![Models page](images/tutorial/Screenshot_3_21_13_9_34_AM-2.png "Models")
 ![Models page](images/tutorial/Screenshot_3_21_13_9_36_AM.png "Models")
@@ -124,22 +105,26 @@ model, but you can add new fields.
 You will start by adding three new
 fields:
 
-* A "string" called "Title"
-* A "string" called "Author"
-* A "date/time" called "Presentation Date"
+* A "string" called "Title" (leave "searchable" checked)
+* A "string" called "Author" (leave "searchable" checked)
+* A "date/time" called "Presentation Date" (uncheck the "searchable" box)
 
 After you've added these three fields, drag the "Title" field to the
 top and click "Save" to update the order that the fields appear in your model.
+
+![Models page](images/tutorial/Screenshot_3_21_13_9_41_AM.png "Models")
 
 Next you'll create a second model, and then we'll connect them.
 
 
 ## 5. Create A Model Called "Slide"
 
-Return to the "Models" page by clicking the "Models" link in
+Return to the *Models* page by clicking the *Models* link in
 the breadcrumbs.
 
-Just like you did with "Presentation", create a new model called "Slide",
+![Models page](images/tutorial/Screenshot_3_21_13_9_43_AM.png "Models")
+
+Just like you did with *Presentation*, create a new model called *Slide*,
 and add three fields (these are slightly different):
 
 * A "string" called "Title"
@@ -148,20 +133,24 @@ and add three fields (these are slightly different):
 
 and once again, drag the title to the top and click "Save".
 
-## 6. Connection "Presentation" to "Slide"
+## 6. Connecting "Presentation" to "Slide"
 
-Go back to the Models page, and click "Tweak fields" for the "Presentation" Model.
+![Models page](images/tutorial/Screenshot_3_21_13_9_47_AM.png "Models")
+
+Go back to the Models page, and click "Tweak fields" for the *Presentation* Model.
 You're going to add another fields that will represent a collection of slides that
-belong to a presentation.  Click "+ attribute" to add another attribute, but this
-time set the type "Collection of other model things".  Enter "Slides" for the
-name, uncheck the "searchable" checkbox, and choose "Slide" as the Target.
+belong to a presentation.  Click *"+ attribute"* to add another attribute, but this
+time set the type "Collection of other model things".  Enter *Slides* for the
+name, uncheck the "searchable" checkbox, and choose *Slide* as the Target.
+
+![Models page](images/tutorial/Screenshot_3_21_13_9_49_AM.png "Models")
 
 Your presentations all now have a collection of slides, and each slide has an
 associated presentation!
 
 ## 7. Create Some Content!
 
-From the "Presentation" dropdown at the top, choose "Create New" to make a new
+From the *Presentation* dropdown at the top, choose "Create New" to make a new
 presentation:
 
 
