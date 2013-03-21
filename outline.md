@@ -29,7 +29,7 @@
       * Building controller actions
       * Fetching content
   * Templates
-    * antler/stencil
+    * antler/antlers
     * layouts, partials
     * loops, conditionals
     * helpers
