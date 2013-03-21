@@ -177,12 +177,49 @@ Go ahead and create a couple more slides, so you end up with something like this
 
 ## 8. Make some pages!
 
+(**Note:** at present you need to create pages through the generic admin UI.  This will change soon
+when we provide a Page-editor)
+
 Now we're going to create user-facing pages to show our presentations.
 
+Go to the models page, and scroll to *System Models* at the bottom.
+Choose *"View fields"* from *Page*, then "Create a Page".   Fill in the fields like this
+to create a page that will show a *Presentation*:
+
+![Presentation page](images/tutorial/Screenshot_3_21_13_1_58_PM.png "Presentation Page")
+
+and then create a page to display a slide, again, paying attention to the fields:
+
+![Slide page](images/tutorial/Screenshot_3_21_13_1_59_PM.png "Slide Page")
+
+(**Note:** We set the parent id of the *Slide* page to the ID of the newly-created *Presentations* page - this
+step will happen automatically in the future).
 
 
-  11. Create Page "Presentation"
-  12. Create Page "Slide"
+## 9. Check your pages in the browser!
+
+Navigate to your new *Presentation* page, at [http://localhost:33333/presentation/Mountains]
+
+![Presentation page](images/tutorial/Screenshot_3_21_13_3_45_PM.png "Presentation Page")
+
+Oh no!  Your controller action doesn't exist yet.  We need to build it!
+Open the file _src/pictograph/controllers/home.clj_ and add the following code:
+
+```clj
+(defn presentation
+  [request]
+  (let [title (-> request :params :title)
+        presentation (model/pick
+                      :presentation
+                      {:where {:title title}
+                       :include {:slides {}}})]
+    (render (assoc request
+              :presentation presentation))))
+```
+
+
+
+
   13. Test page URLs in address bar
 
 Code: Create Page Templates
