@@ -91,16 +91,16 @@ Click the "New Model" button to start creating
 your own custom content.  We'll start by creating a model
 called *Presentation*.
 
-![Models page](images/tutorial/Screenshot_3_21_13_9_34_AM-2.png "Models")
-![Models page](images/tutorial/Screenshot_3_21_13_9_36_AM.png "Models")
+![Models page](images/tutorial/Screenshot_3_21_13_9_34_AM-2.png)
+![Models page](images/tutorial/Screenshot_3_21_13_9_36_AM.png)
 
 After you've created your model, you'll be shown a page of all of
 the fields in your new model.   Initially, the fields will only
 be the default set of fields that Caribou uses to maintain your
 model, but you can add new fields. 
 
-![Models page](images/tutorial/Screenshot_3_21_13_9_37_AM.png "Models")
-![Models page](images/tutorial/Screenshot_3_21_13_9_37_AM 2.png "Models")
+![Models page](images/tutorial/Screenshot_3_21_13_9_37_AM.png)
+![Models page](images/tutorial/Screenshot_3_21_13_9_37_AM 2.png)
 
 You will start by adding three new
 fields:
@@ -112,7 +112,7 @@ fields:
 After you've added these three fields, drag the "Title" field to the
 top and click "Save" to update the order that the fields appear in your model.
 
-![Models page](images/tutorial/Screenshot_3_21_13_9_41_AM.png "Models")
+![Models page](images/tutorial/Screenshot_3_21_13_9_41_AM.png)
 
 Next you'll create a second model, and then we'll connect them.
 
@@ -122,7 +122,7 @@ Next you'll create a second model, and then we'll connect them.
 Return to the *Models* page by clicking the *Models* link in
 the breadcrumbs.
 
-![Models page](images/tutorial/Screenshot_3_21_13_9_43_AM.png "Models")
+![Models page](images/tutorial/Screenshot_3_21_13_9_43_AM.png)
 
 Just like you did with *Presentation*, create a new model called *Slide*,
 and add three fields (these are slightly different):
@@ -135,7 +135,7 @@ and once again, drag the title to the top and click "Save".
 
 ## 6. Connecting "Presentation" to "Slide"
 
-![Models page](images/tutorial/Screenshot_3_21_13_9_47_AM.png "Models")
+![Models page](images/tutorial/Screenshot_3_21_13_9_47_AM.png)
 
 Go back to the Models page, and click "Tweak fields" for the *Presentation* Model.
 You're going to add another fields that will represent a collection of slides that
@@ -153,26 +153,26 @@ associated presentation!
 From the *Presentation* dropdown at the top, choose "Create New" to make a new
 presentation, then click "Save then continue editing".
 
-![Models page](images/tutorial/Screenshot_3_21_13_12_09_PM-3.png "Models")
+![Models page](images/tutorial/Screenshot_3_21_13_12_09_PM-3.png "Models page")
 
 Once you've saved it, you can now add slides to the _slides_ collection.
 
-![Models page](images/tutorial/Screenshot_3_21_13_12_17_PM.png "Models")
+![Models page](images/tutorial/Screenshot_3_21_13_12_17_PM.png)
 
 so click on _Edit_ and you'll move to a screen to add a slide:
 
-![Add a slide](images/tutorial/Screenshot_3_21_13_12_20_PM.png "Add a slide")
+![Add a slide](images/tutorial/Screenshot_3_21_13_12_20_PM.png)
 
 As you can see, there are no *Slides* associated with this *Presentation* yet,
 so you can click *"+ new"* to create a new *Slide* within this *Presentation*:
 
-![New slide](images/tutorial/Screenshot_3_21_13_12_22_PM.png "New slide")
+![New slide](images/tutorial/Screenshot_3_21_13_12_22_PM.png)
 
 Be sure to upload an image too by clicking on *"Choose/Edit"* and selecting an image.
 
 Go ahead and create a couple more slides, so you end up with something like this:
 
-![slides](images/tutorial/Screenshot_3_21_13_12_34_PM.png "Slides")
+![slides](images/tutorial/Screenshot_3_21_13_12_34_PM.png)
 
 
 ## 8. Make some pages!
@@ -186,11 +186,11 @@ Go to the models page, and scroll to *System Models* at the bottom.
 Choose *"View fields"* from *Page*, then "Create a Page".   Fill in the fields like this
 to create a page that will show a *Presentation*:
 
-![Presentation page](images/tutorial/Screenshot_3_21_13_1_58_PM.png "Presentation Page")
+![Presentation page](images/tutorial/Screenshot_3_21_13_1_58_PM.png)
 
 and then create a page to display a slide, again, paying attention to the fields:
 
-![Slide page](images/tutorial/Screenshot_3_21_13_1_59_PM.png "Slide Page")
+![Slide page](images/tutorial/Screenshot_3_21_13_1_59_PM.png)
 
 (**Note:** We set the parent id of the *Slide* page to the ID of the newly-created *Presentations* page - this
 step will happen automatically in the future).
@@ -200,7 +200,7 @@ step will happen automatically in the future).
 
 Navigate to your new *Presentation* page, at [http://localhost:33333/presentation/Mountains]
 
-![Presentation page](images/tutorial/Screenshot_3_21_13_4_00_PM-2.png "Presentation Page")
+![Presentation page](images/tutorial/Screenshot_3_21_13_4_00_PM-2.png)
 
 Oh no!  Your controller action doesn't exist yet.  We need to build it!
 Open the file _site/src/pictograph/controllers/home.clj_ and add the following code:
@@ -223,7 +223,7 @@ presentation, making it available to the template(s).
 
 Now, if you refresh your browser, you'll see this:
 
-![Presentation page](images/tutorial/Screenshot_3_21_13_4_07_PM.png "Presentation Page")
+![Presentation page](images/tutorial/Screenshot_3_21_13_4_07_PM.png)
 
 Oh no! Now there's no template.  But the application is telling you what's missing, so you know
 exactly what to do.   Let's create a new template for the page in _resources/templates/presentation.html_.
