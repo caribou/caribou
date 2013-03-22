@@ -226,9 +226,9 @@ Now, if you refresh your browser, you'll see this:
 ![Presentation page](images/tutorial/Screenshot_3_21_13_4_07_PM.png)
 
 Oh no! Now there's no template.  But the application is telling you what's missing, so you know
-exactly what to do.   Let's create a new template for the page in _resources/templates/presentation.html_.
+exactly what to do.   Let's create a new template for the page in _site/resources/templates/presentation.html_.
 
-```html+mustache
+```html
 {{< templates/layout.html}}
 {{%body}}
 <h1>{{presentation.title}}</h1>
@@ -238,21 +238,45 @@ exactly what to do.   Let's create a new template for the page in _resources/tem
 {{/body}}
 ```
 
+Refresh your browser, and presto!  Here are your presentation's slides.  
+
+![Presentation page](images/tutorial/Screenshot_3_21_13_4_44_PM.png)
+
+Each slide is clickable (thanks to the _route-for_ in the above HTML snippet) and the images are conveniently resized (and cached!) thanks to the _resize_.   More on those later.
+
+If you click one of the images, you'll see something familiar:
+
+![Slide page](Screenshot_3_21_13_5_00_PM.png)
+
+and you know that this means you need to write the action for this page:
+
+```clj
+(defn slide
+  [request]
+  (let [slide-title (-> request :params :slide)
+        slide     (model/pick
+                   :slide
+                   {:where {:title slide-title}
+                    :include {:presentation {}}})
+        following (model/following
+                   :slide slide
+                   :presentation_position
+                   {:where (select-keys slide [:presentation_id])})
+        previous  (model/previous
+                   :slide slide
+                   :presentation_position
+                   {:where (select-keys slide [:presentation_id])})]
+    (render (assoc request
+              :slide slide
+              :following following
+              :previous previous))))
+```
+
+This action looks a bit more complicated but really it's not.  It fetches
+the slide that's mentioned in the URL, then fetches the following and previous
+slides in the presentation.  Then it makes all three available to the template.
 
 
-  13. Test page URLs in address bar
-
-Code: Create Page Templates
-
-   1. Create Presentations page
-
-         * Open home controller
-         * In home controller, create "presentation" action to pull in
-           presentations
-         * Create layout.html from template home.html
-         * Create presentation.html
-
-              * Fill in body block to display presentations
 
    2. Create Slide sub-page
 
