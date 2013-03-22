@@ -246,7 +246,7 @@ Each slide is clickable (thanks to the _route-for_ in the above HTML snippet) an
 
 If you click one of the images, you'll see something familiar:
 
-![Slide page](Screenshot_3_21_13_5_00_PM.png "Slide page")
+![Slide page](images/tutorial/Screenshot_3_21_13_5_00_PM.png "Slide page")
 
 and you know that this means you need to write the action for this page:
 
