@@ -276,15 +276,35 @@ This action looks a bit more complicated but really it's not.  It fetches
 the slide that's mentioned in the URL, then fetches the following and previous
 slides in the presentation.  Then it makes all three available to the template.
 
+You'll also need to create the template in _site/resources/templates/slide.html_:
+
+```html
+{{< templates/layout.html}}
+{{%body}}
+<h1>{{slide.title}}</h1>
+<img src="{{resize slide.image {:height 500} }}" />
+<h2>{{slide.caption}}</h2>
+{{#previous}}<p><<< <a href="{{route-for :slide {:title slide.presentation.title :slide previous.title} }}">{{previous.title}}</a></p>{{/previous}}
+{{#following}}<p><a href="{{route-for :slide {:title slide.presentation.title :slide following.title} }}">{{following.title}}</a> >>></p>{{/following}}
+{{/body}}
+```
+
+and now here's your slide page:
+
+![Slide page](images/tutorial/Screenshot_3_21_13_5_09_PM.png "Slide page")
+
+and you can click the links at the bottom to go to the next and previous slides.
+
+## 10. Bonus Feature!
+
+Go into the admin, and edit your presentation under "Presentations" -> "See all" -> "edit".
+Click _"Edit"_ in the *Slides* field, taking you to a view of the slides association with your
+*Presentation*.  Drag them into a different order, and click *Save*.
+
+![Presentation editor page](images/tutorial/Screenshot_3_21_13_5_13_PM.png "Presentation editor page")
+
+Now refresh your "Presentation" page, and the order of the slides will have changed!
+
+![Presentation with reordered slides](images/tutorial/Screenshot_3_21_13_5_15_PM.png "Presentation with reordered slides")
 
 
-   2. Create Slide sub-page
-
-         * In home controller, create "slide" action
-         * Create "slide.html"
-
-              * Fill in body block to display slides
-
-   3. Run tree to show where those templates are.
-   4. Prev/Next links to slides
-   5. Reorder Slides in CMS
