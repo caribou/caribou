@@ -170,13 +170,14 @@
         Install Java >= 1.6</br></br>
         Install <a href="http://github.com/technomancy/leiningen">Leiningen 2</a></br></br>
         Add Caribou as a Leiningen plugin (add this line to your ~/.lein/profiles.clj):</br>
-        <pre>{:user {:plugins [[antler/lein-caribou "2.0.7"]]}}</pre>
+        <pre>{:user {:plugins [[antler/lein-caribou "2.2.8"]
+                               [lein-ring "0.8.2"]]}}</pre>
 
         Create a new Caribou project:</br>
         <pre>$ lein caribou create pictograph</pre>
 
         Bootstrap and start the new project:</br>
-        <pre>$ cd pictograph</br>$ lein caribou start
+        <pre>$ cd pictograph</br>$ lein ring server
         </pre>
         
         Now navigate to your <a href="http://localhost:33333">new site</a>, and embark!
@@ -186,8 +187,8 @@
       
       <h2>Learn</h2>
       <p>
-        For building something with Caribou, there is extensive documentation on every facet here:
-        <a href="https://github.com/antler/caribou-docs/blob/master/resources/outline.md">Caribou Docs</a>
+        For building something with Caribou, there is extensive documentation of the various facets here:
+        <p><a href="https://github.com/antler/caribou-docs/blob/master/resources/outline.md">Caribou Docs</a></p>
 
         Also, check out the various API Docs:
         <ul>
