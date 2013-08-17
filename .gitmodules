@@ -19,3 +19,6 @@
 [submodule "lein-caribou"]
 	path = lein-caribou
 	url = git@github.com:antler/lein-caribou.git
+[submodule "caribou-template"]
+	path = caribou-template
+	url = git@github.com:antler/caribou-template.git
