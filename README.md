@@ -1,21 +1,20 @@
-# DEPRECATED
+# Caribou!
 
-This project has been superseded by the following:
+Caribou is a dynamic web ecosystem composed of a number of libraries:
 
-* [lein-caribou](https://github.com/antler/lein-caribou)
 * [caribou-core](https://github.com/antler/caribou-core)
 * [caribou-frontend](https://github.com/antler/caribou-frontend)
 * [caribou-admin](https://github.com/antler/caribou-admin)
 * [caribou-api](https://github.com/antler/caribou-api)
+* [caribou-docs](https://github.com/antler/caribou-docs)
+* [caribou-development](https://github.com/antler/caribou-development)
+* [lein-caribou](https://github.com/antler/lein-caribou)
 
-# START HERE
+# Docs
 
-It is easier to get started with the caribou eco-system now.
-Follow these instructions to get yourself up and running
-faster than you can say "antidisestablishmentarianism":
+Docs are constantly evolving.  To get started, check out:
 
-[caribou](http://antler.github.com/caribou)
-
+[caribou](https://github.com/antler/caribou-docs/blob/master/resources/outline.md)
 
 # LICENSE
 
