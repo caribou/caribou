@@ -1,6 +1,6 @@
 # Caribou!
 
-Caribou is a dynamic web ecosystem composed of a number of libraries:
+Caribou is a web ecosystem composed of a number of libraries:
 
 * [caribou-core](https://github.com/antler/caribou-core)
 * [caribou-frontend](https://github.com/antler/caribou-frontend)
@@ -14,7 +14,7 @@ Caribou is a dynamic web ecosystem composed of a number of libraries:
 
 Docs are constantly evolving.  To get started, check out:
 
-[caribou](https://github.com/antler/caribou-docs/blob/master/resources/outline.md)
+[Caribou Documentation](https://github.com/antler/caribou-docs/blob/master/resources/outline.md)
 
 # LICENSE
 
