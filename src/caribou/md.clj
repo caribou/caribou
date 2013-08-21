@@ -36,7 +36,7 @@
 
     <header>
       <div class=\"container\">
-        <h1>THIS. IS. CARIBOU.</h1>
+        <h1>Caribou Documentation</h1>
       </div>
     </header>
 

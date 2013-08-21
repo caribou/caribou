@@ -57,10 +57,10 @@ header h1 {
   -webkit-font-smoothing: antialiased;
 }
 
-header h1:before {
-  content: "./ ";
-  font-size: 24px;
-}
+/* header h1:before { */
+/*   content: "./ "; */
+/*   font-size: 24px; */
+/* } */
 
 header h2 {
   font-size: 18px;
@@ -217,10 +217,10 @@ hr {
   float: left;
 }
 
-.btn-github .icon {
-  opacity: 0.6;
-  background: url("../images/blacktocat.png") 0 0 no-repeat;
-}
+/* .btn-github .icon { */
+/*   opacity: 0.6; */
+/*   background: url("../images/blacktocat.png") 0 0 no-repeat; */
+/* } */
 
 /* Links
    a, a:hover, a:visited
