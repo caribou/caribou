@@ -1,3 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+
+    <title>Caribou Documentation</title>
+  </head>
+
+  <body>
+
+    <header>
+      <div class="container">
+        <h1>THIS. IS. CARIBOU.</h1>
+      </div>
+    </header>
+
+    <div class="container">
+      <section id="main_content">
 <h1>Getting Started</h1><h2>Installing Caribou</h2><p>Caribou depends on the java runtime, so the zeroth step would be to <a href='http://www.java.com/en/download/help/index&#95;installing.xml'>install a JVM</a> if you don't have one already.</p><p>Next, <a href='http://leiningen.org/'>install Leiningen</a> (which provides the <code>lein</code> command) if it is not already installed.</p><p>Once you have the <code>lein</code> command, create a profile that includes <code>lein-caribou</code> (the Leiningen Caribou plugin).</p><ul><li>Create a file called <code>&#126;/.lein/profiles.clj</code> with the following contents:</li></ul><pre class="brush: clj">
 {:user 
   {:plugins &#91;&#91;lein-ring &quot;0.8.6&quot;&#93; 
@@ -8,3 +30,9 @@
 % cd taiga
 % lein ring server
 </pre><p>A new window will appear in your browser under http://localhost:33333 .  <br /></p><p>Congratulations!  You are now running Caribou.</p>
+      </section>
+    </div>
+
+    
+  </body>
+</html>

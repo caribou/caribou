@@ -1,3 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+
+    <title>Caribou Documentation</title>
+  </head>
+
+  <body>
+
+    <header>
+      <div class="container">
+        <h1>THIS. IS. CARIBOU.</h1>
+      </div>
+    </header>
+
+    <div class="container">
+      <section id="main_content">
 <h1>Writing Controllers</h1><p>The whole point of the Caribou router is to funnel requests to the appropriate controller action with the right parameters.  Once a request comes through, an action is simply a function that is called with the request map as an argument, and evaluates to a valid response map.  In between of course, all kinds of magic can happen.</p><h2>Controllers are Namespaces which contain Actions</h2><p>To define a controller namespace, add a new file to your <code>src/{project}/controllers</code> directory with the name of the new controller.  So for this example it would be <code>src/taiga/controllers/example&#95;controller.clj</code> with the following contents:</p><pre class="brush: clj">
 &#40;ns taiga.controllers.example-controller
   &#40;:require &#91;caribou.model :as model&#93;
@@ -125,3 +147,9 @@ Salutations Tundra Warrior!
 </pre><p>Then you could register this pre-action in the same way as before: </p><pre class="brush: clj">
 &#40;caribou.app.routing/register-pre-action :protected ensure-authorized&#41;
 </pre><p>Now this action will only be run if the call to <code>&#40;authorized? request&#41;</code> returns true.</p>
+      </section>
+    </div>
+
+    
+  </body>
+</html>

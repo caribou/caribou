@@ -1,3 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+
+    <title>Caribou Documentation</title>
+  </head>
+
+  <body>
+
+    <header>
+      <div class="container">
+        <h1>THIS. IS. CARIBOU.</h1>
+      </div>
+    </header>
+
+    <div class="container">
+      <section id="main_content">
 <h1>Introduction to Data Modeling</h1><p>Defining models for an application is the heart of a Caribou project.  Once a model is created a host of capabilities are automatically generated for that newly created model.  This section details the means for creating new models and expanding on existing models.</p><h2>Creating Models</h2><p>Creating a model is just like creating any other content in a Caribou project. The first step is to acquire a configuration map, which is detailed in the <a href='#how-configuration-works-in-caribou'>How Configuration Works in Caribou</a> section.  <br /></p><p>Assuming a configuration exists and it is called <code>config</code>, a model can be created from the repl with the following call:</p><pre class="brush: clj">
 &#40;caribou.core/with-caribou config 
   &#40;caribou.model/create 
@@ -232,3 +254,9 @@
 
 ---&gt; &#40;{:id 1 :quotation &quot;Trust, but verify&quot; ...}&#41;
 </pre><p>This non-localized version is actually part of the "global" locale, which is always present.  The "global" locale also supplies values for instances that don't have a value in the localized field.  So until a specific value is given to the <code>quotation</code> for the "ql-QN" locale, it will inherit the value that exists in "global".  This allows you to just override the content that needs to be overridden and provide, for instance, the same image in all locales except the specific ones that need their own image.</p>
+      </section>
+    </div>
+
+    
+  </body>
+</html>

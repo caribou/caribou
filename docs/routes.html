@@ -1,3 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+
+    <title>Caribou Documentation</title>
+  </head>
+
+  <body>
+
+    <header>
+      <div class="container">
+        <h1>THIS. IS. CARIBOU.</h1>
+      </div>
+    </header>
+
+    <div class="container">
+      <section id="main_content">
 <h1>Defining Routes and Pages</h1><p>When a user visits a URL in your site, the Caribou Router is what matches that URL and sends a request to a particular controller you have defined in your <code>src/{project}/controllers</code> directory.  These controllers are just Clojure namespaces which contain a collection of functions (which we call "actions"), each of which can conjure a response based on a given request.</p><p>In order to perform this magic, you have to specify which URLs map to which controller actions, and what parts of that URL are parsed and provided to the action in the form of parameters.  This happens through the use of two new concepts in Caribou: Routes and Pages.</p><p>Routes define a routing hierarchy which is based on URL paths.  Every route defines a path (which is a string to match), a key which will be used to map it to a page, and a set of child routes, each of which inherits the first part of its path from its parent.  This tree will then be used by the router to route requests based on their URL to the controller actions given by that route's key.</p><p>The simplest route would be one that matches the empty path, "", and maps to a home page.  This is given below:</p><pre class="brush: clj">
 &#91;&quot;/&quot; :home &#91;&#93;&#93;
 </pre><p>The path is "", the key is <code>:home</code>, and its children routes are empty. Needless to say, routes for a site can become much more elaborate than this, but they are all represented in this same format.</p><p>The above is a single route, but in practice routes come as a collection.  So an example of the simplest routing a site could have would be something like the following:</p><pre class="brush: clj">
@@ -152,3 +174,9 @@ http://localhost:33333/place/earth       ---&gt;  :specific-place  {:name &quot;
   &#91;&#93;
   &#40;pages/add-page-routes page-tree&#41;&#41;
 </pre>
+      </section>
+    </div>
+
+    
+  </body>
+</html>

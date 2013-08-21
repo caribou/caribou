@@ -1,3 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+
+    <title>Caribou Documentation</title>
+  </head>
+
+  <body>
+
+    <header>
+      <div class="container">
+        <h1>THIS. IS. CARIBOU.</h1>
+      </div>
+    </header>
+
+    <div class="container">
+      <section id="main_content">
 <h1>Using the API</h1><p>The API is already running when you fire up a Caribou project.  Its function is to make available all the content in your system as json, xml or csv.  Every time a model is created, a corresponding API for that model is instantly available.</p><h2>All Content is Accessible from the API</h2><p>Once a new model is created, any instances of that model can be accessed at a URL of the form:</p><pre>
 http://localhost:33333/&#95;api/{model-name}
 </pre><p>So, to access the Model API, simply navigate to http://localhost:33333/_api/model .  You will see a json representation of every model in the system.  If you want a specific representation, add it as a file extension to this basic URL structure:</p><pre>
@@ -25,3 +47,9 @@ http://localhost:33333/&#95;api/model?include=fields&amp;limit=2
    &#40;pages/all-pages&#41;
    &#40;config/draw :controller :namespace&#41;&#41;&#41;
 </pre><p>As you can see, the Admin is loaded first, then the API.  If you want to change where the API is located, just change the string "/_api" to your desired API root.  And if you don't want the API enabled at all, simply remove the whole <code>pages/add-page-routes</code> call to add the API routes.</p>
+      </section>
+    </div>
+
+    
+  </body>
+</html>

@@ -1,3 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+
+    <title>Caribou Documentation</title>
+  </head>
+
+  <body>
+
+    <header>
+      <div class="container">
+        <h1>THIS. IS. CARIBOU.</h1>
+      </div>
+    </header>
+
+    <div class="container">
+      <section id="main_content">
 <h1>Configuring Caribou</h1><h2>Default Directory Structure</h2><p>The Caribou directory structure is designed to be simple and flexible.  <br /> Running <code>tree</code> in the root illuminates the structure:</p><pre>
 ├── app
 ├── project.clj
@@ -155,3 +177,9 @@
 :debug 7 
 :trace 7 
 </pre><p>If you set a logger to watch at <code>:warn</code> level for instance, it will ignore any event below <code>:warn</code>, but output all messages from <code>:warn</code> level up to <code>:emergency</code>.  <code>:emergency</code> level events are always output.</p><h3>models</h3><p>This is a map that contains all Models in the system.  During a call to <code>caribou.core/init</code> the Models are loaded from memory and added to this map under a key containing the slug of the Model.  If you want to define Models that are not represented in the Model table, you can add more keys to this map (though this is probably unnecessary).</p><p>There is a whole section on <a href='#creating-models'>Creating Models</a> later on.</p><h3>nrepl</h3><p>Nrepl provides a repl running inside the Caribou process that can be connected to from the command line or from inside an editor with nrepl support: https://github.com/clojure/tools.nrepl .  This is a great way to interact with a running Caribou process and inspect or alter state using a given configuration.</p><p>If a <code>:port</code> is provided, then an nrepl server will be booted at that port when Caribou is initialized.  In that case, a reference to the running server will be stored in the atom under <code>:server</code>.  If no <code>:port</code> option is present, nrepl will not be booted.</p><h3>pages</h3><p>This provides a reference to the page tree for this Caribou instance.  Most likely this will be populated during the definition of the handler in your <code>{project}.core</code> namespace.  <code>{project}.core/reload-pages</code> is a function that adds whatever routes you have to your site, which gets passed into the invocation of the root handler, <code>caribou.app.handler/handler</code>, so that it can reload the pages whenever necessary.  This is all covered in the section on <a href='#defining-routes-and-pages'>Defining Routes and Pages</a>.</p><h3>pre-actions</h3><p>This configuration option holds the current map of existing pre-actions for different pages.  Keyed by the slug of a page, pre-actions will be run before a given action is evaluated.  This could be used for things like authorization or processing of request parameters.  See the section on [Defining Pre-Actions](#defining-pre-actions) for more details.</p><h3>query</h3><p>The <code>query</code> option is the domain of the query cache.  Turned off by default, the query cache will cache the results of every query map that <code>caribou.model/gather</code> sees.  There are a variety of entries in this map that play different roles in the inner workings of the query cache.</p><ul><li><strong>enable-query-cache</strong></li></ul><p>To turn on the query-cache, simply set this option to <code>true</code> in your config.Not necessary for development, but a good thing to do in production if you know that your content is not necessarily changing often.  Even if it does change, the cache will be invalidated on any update to that model, so your site will remain current.</p><ul><li><strong>queries</strong></li></ul><p>An atom containing the map of queries to results.  Populated automatically bythe query cache (but fun to inspect, if you are into that kind of thing).</p><ul><li><strong>reverse-cache</strong></li></ul><p>Tracks the models that are hit by each query.  Invalidates those caches in thecase of an update.</p><ul><li><strong>query-defaults</strong></li></ul><p>This map will be added automatically to any query issues through a<code>caribou.model/gather</code>.  Want to restrict your content to only those "enabled"? This is the place to do it.</p><h3>reset</h3><p>This is a reference to a user-defined function passed into the initial creation of the frontend Caribou handler in your <code>{project}.core/init</code> function.  It should do any kind of necessary initialization work that your site requires (like loading pages or defining routes, for instance).  It is added automatically in a newly generated Caribou site.</p><h3>routes</h3><p>This is an ordered map of your routes.  The routes map url patterns to the actions that are triggered by them.  One by one each pattern is tested against an incoming url until it is matched or a 404 is issued.  Once a route is matched the corresponding action is called with the request map as a parameter.  See more at <a href='#defining-routes-and-pages'>Defining Routes and Pages</a>.</p><h3>template</h3><p>The various options pertaining to the built-in template rendering live here.</p><ul><li><strong>cache-strategy</strong></li></ul><p>This option governs the caching strategy used by the template engine.  Thepossible values are currently <code>:never</code> or <code>:always</code>.</p><ul><li><strong>helpers</strong></li></ul><p>This is a map containing the default helpers that will be available during therendering of every template.  To find out all about helpers check out the section on <a href='#template-helpers'>Template Helpers</a>.</p>
+      </section>
+    </div>
+
+    
+  </body>
+</html>
