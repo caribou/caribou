@@ -1,49 +1,19 @@
 # This. Is. Caribou.
 
-* Overview
-  * Uber-Quickstart
-  * Example
-  * Feature list
-* Docs
-  * Intro
-    * Background
-    * Conventions
-    * Why Clojure?
-    * Concepts
-      * Model
-      * Field
-      * Uberquery
-      * Query cache
-  * Installation
-    * lein
-    * lein-caribou
-  * Quickstart
-    * lein caribou create
-  * Tutorial / Sample Application
-    * Make a blog / to-do / cheese-shop app
-    * Illustrate examples of
-      * Creating models
-      * Adding fields
-      * Adding associations
-      * Customising templates
-      * Building controller actions
-      * Fetching content
-  * Templates
-    * antler/antlers
-    * layouts, partials
-    * loops, conditionals
-    * helpers
-  * Cookbook
-    * sessions
-    * logins
-    * belongs-to
-    * has-many
-    * many-to-many
-    * querying
-    * prefetching/eager-loading (:include)
-    * ordering and positioning
-* Roadmap
-  * To-do list
-  * Project goals
-* Credits
-* License & (C)
+Here is an overview of the main topics for Caribou.  Refer to these
+individual pages for comprehensive documentation:
+
+* [What is Caribou?](/what-is-caribou.html)
+* [Getting Started](/getting-started.html)
+* [Components of a Caribou Project](/components.html)
+* [Basic Concepts](/basic-concepts.html)
+* [Philosophy](/philosophy.html)
+* [Configuring Caribou](/configuring.html)
+* [Models in Caribou](/models.html)
+* [Routes and Pages](/routes.html)
+* [Writing Controllers](/controllers.html)
+* [Rendering Templates](/templates.html)
+* [Miscellaneous Topics](/misc.html)
+* [Using the Admin](/tutorial.html)
+* [Using the API](/api.html)
+* [Deploying Caribou](/deploying.html)

@@ -1,0 +1,115 @@
+<h1>Rendering Templates</h1><p>Caribou comes with a built-in template rendering system called <a href='https://github.com/antler/antlers'>antlers</a>.  When a defined page specifies a <code>:template</code> key, it will search for the given template in the <code>resources/templates</code> directory of your project and associate a function to render that template into the incoming request in a controller action under the <code>:template</code> key.  When that action calls <code>caribou.app.controller/render</code>, it will look for this function under the <code>:template</code> key and pass it the map <code>render</code> receives as its main argument.  This is reflected in the canonical controller action pattern of usage:</p><pre class="brush: clj">
+&#40;defn some-action
+  &#91;request&#93;
+  &#40;caribou.app.controller/render request&#41;&#41;
+</pre><p>In this case the controller is doing nothing but passing the request map it received on to the template to be rendered.  Inside <code>request</code> lives a key <code>:template</code> which is a function taking a single argument: the map of data available to the template during render time.  Any key in this map can be accessed from inside a template like so:</p><pre class="brush: html">
+Hello template argument :tundra -- {{tundra}}
+</pre><p>Now if the request map contains the value "Arctic" under the key <code>:tundra</code>, this will render as:</p><pre class="brush: html">
+Hello template argument :tundra -- Arctic
+</pre><p>If the map is nested, successive maps can be accessed through the '.' pattern. So if this is the template:</p><pre class="brush: html">
+Hello nested template argument -- {{tundra.denizens}} !
+</pre><p>And it is given a map like this:</p><pre class="brush: clj">
+{:tundra {:denizens &quot;Caribou&quot;}}
+</pre><p>Then the template will render out like this:</p><pre class="brush: html">
+Hello nested template argument -- Caribou !
+</pre><h2>Using Loops with Sequences from the Render Map</h2><p>Any sequence of items (list or vector) in the render map can be looped over inside a template.  <br /></p><pre class="brush: clj">
+&#40;defn find-lakes
+  &#91;request&#93;
+  &#40;let &#91;lakes &#40;model/gather :lake&#41;&#93;
+    &#40;render &#40;assoc request :lakes lakes&#41;&#41;&#41;&#41;
+
+;; now the request map looks something like this:
+{:lakes &#91;{:name &quot;Huron&quot;} 
+         {:name &quot;Erie&quot;} 
+         {:name &quot;Crater&quot;}&#93;}
+</pre><p>Traversing a loop is simple.  In the "lake" template:</p><pre>
+{{#lakes}}
+  {{name}}
+{{/lakes}}
+</pre><p>This would render as: </p><pre class="brush: html">
+Huron 
+Erie 
+Crater
+</pre><p>But what if we want the last one to be emphasized?  This works:</p><pre>
+{{#lakes}}
+  {{name}}{{#loop.last}}!!!{{/loop.last}}
+{{/lakes}}
+</pre><p><pre class="brush: html">
+Huron 
+Erie 
+Crater!!! 
+</pre></p><p>Other loop variables include:</p><pre>
+loop.first       --&gt;  true/false
+loop.last        --&gt;  true/false
+loop.item        --&gt;  the current item in the loop
+loop.index       --&gt;  the current index
+loop.inc-index   --&gt;  one-based index &#40;useful for things&#41;
+loop.count       --&gt;  total count of items in this list
+loop.outer       --&gt;  a reference to any loop variables from an outer loop.  outer can also have an outer, ad infinitum.
+</pre><h2>Template Helpers</h2><p>Template helpers are simply functions which live in the render map.  They are easy to invoke, and accept arguments which can be literals or other values from the render map:</p><pre class="brush: clj">
+&#40;defn some-action
+  &#91;request&#93;
+  &#40;caribou.app.controller/render 
+   &#40;assoc request :excite &#40;fn &#91;s&#93; &#40;str s &quot;!&quot;&#41;&#41;&#41;&#41;&#41;
+</pre><p>Then in the template:</p><pre class="brush: html">
+{{excite &quot;yellow&quot;}}  --&gt;   yellow!
+</pre><p>Or with a value from the same map:</p><pre class="brush: clj">
+&#40;defn some-action
+  &#91;request&#93;
+  &#40;caribou.app.controller/render 
+   &#40;assoc request 
+     :antler &quot;Velvet&quot;
+     :excite &#40;fn &#91;s&#93; &#40;str s &quot;!&quot;&#41;&#41;&#41;&#41;&#41;
+</pre><pre class="brush: html">
+{{excite antler}}  --&gt;   Velvet!
+</pre><h2>Existing Helpers</h2><p>There are many helpers Caribou provides by default, but the two most important are <code>route-for</code> and <code>resize</code>.  These are explained here.</p><ul><li><strong>route-for</strong></li></ul><p><code>route-for</code> is a way to generate a url based on a key and some parameters.  Thisis a helpful alternative to simply hard-coding urls throughout your templates, since it means that you are free to change your routes at will and all of the urls in your templates will immediately reflect this.</p><p><code>route-for</code> takes the key for a route and a map of params to be substituted into the variable parts of the route.  So say you have a route defined like this:</p><pre class="brush: clj">
+&#91;&quot;/place/:where&quot; :somewhere &#91;&#93;&#93;
+</pre><p>Then you need to link to this route in a template somewhere.  To generate the url using <code>route-for</code>, in your template:</p><pre class="brush: html">
+&lt;a href=&quot;{{route-for :somewhere {:where &quot;yellow&quot;} }}&quot;&gt;somewhere yellow&lt;/a&gt;
+</pre><p>This will produce:</p><pre class="brush: html">
+&lt;a href=&quot;/place/yellow&quot;&gt;somewhere yellow&lt;/a&gt;
+</pre><p>Of course, the value of the params can also be a value in the request map.  So if you want the url to depend on the value of <code>:where</code> in the render map, simply refer to that in your params map:</p><pre class="brush: html">
+&lt;a href=&quot;{{route-for :somewhere {:where where} }}&quot;&gt;somewhere {{where}}&lt;/a&gt;
+</pre><p>Then if you pass in a map to render like this:</p><pre class="brush: clj">
+{:where &quot;pink&quot;}
+</pre><p>Your template will render out as:</p><pre class="brush: html">
+&lt;a href=&quot;/place/pink&quot;&gt;somewhere pink&lt;/a&gt;
+</pre><ul><li><strong>resize</strong></li></ul><p><code>resize</code> takes existing images and resizes them to dimensions given by <code>:width</code>and <code>:height</code> parameters.  If only <code>:width</code> or only <code>:height</code> is supplied, it scales the image to maintain the aspect ratio of the original image.  There is also a <code>:quality</code> option that governs the image quality of the resized image.</p><p>The first argument to <code>resize</code> is an image map, which can be obtained from a model containing an "asset" field.  So if you have a Slide model with an "image" field of type "asset", the resize call would work like the following.</p><p>In the controller:</p><pre class="brush: clj">
+&#40;defn display-slide
+  &#91;request&#93;
+  &#40;let &#91;slide &#40;model/pick :slide {:where {:slug &#40;-&gt; request :params :slide&#41;}}&#41;&#93;
+    &#40;render &#40;assoc request :slide slide&#41;&#41;&#41;&#41;
+</pre><p>To render the image at the original size:</p><pre class="brush: html">
+&lt;img src=&quot;/{{slide.image.path}}&quot; /&gt;
+</pre><p>To resize it to have a width of 500:</p><pre class="brush: html">
+&lt;img src=&quot;{{resize slide.image {:width 500} }}&quot; /&gt;
+</pre><p>Or a height of 200 with a quality of 0.7:</p><pre class="brush: html">
+&lt;img src=&quot;{{resize slide.image {:height 200 :quality 0.7} }}&quot; /&gt;
+</pre><p>You get the idea.</p><h2>Templates can Inherit Structure from other Templates</h2><p>Sometimes you have a set of templates that all share a common markup layout, and really only differ in one content block somewhere in the middle.  This is what template inheritance is for, which is provided in antlers in the form of blocks.</p><p>To declare a block, use the <code>{{%...}}</code> syntax, as in the following example.</p><p>Suppose you have a file "layout" which looks something like this:</p><pre>
+HEADER
+  MONOLITHIC BODY
+FOOTER
+</pre><p>But you would like to have other bodies, like <code>BODY OF MODULARITY</code>, without replicating <code>HEADER</code> and <code>FOOTER</code> over and over again.  Here is the perfect use case for a block:</p><pre>
+HEADER
+  {{%body}}{{/body}}
+FOOTER
+</pre><p>Then, in another file "modular" can be the content:</p><pre>
+{{&lt; templates/layout}}
+{{%body}}BODY OF MODULARITY{{/body}}
+</pre><p>Which, when called with <code>&#40;antlers/render-file &quot;modular&quot; {}&#41;</code> yields:</p><pre>
+HEADER
+  BODY OF MODULARITY
+FOOTER
+</pre><p>Now, you can have another file called "alternate" which can have totally different contents for the <code>body</code> block.  You only need to specify the changes in the blocks, not the rest of the file:</p><pre>
+{{&lt; layout}}
+{{%body}}This is a more conversational body for the same layout template{{/body}}
+</pre><p>Which yields when rendering "alternate":</p><pre>
+HEADER
+  This is a more conversational body for the same layout template
+FOOTER
+</pre><p>In this way you can reuse layouts repeatedly and only need to specify what is different.</p><h2>Swapping out the template engine</h2><p>There is nothing special about the function that lives under the <code>:template</code> key passed into <code>caribou.app.controller/render</code> besides the fact that it takes a map of values as an argument and produces a string representing a rendered template.  <br /></p><p>If you want to use a different template engine simply swap out the function living under <code>:template</code> with your own, as long as you can wrap it into the same form:</p><pre class="brush: clj">
+&#40;defn some-action
+  &#91;request&#93;
+  &#40;let &#91;template &#40;fn &#91;render-values&#93; &#40;my-template-engine/render &quot;where.html&quot; render-values&#41;&#41;&#93;
+    &#40;caribou.app.controller/render &#40;assoc request :template template&#41;&#41;&#41;&#41;
+</pre>

@@ -1,0 +1,154 @@
+<h1>Defining Routes and Pages</h1><p>When a user visits a URL in your site, the Caribou Router is what matches that URL and sends a request to a particular controller you have defined in your <code>src/{project}/controllers</code> directory.  These controllers are just Clojure namespaces which contain a collection of functions (which we call "actions"), each of which can conjure a response based on a given request.</p><p>In order to perform this magic, you have to specify which URLs map to which controller actions, and what parts of that URL are parsed and provided to the action in the form of parameters.  This happens through the use of two new concepts in Caribou: Routes and Pages.</p><p>Routes define a routing hierarchy which is based on URL paths.  Every route defines a path (which is a string to match), a key which will be used to map it to a page, and a set of child routes, each of which inherits the first part of its path from its parent.  This tree will then be used by the router to route requests based on their URL to the controller actions given by that route's key.</p><p>The simplest route would be one that matches the empty path, "", and maps to a home page.  This is given below:</p><pre class="brush: clj">
+&#91;&quot;/&quot; :home &#91;&#93;&#93;
+</pre><p>The path is "", the key is <code>:home</code>, and its children routes are empty. Needless to say, routes for a site can become much more elaborate than this, but they are all represented in this same format.</p><p>The above is a single route, but in practice routes come as a collection.  So an example of the simplest routing a site could have would be something like the following:</p><pre class="brush: clj">
+&#40;def routes
+  &#91;&#91;&quot;/&quot; :home &#91;&#93;&#93;&#93;&#41;
+</pre><p>As you can imagine, there could be several routes living in parallel:</p><pre class="brush: clj">
+&#40;def routes
+  &#91;&#91;&quot;/&quot;               :home      &#91;&#93;&#93;
+   &#91;&quot;/place&quot;          :place     &#91;&#93;&#93;
+   &#91;&quot;/somewhere-else&quot; :somewhere &#91;&#93;&#93;&#93;&#41;
+</pre><p>Pages are represented as a map where the keys are the same as those defined by the routes, and each value is a specification of where to route any incoming request that matches:</p><pre class="brush: clj">
+&#40;def pages
+  {:home {:GET {:controller 'home :action 'index :template &quot;home.html&quot;}}}&#41;
+</pre><p>In this case, this page will be triggered by any route containing the <code>:home</code> key, and the next map discerns which methods this page will match.  So in the case of a GET request, the corresponding controller that will be activated is the "home" controller, which is located in <code>src/{project}/controllers/home.clj</code> in the <code>{project}.controllers.home</code> namespace, and the action that will be called will be a function by the name of "index" defined in that namespace.</p><p>There can be multiple methods if desired:</p><pre class="brush: clj">
+&#40;def pages
+  {:home {:GET    {:controller 'home  :action 'index  :template &quot;home.html&quot;}
+          :POST   {:controller 'home  :action 'login  :template &quot;login.html&quot;}
+          :PUT    {:controller 'home  :action 'update :template &quot;acknowledge.html&quot;}
+          :DELETE {:controller 'hades :action 'perish :template &quot;writhing.html&quot;}}}&#41;
+</pre><p>Once we have a set of routes and a page map, we can combine them into a page tree that Caribou can use to build a router.  The function for this is named <code>caribou.app.pages/build-page-tree</code>, and it is called with a seq of routes and a map of pages and returns a page tree:</p><pre class="brush: clj">
+&#40;def page-tree
+  &#40;caribou.app.pages/build-page-tree routes pages&#41;&#41;
+</pre><p>Putting this all together we have the creation of a full page tree:</p><pre class="brush: clj">
+&#40;def routes
+  &#91;&#91;&quot;/&quot; :home &#91;&#93;&#93;&#93;&#41;
+
+&#40;def pages
+  {:home {:GET {:controller 'home :action 'index :template &quot;home.html&quot;}}}&#41;
+
+&#40;def page-tree
+  &#40;caribou.app.pages/build-page-tree routes pages&#41;&#41;
+</pre><p>This can later be given to the initialization of the Caribou handler that will be running your site.  It will define the routing structure and URL matching that will be followed by the running app.</p><h2>Routes are Matched based on Paths</h2><p>The routes you define govern the way URLs coming from requests will be matched. So given a set of routes, you can tell how an incoming URL will be handled. Take the following case:</p><pre class="brush: clj">
+&#40;def routes
+  &#91;&#91;&quot;/&quot;               :home      &#91;&#93;&#93;
+   &#91;&quot;/place&quot;          :place     &#91;&#93;&#93;
+   &#91;&quot;/somewhere-else&quot; :somewhere &#91;&#93;&#93;&#93;&#41;
+</pre><p>Here there are three separate routes.  Any incoming request will match one of these routes, or trigger a 404.  Caribou routes match given a trailing slash or not, so:</p><pre>
+http://localhost:33333                   ---&gt;  :home
+http://localhost:33333/                  ---&gt;  :home
+http://localhost:33333/place             ---&gt;  :place
+http://localhost:33333/place/            ---&gt;  :place
+http://localhost:33333/somewhere-else    ---&gt;  :somewhere
+http://localhost:33333/somewhere-else/   ---&gt;  :somewhere
+http://localhost:33333/off-the-map       ---&gt;  404!
+</pre><h2>Route Elements can be Variable</h2><p>This is all well and good, but what if you want to pull up a model by id?  Do you need a route for every id that could be called?</p><p>This is where variable slugs come into play.  You can specify a placeholder path element with a <code>:</code>, and when the router matches it it will parse the path and pass the value in as a named parameter.</p><p>Here is an example:</p><pre class="brush: clj">
+&#40;def routes
+  &#91;&#91;&quot;/&quot;            :home           &#91;&#93;&#93;
+   &#91;&quot;/place&quot;       :general-place  &#91;&#93;&#93;
+   &#91;&quot;/place/:name&quot; :specific-place &#91;&#93;&#93;&#93;&#41;
+</pre><p>In this case, the router will match any URL of the form "/place/*" and assign whatever the * is to a parameter called <code>:name</code>.  So:</p><pre>
+http://localhost:33333                   ---&gt;  :home
+http://localhost:33333/place             ---&gt;  :general-place
+http://localhost:33333/place/hello       ---&gt;  :specific-place  {:name &quot;hello&quot;}
+http://localhost:33333/place/earth       ---&gt;  :specific-place  {:name &quot;earth&quot;}
+</pre><p>Once the request reaches your controller, you can access the value of <code>:name</code> in the request map:</p><pre class="brush: clj">
+;; request to http://localhost:33333/place/earth
+
+&#40;defn place
+  &#91;request&#93;
+  &#40;println &#40;-&gt; request :params :name&#41;&#41;&#41;
+  
+---&gt; &quot;earth&quot;
+</pre><p>One word of caution: a variable slug can shadow a specific slug, so the ordering of your routes matters:</p><pre class="brush: clj">
+&#40;def routes
+  &#91;&#91;&quot;/place/:where&quot;  :variable-place &#91;&#93;&#93;    ;; &lt;--- absorbs all requests
+   &#91;&quot;/place/here&quot;    :right-here     &#91;&#93;&#93;&#93;&#41;  ;; &lt;--- never called!
+</pre><p>This is easily resolved by swapping the order:</p><pre class="brush: clj">
+&#40;def routes
+  &#91;&#91;&quot;/place/here&quot;    :right-here     &#91;&#93;&#93;    ;; &lt;--- now this works
+   &#91;&quot;/place/:where&quot;  :variable-place &#91;&#93;&#93;&#93;&#41;  ;; &lt;--- called only if the previous route fails to match
+</pre><h2>Routes can be Nested, Paths are Inherited</h2><p>A useful feature for organizing routes is to decompose them into a hierarchy. Routes inherit their path from the routes above them in the hierarchy, which means subtrees can be moved around and put into new places in the hierarchy while preserving the routing structure of that subtree.  Every subroute just needs to know its own path and what routes it has as children, and the full path is implied by its position in the tree.</p><p>Here is an example:</p><pre class="brush: clj">
+&#40;def routes
+  &#91;&#91;&quot;/&quot;                     :home 
+    &#91;&#91;&quot;presentations&quot;      :presentations 
+      &#91;&#91;&quot;:presentation&quot;    :presentation-detail 
+        &#91;&#91;&quot;info&quot;           :presentation-info &#91;&#93;&#93;
+         &#91;&quot;author/:author&quot; :presentation-author &#91;&#93;&#93;
+         &#91;&quot;slides&quot;         :slides 
+          &#91;&#91;&quot;:slide&quot;       :slide-detail &#91;&#93;&#93;&#93;&#93;&#93;&#93;&#93;&#93;
+     &#91;&quot;categories&quot;         :categories 
+      &#91;&#91;&quot;:category&quot;        :category-detail &#91;&#93;&#93;&#93;&#93;&#93;&#93;&#93;&#41;
+</pre><p>This generates a moderately comprehensive routing structure for a presentation-based application.  Here is a representative sample of routes that will be matched by this routing tree:</p><pre>
+.../                                      ---&gt;  :home
+.../presentations                         ---&gt;  :presentations
+.../presentations/caribou                 ---&gt;  :presentation-detail {:presentation &quot;caribou&quot;}
+.../presentations/caribou/info            ---&gt;  :presentation-info   {:presentation &quot;caribou&quot;}
+.../presentations/caribou/author/tundra   ---&gt;  :presentation-author {:presentation &quot;caribou&quot; :author &quot;tundra&quot;}
+.../presentations/caribou/slides          ---&gt;  :slides              {:presentation &quot;caribou&quot;}
+.../presentations/caribou/slides/welcome  ---&gt;  :slide-detail        {:presentation &quot;caribou&quot; :slide &quot;welcome&quot;}
+.../presentations/caribou/slides/routing  ---&gt;  :slide-detail        {:presentation &quot;caribou&quot; :slide &quot;routing&quot;}
+.../categories                            ---&gt;  :categories
+.../categories/programming                ---&gt;  :category-detail     {:category &quot;programming&quot;}
+</pre><p>Paths are generated for each route based on the sequence of paths starting at the root of the tree leading to that route.  This makes it easy to define sub-parts of your application's routing structure as individual trees and then compose them however you want.  The following is equivalent to the above routing tree:</p><pre class="brush: clj">
+&#40;def slide-routing
+  &#91;&quot;slides&quot;    :slides 
+   &#91;&#91;&quot;:slide&quot;  :slide-detail &#91;&#93;&#93;&#93;&#93;&#41;
+
+&#40;def presentation-routing
+  &#91;&quot;presentations&quot;       :presentations 
+   &#91;&#91;&quot;:presentation&quot;     :presentation-detail 
+     &#91;&#91;&quot;info&quot;            :presentation-info &#91;&#93;&#93;
+      &#91;&quot;author/:author&quot;  :presentation-author &#91;&#93;&#93;
+      slide-routing&#93;&#93;&#93;&#93;&#41;
+
+&#40;def category-routing
+  &#91;&quot;categories&quot;   :categories 
+   &#91;&#91;&quot;:category&quot;  :category-detail &#91;&#93;&#93;&#93;&#93;&#41;
+
+&#40;def all-routes
+  &#91;&#91;&quot;/&quot;  :home 
+    &#91;presentation-routing
+     category-routing&#93;&#93;&#93;&#41;
+</pre><p>This kind of separation of concerns allows for clean decomposition of different aspects of the routing structure, and also enables the addition of libraries which define their own routes to be inserted at arbitrary points in your own routing tree.  Not all routes need to be defined up front, and not all defined routes need to know where they are ultimately going to live.  Think of it as functional decomposition of the routing structure of your application.</p><h2>Pages Tie Routes to Controllers and Templates</h2><p>Once your routes are defined, you still need to say how those routes will map to controller actions and templates.  This is the role of Pages.  Pages live independently of routes, so they can vary without changing the routing and vice versa.  A set of pages is at its heart a map whose keys are the target of the various routes.  The second component of any route is a key, and this is the key that is looked up in the page map to find where that route sends the requests it matches.</p><p>A page is further indexed by its HTTP method, so that the same route can map to different controller actions based on whether it is a GET or a POST or whatever else.  <br /></p><p>The page map itself contains two keys at minimum: <code>:controller</code> and <code>:action</code>. It can contain any keys you wish and those keys will be available at render time in the request map under <code>:page</code>, but at least it must guide the system on which controller and action to pass any matched request at run time.  In addition, if your action is going to make use of the built in rendering then it must also contain a <code>:template</code> key that specifies which template to render.</p><p>Putting this all together, the simplest page map looks like this:</p><pre class="brush: clj">
+&#40;def simple-pages
+  {:home {:GET {:controller 'home :action 'index :template &quot;index.html&quot;}}}&#41;
+</pre><p>There is one page, <code>:home</code>, that responds to one method, <code>:GET</code>, and routes the request received to the "index" action inside the "home" controller.  Once there, if  <code>caribou.app.controller/render</code> is called in that controller, the template "index.html" living inside your "resources/templates" directory will be rendered with whatever map is passed into the <code>render</code> call.  This is the full round-trip story of Caribou routing, from request to route matching to controller action to template rendering and back as a response.  This is the pattern of the Internet.  <br /></p><h2>Providing your Pages to the Caribou Handler</h2><p>Once you have acquired a page tree, you can pass it into a call to <code>caribou.app.pages/add-page-routes</code>.  This is already happening inside your <code>{project}.core</code> namespace in the <code>{project}.core/reload-pages</code> function (this is where the Admin and the API are added into your site).  This function is eventually handed to the core Caribou handler that runs your site so that all routes can be reloaded when necessary:</p><pre class="brush: clj">
+&#40;defn reload-pages
+  &#91;&#93;
+  &#40;pages/add-page-routes
+   admin-routes/admin-routes
+   'caribou.admin.controllers
+   &quot;/&#95;admin&quot;
+   admin-core/admin-wrapper&#41;
+
+  &#40;pages/add-page-routes
+   api-routes/api-routes
+   'caribou.api.controllers
+   &quot;/&#95;api&quot;
+   api-core/api-wrapper&#41;
+
+  &#40;pages/add-page-routes
+   &#40;pages/all-pages&#41;
+   &#40;config/draw :controller :namespace&#41;&#41;&#41;
+</pre><p>The first two calls to <code>pages/add-page-routes</code> add in the Admin and API routes respectively.  The last one is currently adding in all the pages defined in the database (usually created through the Admin) by calling <code>pages/all-pages</code>, but you can give it any page tree you have created here.</p><p>Notice also that <code>pages/add-page-routes</code> has a number of additional arguments that can be passed in.  The first argument is a page tree, and the second is the controller namespace.  If you want to move where you store your controllers you can change this in your config, or just hardcode something here (like was done for the Admin and API, each of which have controller namespaces that live inside those respective projects).  The third argument is a URL prefix, which is how all the Admin and API routes end up living under "/&#95;admin" and "/&#95;api".  <br /></p><p>An example <code>{project}.core/reload-pages</code> that does not include the Admin or API but does use your custom routes and pages using a custom controller namespace and a different URL prefix would look something like this:</p><pre class="brush: clj">
+&#40;def routes
+  &#91;&#91;&quot;/&quot; :home &#91;&#93;&#93;&#93;&#41;
+
+&#40;def pages
+  {:home {:GET {:controller 'home :action 'index :template &quot;home.html&quot;}}}&#41;
+
+&#40;def page-tree
+  &#40;pages/build-page-tree routes pages&#41;&#41;
+  
+&#40;defn reload-pages
+  &#91;&#93;
+  &#40;pages/add-page-routes
+   page-tree
+   'some.other.controller.namespace
+   &quot;/lives/somewhere/else&quot;&#41;&#41;
+</pre><p>Of course if you want to use the default controller namespace and have your routes live at the root, it is as simple as:</p><pre class="brush: clj">
+&#40;defn reload-pages
+  &#91;&#93;
+  &#40;pages/add-page-routes page-tree&#41;&#41;
+</pre>

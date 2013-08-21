@@ -1,0 +1,157 @@
+<h1>Configuring Caribou</h1><h2>Default Directory Structure</h2><p>The Caribou directory structure is designed to be simple and flexible.  <br /> Running <code>tree</code> in the root illuminates the structure:</p><pre>
+├── app
+├── project.clj
+├── resources
+│   ├── config
+│   │   ├── development.clj
+│   │   ├── production.clj
+│   │   ├── staging.clj
+│   │   └── test.clj
+│   ├── public
+│   │   ├── css
+│   │   │   ├── fonts
+│   │   │   │   ├── caribou.eot
+│   │   │   │   ├── caribou.svg
+│   │   │   │   ├── caribou.ttf
+│   │   │   │   └── caribou.woff
+│   │   │   └── taiga.css
+│   │   ├── favicon.ico
+│   │   ├── ico
+│   │   │   └── favicon.ico
+│   │   └── js
+│   │       └── taiga.js
+│   └── templates
+│       ├── errors
+│       │   ├── 404.html
+│       │   └── 500.html
+│       └── home.html
+├── src
+│   ├── immutant
+│   │   └── init.clj
+│   └── taiga
+│       ├── boot.clj
+│       ├── controllers
+│       │   └── home.clj
+│       ├── core.clj
+│       ├── hooks
+│       │   └── model.clj
+│       └── migrations
+│           ├── admin.clj
+│           ├── default.clj
+│           └── order.clj
+├── taiga&#95;development.h2.db
+├── taiga&#95;development.trace.db
+</pre><p>There are some main features to take note of for now.</p><h3>project.clj</h3><p>First is the <code>project.clj</code>, which configures <code>lein</code> and holds information about dependencies and plugins.  You will be editing this when you want to add a new Clojure library to your project, for instance.  Also, this is where you define various options about how the site runs, including the port, the handler and an init function that is run on boot.  Full details can be found in the configuration section on project.clj.</p><h3>resources</h3><p>The <code>resources</code> directory has three branches: <code>config</code>, <code>public</code>, and <code>templates</code>.</p><ul><li><strong>config</strong></li></ul><p>The first, <code>config</code>, holds all the configuration files for the variousenvironments that your Caribou app will eventually run in.  The name of each environment maps to a configuration file with the same name and suffixed by <code>.clj</code>.  So in the "development" environment Caribou will use the <code>development.clj</code> config file.  For now the app defaults to <code>development</code>, but there are things you will want to shut down for production that are helpful in development, like automatic code reloading.  For this Caribou provides a <code>production.clj</code> with its own set of configuration options.</p><ul><li><strong>public</strong></li></ul><p>Anything in <code>public</code> will be accessible as a static resource under the URL thatmaps to this directory structure.  If all you have is static content, just throw a bunch of files in here where you want them to be accessed and you are good to go!  We have put some helpful files in here to get you started, (css and js) but nothing is set in stone.  Have at!</p><ul><li><strong>templates</strong></li></ul><p>Here is where all of the dynamic templates go.  In Caribou, you can createcontent that can then be accessed from templates.  Caribou uses a template engine called Antlers by default: https://github.com/antler/antlers .  The docs for using antlers are all on that page.</p><h3>src</h3><p><code>src</code> holds all of the Clojure files that run your Caribou site.  There is an <code>immutant</code> subdirectory for configuring Immutant (which is an optional app container): http://immutant.org/ .  You can ignore this one for now.  Next to that is a directory named after your project (here that is "taiga").  All of your site specific code will go in here.</p><p>There are some notable entries in your project source folder:</p><ul><li><strong>core.clj</strong></li></ul><p>This is the entry point into your Caribou project, and ultimately what getsexecuted on boot.  You can change everything about how Caribou runs from inside this file, from replacing pages and models to defining configuration to executing handlers for every request.  For now, the structure is set up to run Caribou how it was designed to be run, but never forget that you have ultimate control of this.</p><ul><li><strong>boot.clj</strong></li></ul><p>This file governs which configuration file gets loaded.  You can also changeconfiguration options inside this file that apply to all running environments, if you wish.</p><ul><li><strong>migrations</strong></li></ul><p>This directory contains data migrations that specify how your data evolves overtime.  You can add your own migrations in addition to the migrations necessary to run your site for the first time.  Any migration files added here must be included in <code>order.clj</code>.  This is necessary so that the migration system knows what order to run the migrations in.  The database keeps track of which migrations have been run, so no migration is ever run twice on one database.</p><ul><li><strong>hooks</strong></li></ul><p>Hooks are defined per model.  There are a variety of points in the contentlifecycle where custom code can be run, if desired.  This is covered in the configuration section on hooks.</p><ul><li><strong>controllers</strong></li></ul><p>Controllers are called when an http request is matched by a page that referencesthat controller.  This is how routes are linked to actual Clojure functions that eventually render a template or a return a valid response of some kind.</p><h3>The default H2 database</h3><p>This will be named after your project with the suffix "_development.h2.db".  By default Caribou uses H2 because it is an all java database which requires no native dependencies.  You will probably want to swap this out with your own database backend, but Caribou will work fine if all you ever want to use is H2.</p><h2>How Configuration Works in Caribou</h2><p>Caribou avoids holding any global state and elects rather to store state particular to the application in a configuration map that is owned by the user. This has a number of advantages, the first being that no code is tied to a particular configuration.  Configurations can be swapped in and out and Caribou will pick up and run with that configuration as if it had been using it the whole time.</p><p>That given, there are a fair number of options and state that Caribou keeps track of and requires to run, so not just any map will work.  In the <code>caribou.config</code> and <code>caribou.app.config</code> namespace there are a number of functions which facilitate the construction, modification and reading of these configuration maps.</p><p>Once you have a configuration map, you can call any Caribou methods inside of a <code>caribou.core/with-caribou</code> block.</p><pre class="brush: clj">
+&#40;let &#91;config &#40;pull-config-map-from-somewhere&#41;&#93; 
+  &#40;caribou.core/with-caribou config 
+    &#40;... &#41;&#41;  ;; block of code that assumes a caribou config 
+</pre><p>As we progress we will illuminate a number of Caribou calls that work in this manner.</p><p>Also, in order to access a value that lives inside a Caribou configuration, use <code>caribou.config/draw</code>:</p><pre class="brush: clj">
+&#40;caribou.config/draw :models :model :id&#41; ---&gt; The id of the Model model.
+</pre><h2>Initializing a Caribou Configuration</h2><p>In general, we will refer to namespaces inside a Caribou project as <code>{project}.foo</code>, since we don't know what you named your project.  So if you named your project "taiga" and we are talking about the <code>{project}.core</code> namespace, that means <code>taiga.core</code>.</p><p>Caribou configuration is done by passing in a configuration map to the <code>caribou.core/init</code> call in the main <code>{project}.boot</code> namespace.  By convention, this map is obtained as a result of calling the <code>caribou.config/config-from-environment</code> method on a default configuration map obtained from <code>caribou.app.config/default-config</code>.</p><pre class="brush: clj">
+&#40;let &#91;default &#40;caribou.app.config/default-config&#41; 
+      config &#40;caribou.config/config-from-environment default&#41;&#93; 
+  &#40;caribou.core/init config&#41;&#41;
+</pre><p><code>caribou.core/init</code> sets up all the state that Caribou needs to run and stores it in the config object passed into it.  Once a config map has been through <code>caribou.core/init</code> it is ready to be used for any Caribou related operation that needs to be performed.</p><p><code>caribou.config/config-from-environment</code> just reads the result of whatever file in <code>resources/config/{environment}.clj</code> matches the current environment setting and merges that map into the default map you provide.  By default the environment is "development", but it can be set as a java option (which can be done in a number of ways).  One of the easiest is to set it in your env like so:</p><pre>
+% export &#95;JAVA&#95;OPTIONS=-Denvironment=production 
+</pre><p>This is a standard method for setting JVM options from the command line.  (For other methods check the java documentation).</p><p>Even though this is the default method for Caribou configuration, you can configure Caribou in any way that gets a configuration map with the right options into <code>caribou.core/init</code> in <code>{project}.boot</code>.  Your <code>{project}.core</code> will call <code>{project}.boot/boot</code> to obtain this map when setting up the initial handler.</p><h2>Configuration Options</h2><p>Caribou is highly configurable in a number of ways.  Caribou configuration is meant to work out of the box, while still allowing for any changes that might be desired along the way.</p><h3>Default Configuration</h3><p>There are a variety of options for configuring a Caribou site.  Most of these you will not need immediately, but they are documented here for when they do become necessary.</p><p>Here is a map of all default configuration options:</p><pre class="brush: clj">
+{:app {:use-database        true
+       :public-dir &quot;public&quot;
+       :default-locale &quot;global&quot;
+       :localize-routes &quot;&quot;}
+ :actions &#40;atom {}&#41;
+ :assets {:dir &quot;app/&quot;
+          :prefix nil
+          :root &quot;&quot;}
+ :aws {:bucket nil
+       :credentials nil}
+ :controller {:namespace &quot;{project}.controllers&quot;
+              :reload true
+              :session-defaults &#40;atom {}&#41;}
+ :database {:classname    &quot;org.h2.Driver&quot;
+            :subprotocol  &quot;h2&quot;
+            :host         &quot;localhost&quot;
+            :protocol     &quot;file&quot;
+            :path         &quot;/tmp/&quot;
+            :database     &quot;taiga&#95;development&quot;
+            :user         &quot;h2&quot;
+            :password     &quot;&quot;}
+ :error {:handlers &#40;atom {}&#41;
+         :templates &#40;atom {}&#41;
+         :show-stacktrace false}
+ :field {:constructors &#40;atom {}&#41;
+         :namespace &quot;{project}.fields&quot;
+         :slug-transform &#91;&#91;#&quot;&#91;'\&quot;&#93;+&quot; &quot;&quot;&#93;
+                          &#91;#&quot;&#91;&#95; \\/?%:#&#94;\&#91;\&#93;&lt;&gt;@!|$&amp;&#42;+;,.&#40;&#41;&#93;+&quot; &quot;-&quot;&#93;
+                          &#91;#&quot;&#94;-+|-+$&quot; &quot;&quot;&#93;&#93;}
+ :handler &#40;atom nil&#41;
+ :hooks {:namespace &quot;{project}.hooks&quot;
+         :lifecycle &#40;atom {}&#41;}
+ :index {:path &quot;caribou-index&quot;
+         :default-limit 1000
+         :store &#40;atom nil&#41;}
+ :logging {:loggers &#91;{:type :stdout :level :debug}&#93;}
+ :models &#40;atom {}&#41;
+ :nrepl {:port nil 
+         :server &#40;atom nil&#41;}
+ :pages &#40;atom &#40;&#41;&#41;
+ :pre-actions &#40;atom {}&#41;
+ :query {:queries &#40;atom {}&#41;
+         :enable-query-cache  false
+         :query-defaults {}
+         :reverse-cache &#40;atom {}&#41;}
+ :reset &#40;atom nil&#41;
+ :routes &#40;atom &#40;flatland/ordered-map&#41;&#41;
+ :template {:helpers &#40;atom {}&#41;
+            :cache-strategy :never}
+}
+</pre><p>As you can see, there is a whole rainbow of options to choose from.  Let's take them one by one.</p><h3>app</h3><p>Here is where we hold the most general configuration level options.</p><ul><li><strong>use-database</strong></li></ul><p>Determines whether or not a database is in use.  Usually left at <code>true</code>.</p><ul><li><strong>public-dir</strong></li></ul><p>The directory that holds all of the static resources a site contains.  Anythingplaced in the public directory is available at the url representing its file path without having to go through the router.</p><ul><li><strong>default-locale</strong></li></ul><p>The name given to the default locale.  If you are not using localization you cansafely ignore this option.  If you are using localization, this is the locale that is given to request maps if no other locale is specified.</p><h3>actions</h3><p>This is an atom with a map containing all controller actions in the site.  You probably won't have to interact with this one directly, unless you have custom actions that are not defined in controller files.</p><h3>assets</h3><p>Anything having to do with uploaded files is configured in this map.  The available keys in the assets map are:</p><ul><li><strong>dir</strong></li></ul><p>This specifies where local files on disk will be stored after upload.  "app/" bydefault, could be anywhere on the filesystem.</p><ul><li><strong>prefix</strong></li></ul><p>When using s3 for storing assets, this defines the prefix inside the bucket thatwill be appended to the beginning of any asset path.  This provides a means to have assets from many sites stored in a single bucket (if desired).</p><ul><li><strong>root</strong></li></ul><p>The asset root can be used in templates to prefix a given asset with a differenthost.  This way different environments can have assets that originate from different hosts, like one set of assets for staging and one set for production for example.</p><h3>aws</h3><p>Information about how to connect to amazon is stored here.  Because the configuration can be different for different environments, you could have one amazon bucket or account for one environment, and a different account or bucket for another environment.</p><ul><li><strong>bucket</strong></li></ul><p>The name of the s3 bucket that assets will be stored in.</p><ul><li><strong>credentials</strong></li></ul><p>A map containing your AWS credentials of the form `{:access-key"YOUR-ACCESS-KEY" :secret-key "YOUR-SECRET-KEY"}`</p><h3>controller</h3><p>The various options for configuring controllers.</p><ul><li><strong>namespace</strong></li></ul><p>The namespace prefix where all of the controllers in your site live.  Defaultsto <code>{project}.controllers</code>, which means that any controller namespace you want to reference must start with <code>{project}.controllers.{controller}</code>.  Actions are functions inside your controller namespace, so the <code>index</code> action inside your <code>home</code> controller in the <code>taiga</code> project would be found at <code>taiga.controllers.home/index</code>.</p><ul><li><strong>reload</strong></li></ul><p>Defaults to true.  This reloads every action on every request, which is helpfulin development when you are modifying them all the time, but you probably want to turn it off in production unless you are modifying your controllers at runtime (which is not suggested for production!)</p><ul><li><strong>session-defaults</strong></li></ul><p>Anything placed into the session-defaults atom will be available in a freshsession created when a user first visits your site.</p><h3>database</h3><p>Any and all information for connecting to a database go in this map.  Usually the main feature of each environment's config file, it holds a variety of options, some of which are relevant only to certain databases:</p><ul><li><strong>classname</strong> -- <em>required</em></li></ul><p>The Java class representing the driver for the database.  You can't reallyconnect to the db unless there is a class that handles the connection, which there is for every database we have encountered.</p><ul><li><strong>subprotocol</strong> -- <em>required</em></li></ul><p>This string represents the subprotocol that is used to connect to the databasethrough the driver.  Every driver has some specific options (usually only one).</p><p>Current possible values: postgresql, mysql, h2</p><ul><li><strong>host</strong> -- <em>required</em></li></ul><p>What host does your database live on?  For local database development this willmost likely be <code>localhost</code>, but in many situations this is a remote server.</p><ul><li><strong>database</strong> -- <em>required</em></li></ul><p>The actual name of your database.</p><ul><li><strong>user</strong> -- <em>required</em></li></ul><p>The user that is being used to access the database.</p><ul><li><strong>password</strong> -- <em>required</em></li></ul><p>The password that belongs to the given user.</p><ul><li><strong>protocol</strong></li></ul><p>This is a string representing the mode the database is connected to with, ifapplicable.  For instance, H2 can use file access, tcp access or a variety of others.  Ignore if this does not apply.</p><ul><li><strong>path</strong></li></ul><p>For accessing file based databases, this represents the location of yourdatabase on disk.  Again, only necessary for file based databases.</p><h4>Some example database configurations</h4><p>Here are a couple of examples of database configurations to get you started:</p><ul><li>Postgresql</li></ul><pre class="brush: clj">
+{:database 
+  {:classname &quot;org.postgresql.Driver&quot; 
+   :subprotocol &quot;postgresql&quot;
+   :host &quot;127.0.0.1&quot; 
+   :database &quot;caribou&#95;test&quot; 
+   :user &quot;caribou&quot; 
+   :password &quot;TUNDRA&quot;}}
+</pre><ul><li>Mysql</li></ul><pre class="brush: clj">
+{:database 
+  {:classname &quot;com.mysql.jdbc.Driver&quot; 
+   :subprotocol &quot;mysql&quot; 
+   :host &quot;localhost&quot; 
+   :database &quot;caribou&#95;test&quot; 
+   :user &quot;caribou&quot; 
+   :password &quot;TUNDRA&quot;}} 
+</pre><ul><li>H2</li></ul><p>H2 requires a couple more fields to identify that you are using a file baseddatabase and to specify the path.  (notice <code>:protocol</code> and <code>:path</code> are both present, but not <code>:host</code>)</p><pre class="brush: clj">
+{:database 
+  {:classname &quot;org.h2.Driver&quot; 
+   :subprotocol &quot;h2&quot; 
+   :protocol &quot;file&quot;
+   :path &quot;./&quot; 
+   :database &quot;caribou&#95;development&quot; 
+   :user &quot;h2&quot; 
+   :password &quot;&quot;}} 
+</pre><h3>error</h3><p>When errors occur, these options governs how they are handled.</p><ul><li><strong>handlers</strong></li></ul><p>This map holds custom error handlers for specific error codes.  So if you wantedto do some custom action when a 404 is hit for instance, you could associate a :404 key into this map with the value of a function to be run whenever a 404 occurs.  If no handler exists for that error, the default error handler is run.</p><ul><li><strong>templates</strong></li></ul><p>A map holding templates that will be rendered in the case of various errorcodes.  So a template that lives under the :404 key will be rendered whenever a 404 error occurs.</p><ul><li><strong>show-stacktrace</strong></li></ul><p>Set this option to true if you want the stacktrace of any exception to appear inthe browser.  Not desirable for production when it is better practice to render a custom 500 page, but in development this can be handy (especially if you conjure a lot of stacktraces!)  Otherwise, the stacktrace is rendered out to the logs and a 500 template is rendered in the browser.  Defaults to false.</p><h3>field</h3><ul><li><strong>constructors</strong></li></ul><p>A map that contains all the Field constructors.  Since Field is a protocol, tocreate one requires calling a constructor.  This is a map of Field type names to functions which construct a Field of that type.  Handled automatically by Caribou, you probably don't need to mess with this, but it is here if you need it.</p><ul><li><strong>namespace</strong></li></ul><p>A namespace to hold any custom user-defined Field types.  Any records you definethat implement the Field protocol that live in this namespace will be added as types that can be created like any other built in Field type.</p><ul><li><strong>slug-transform</strong></li></ul><p>Whenever a piece of content of a Model with a Field of type "slug" is saved, thevalue for that Field is generated from a linked text Field according to the transformation encoded in this configuration property.  By default this transformation removes quotes and turns special characters and spaces into a dash (-).  Want underscores instead?  Override this config option.</p><h3>hooks</h3><p>Hooks are run at specific point during every piece of content's lifecycle.  The various hook points are:</p><ul><li><strong>During create these hooks are called in order:</strong></li></ul><pre class="brush: clj">
+:before-save
+:before-create 
+:after-create 
+:after-save 
+</pre><ul><li><strong>During an update, these hooks are called in order:</strong></li></ul><pre class="brush: clj">
+:before-save
+:before-update 
+:after-update 
+:after-save 
+</pre><ul><li><strong>When a piece of content is destroyed, these hooks are run:</strong></li></ul><pre class="brush: clj">
+:before-destroy 
+:after-destroy 
+</pre><ul><li><strong>namespace</strong></li></ul><p>The namespace where the various hooks into the Model lifecycle go.  Every hooknamespace has a name of the form {hooks-namespace}.{model-name}, and hooks are added in a function called {hooks-namespace}.{model-name}/add-hooks.</p><ul><li><strong>lifecycle</strong></li></ul><p>The actual hooks that get run.  Rather than modifying this directly, just call<code>caribou.hooks/add-hooks</code> from a file named after that model in your hooks namespace.  <br /></p><h3>index</h3><p>The index options control how content is indexed in the built in Lucene search engine.  This is used in the Admin but you can also use it in your own site. http://lucene.apache.org/</p><p>Caribou uses the clucy library to abstract over the raw Java Lucene interface: https://github.com/weavejester/clucy</p><ul><li><strong>path</strong></li></ul><p>The directory that will hold the index files.  Defaults to "caribou-index".</p><ul><li><strong>default-limit</strong></li></ul><p>The maximum number of documents a search will return.  Defaults to 1000.</p><ul><li><strong>store</strong></li></ul><p>An atom of the actual clucy index object, if you need to perform any customoperations on it.</p><h3>logging</h3><p>Logging contains a list of logger specifications under the :loggers key.  These specifications are a map containing two keys: <code>:type</code> and <code>:level</code>.  <code>:type</code> indicates what endpoint the logger will output to (the default logger writes to :stdout), and <code>:level</code> indicates what level of Caribou events to pay attention to.</p><p>The different types currently supported are <code>:stdout</code>, <code>:file</code> and <code>:remote</code>. <code>:stdout</code> simply outputs to stdout, and is the default logger type.  If <code>:file</code> is chosen, you must also add a <code>:file</code> key to the map pointing at the file to log to.  If the logger type is <code>:remote</code> then you must also include a <code>:host</code> key which indicates what remote host to log to.  In the case of a remote host, it uses UDP to send packets to the host, so the host must be running syslog and must be configured to allow access from the server sending the packets.</p><p>The levels in order from most critical to least critical are:</p><pre class="brush: clj">
+:emergency 0 
+:alert 1 
+:critical 2 
+:error 3 
+:warning 4 
+:warn 4 
+:notice 5
+:informational 6 
+:info 6 
+:debug 7 
+:trace 7 
+</pre><p>If you set a logger to watch at <code>:warn</code> level for instance, it will ignore any event below <code>:warn</code>, but output all messages from <code>:warn</code> level up to <code>:emergency</code>.  <code>:emergency</code> level events are always output.</p><h3>models</h3><p>This is a map that contains all Models in the system.  During a call to <code>caribou.core/init</code> the Models are loaded from memory and added to this map under a key containing the slug of the Model.  If you want to define Models that are not represented in the Model table, you can add more keys to this map (though this is probably unnecessary).</p><p>There is a whole section on <a href='#creating-models'>Creating Models</a> later on.</p><h3>nrepl</h3><p>Nrepl provides a repl running inside the Caribou process that can be connected to from the command line or from inside an editor with nrepl support: https://github.com/clojure/tools.nrepl .  This is a great way to interact with a running Caribou process and inspect or alter state using a given configuration.</p><p>If a <code>:port</code> is provided, then an nrepl server will be booted at that port when Caribou is initialized.  In that case, a reference to the running server will be stored in the atom under <code>:server</code>.  If no <code>:port</code> option is present, nrepl will not be booted.</p><h3>pages</h3><p>This provides a reference to the page tree for this Caribou instance.  Most likely this will be populated during the definition of the handler in your <code>{project}.core</code> namespace.  <code>{project}.core/reload-pages</code> is a function that adds whatever routes you have to your site, which gets passed into the invocation of the root handler, <code>caribou.app.handler/handler</code>, so that it can reload the pages whenever necessary.  This is all covered in the section on <a href='#defining-routes-and-pages'>Defining Routes and Pages</a>.</p><h3>pre-actions</h3><p>This configuration option holds the current map of existing pre-actions for different pages.  Keyed by the slug of a page, pre-actions will be run before a given action is evaluated.  This could be used for things like authorization or processing of request parameters.  See the section on [Defining Pre-Actions](#defining-pre-actions) for more details.</p><h3>query</h3><p>The <code>query</code> option is the domain of the query cache.  Turned off by default, the query cache will cache the results of every query map that <code>caribou.model/gather</code> sees.  There are a variety of entries in this map that play different roles in the inner workings of the query cache.</p><ul><li><strong>enable-query-cache</strong></li></ul><p>To turn on the query-cache, simply set this option to <code>true</code> in your config.Not necessary for development, but a good thing to do in production if you know that your content is not necessarily changing often.  Even if it does change, the cache will be invalidated on any update to that model, so your site will remain current.</p><ul><li><strong>queries</strong></li></ul><p>An atom containing the map of queries to results.  Populated automatically bythe query cache (but fun to inspect, if you are into that kind of thing).</p><ul><li><strong>reverse-cache</strong></li></ul><p>Tracks the models that are hit by each query.  Invalidates those caches in thecase of an update.</p><ul><li><strong>query-defaults</strong></li></ul><p>This map will be added automatically to any query issues through a<code>caribou.model/gather</code>.  Want to restrict your content to only those "enabled"? This is the place to do it.</p><h3>reset</h3><p>This is a reference to a user-defined function passed into the initial creation of the frontend Caribou handler in your <code>{project}.core/init</code> function.  It should do any kind of necessary initialization work that your site requires (like loading pages or defining routes, for instance).  It is added automatically in a newly generated Caribou site.</p><h3>routes</h3><p>This is an ordered map of your routes.  The routes map url patterns to the actions that are triggered by them.  One by one each pattern is tested against an incoming url until it is matched or a 404 is issued.  Once a route is matched the corresponding action is called with the request map as a parameter.  See more at <a href='#defining-routes-and-pages'>Defining Routes and Pages</a>.</p><h3>template</h3><p>The various options pertaining to the built-in template rendering live here.</p><ul><li><strong>cache-strategy</strong></li></ul><p>This option governs the caching strategy used by the template engine.  Thepossible values are currently <code>:never</code> or <code>:always</code>.</p><ul><li><strong>helpers</strong></li></ul><p>This is a map containing the default helpers that will be available during therendering of every template.  To find out all about helpers check out the section on <a href='#template-helpers'>Template Helpers</a>.</p>

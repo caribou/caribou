@@ -6,3 +6,4 @@ caribou*.jar
 /classes/
 /lib/
 /nginx/
+/target

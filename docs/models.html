@@ -1,0 +1,234 @@
+<h1>Introduction to Data Modeling</h1><p>Defining models for an application is the heart of a Caribou project.  Once a model is created a host of capabilities are automatically generated for that newly created model.  This section details the means for creating new models and expanding on existing models.</p><h2>Creating Models</h2><p>Creating a model is just like creating any other content in a Caribou project. The first step is to acquire a configuration map, which is detailed in the <a href='#how-configuration-works-in-caribou'>How Configuration Works in Caribou</a> section.  <br /></p><p>Assuming a configuration exists and it is called <code>config</code>, a model can be created from the repl with the following call:</p><pre class="brush: clj">
+&#40;caribou.core/with-caribou config 
+  &#40;caribou.model/create 
+   :model
+   {:name &quot;Presentation&quot;
+    :fields &#91;{:name &quot;Title&quot; :type &quot;string&quot;}
+             {:name &quot;Preview&quot; :type &quot;asset&quot;}&#93;}&#41;&#41;
+</pre><p>Some things to note about this code:</p><ul><li>The first line calls <code>caribou.core/with-caribou</code> with an existingconfiguration map.  This configuration map among other things containsinformation about the database connection.  Since this call is creating a newmodel, this will actually generate a new table for that model inside whateverdatabase is referred to by the given configuration map under its <code>:database</code>key.  This means of configuration means that you can create models in differentdatabases just by swapping out the configuration map.  For clarity, from here onout we will assume the config map is provided.</li><li>The next line calls the fundamental function <code>caribou.model/create</code>.  Thiscall is used to create any content inside of a Caribou project, and correspondsto inserting a new row in the database given by the configuration map.</li><li>The next line contains only the key <code>:model</code>, and signifies that we arecreating a model, as opposed to any other content type currently known to thesystem.  Once a model is created (in this case the Presentation model), contentof that variety can be created using the same call, but swapping out the keyhere (which for the case of Presentations, would be <code>:presentation</code>).  If a callto <code>caribou.model/create</code> is made with a key that does not represent a currentmodel known to the system this will throw an exception.</li><li>Next comes a map of properties that define the model being created.  This listof properties has a key for each Field in the Model model.  Given a differentmodel, the available keys in this map would be different.</li><li>Ultimately, the definition of a model really depends on the fields in thatmodel.  In this case, two custom fields are created for the Presentation model,a Title of type "string", and a Preview of type "asset".  Once this modelexists, new Presentations can be created that have titles and previews in thesame manner:</li></ul><pre class="brush: clj">
+&#40;caribou.model/create 
+ :presentation
+ {:title &quot;Caribou!&quot;
+  :preview {:source &quot;path/to/preview/image.png&quot;}}&#41;&#41;
+</pre><p>In this way, creating a model allows new kinds of content to be created. Everything else in Caribou flows from this basic idea.</p><h2>Field Types</h2><p>There are a number of different field type models can have.  Here is a summary:</p><ul><li><strong>address</strong> - Store a location as a set of fields or lat/lng pairs.</li><li><strong>asset</strong> - Represents any kind of file, including images.</li><li><strong>boolean</strong> - Represent a single true/false value.</li><li><strong>decimal</strong> - Store a single decimal value of arbitrary precision.</li><li><strong>enum</strong> - Represent a finite set of possible values.</li><li><strong>integer</strong> - A single number with no decimal digits.</li><li><strong>password</strong> - Store an encrypted value that can be matched but not read.</li><li><strong>position</strong> - A value that automatically increments when new content is added.</li><li><strong>slug</strong> - A string that depends on some other string field for its value, and    reformats that string according to the <a href='#field'>field</a> configuration.</li><li><strong>string</strong> - The workhorse.  Represents a single short string.</li><li><strong>structure</strong> - Stores arbitrary clojure data structures in EDN format.</li><li><strong>text</strong> - Used to store arbitrarily long text.</li><li><strong>timestamp</strong> - Represents dates and times of all varieties.</li></ul><h2>Associations</h2><p>Beyond the simple field types, much of the richness of a Caribou model structure lies in the associations that are created between models in the system.  Model and Field have this relationship, where Model has a "collection" of Fields and Fields are a "part" of Model.  This provides a one to many relationship between the Model model and the Field model.</p><p>Every association in Caribou is represented by a field in the corresponding models, which means that there is an association field in each model representing the two sides of the association.  This means each association type has a reciprocal type, and that every association has one and only one reciprocal association field that lives in another model somewhere.</p><p>The different types of associations available in Caribou are:</p><ul><li><strong>collection</strong> - This association field type represents a collection of    things, meaning there are potentially many pieces of content associated to    any content of this model type.  The reciprocal type of association is the    "part".    </li><li><strong>part</strong> - The reciprocal to "collection", this means that any content of this    model variety will potentially belong to content of the model that it is a    "part" of.  Any content that is part of another collection cannot belong to    another collection.    </li><li><strong>link</strong> - The link association type is its own reciprocal, and represents a    many to many relationship to another model.  This behaves just like a    collection except that the associated content can have many associations as    well.</li></ul><h2>Creating and Updating Content</h2><p>As detailed before at the end of <a href='#creating-models'>Creating Models</a>, once a model has been created, new content can be created according to that model.</p><pre class="brush: clj">
+&#40;caribou.model/create 
+ :model
+ {:name &quot;Presentation&quot;
+  :fields &#91;{:name &quot;Title&quot; :type &quot;string&quot;}
+           {:name &quot;Preview&quot; :type &quot;asset&quot;}&#93;}&#41;&#41;
+
+&#40;def caribou-presentation
+  &#40;caribou.model/create 
+   :presentation
+   {:title &quot;Caribou!&quot;
+    :preview {:source &quot;path/to/preview/image.png&quot;}}&#41;&#41;&#41;
+</pre><p>The first call to <code>caribou.model/create</code> creates the Presentation <em>model</em>, and the second creates new Presentation <em>content</em>.  Notice the fields defined during model creation are available during content creation time.  Next, let's create a new Slide model and associate it to Presentation:</p><pre class="brush: clj">
+&#40;caribou.model/create 
+ :model
+ {:name &quot;Slide&quot;
+  :fields &#91;{:name &quot;Image&quot; :type &quot;asset&quot;}
+           {:name &quot;Caption&quot; :type &quot;string&quot;}
+           {:name &quot;Presentation&quot; :type &quot;part&quot;
+            :target-id &#40;caribou.config/draw :models :presentation :id&#41;}&#93;}&#41;&#41;
+</pre><p>The key here is that we made a new field called "Presentation" of type "part". In order to associate this new field to the Presentation model, we need the id of the Presentation model, which lives inside the current Caribou config.  It can be accessed using the <code>caribou.config/draw</code> method, which indexes anywhere inside the currently applied configuration map.  In this case, we need only the <code>:id</code>, which is passed in as the new association field's <code>:target-id</code>.</p><p>Since the new "Presentation" field inside the Slide model is of type "part", a reciprocal "collection" association is automatically created inside of the Presentation model.  Now, Slides can be created and associated to Presentations:</p><pre class="brush: clj">
+&#40;def first-slide
+  &#40;caribou.model/create 
+   :slide
+   {:caption &quot;Welcome to Caribou!&quot;
+    :image {:source &quot;welcome/to/caribou.jpg&quot;}
+    :presentation caribou-presentation}&#41;&#41;&#41;
+</pre><p>Since Presentation has a collection of Slides, you can also create Slides in the context of a given Presentation using <code>caribou.model/update</code>:</p><pre class="brush: clj">
+&#40;caribou.model/update
+ :presentation 
+ &#40;:id caribou-presentation&#41;
+ {:title &quot;Caribou Redux!&quot;
+  :slides &#91;{:caption &quot;Explaining Caribou Models&quot;
+            :image {:source &quot;explaining/caribou/models.jpg&quot;}}
+           {:caption &quot;How to Update a Caribou Model&quot;
+            :image {:source &quot;updating/caribou/models.jpg&quot;}}&#93;}&#41;&#41;
+</pre><p>This creates two new Slides and associates them to the given presentation.  A couple things to note about this update:</p><ul><li><code>caribou.model/update</code> requires an additional parameter which is the <code>:id</code> of  the preexisting content item you wish to update.  This is automatically  generated when a content item is first created, so is present in the map that  is returned from the original call to <code>caribou.model/create</code> that created that  content item (above this was stored under the var <code>caribou-presentation</code>).</li><li>To add items into the collection, we provide a vector of maps under the  <code>:slides</code> key in the update.  This works just as well for create.  Each map in  the collection vector will be created and associated to the given object.  In  fact, this is how we created the model originally, since <code>:fields</code> is a  collection that lives in the Model model.  If one of these maps contains an  <code>:id</code>, it will find the associated item with the given id and update it rather  than creating a new one.</li></ul><h2>Default Model Fields</h2><p>There are a number of default fields that are added to a model automatically. These play various roles in managing the content internally, and also provide some handy features that all content is likely to need.  These fields are:</p><ul><li><strong>:id</strong> -- The <code>:id</code> represents a unique integer identifier that is used    throughout Caribou.  Every content item in Caribou is given an <code>:id</code>, and    all content can be retrieved based on its model type and its <code>:id</code>.  This is    also the mechanism under the scenes that tracks how different items are    associated to one another.  <code>:id</code> always increments starting from <code>1</code>, so    every item obtains a unique <code>:id</code> within its model table.</li><li><strong>:position</strong> -- The <code>:position</code> field allows content to be ordered in an    arbitrary fasion.  Without the <code>:position</code> field we would be stuck    retrieving content only by name, or id or title or something.  <code>:position</code>    allows people to order content exactly how it should appear.  Without    outside intervention, <code>:position</code> increments automatically starting from    <code>1</code>, just like <code>:id</code>.  <code>:position</code> however can change, whereas once an <code>:id</code>    is acquired it is invariant for the lifetime of the application.</li><li><strong>:locked</strong> -- This boolean field, if <code>true</code>, prevents the given content item    from being modified by a <code>caribou.model/update</code> call.  This is handy to    protect the built in model fields from arbitrary changes which could    undermine the very functioning of Caribou itself.  That is not to say built    in models are unchangeable: new fields can be added to any model.  But    someone cannot remove the "Name" field from a model, for instance.  Caribou    needs this field to run.  Probably you will not need to set this field    yourself, but you could have a vital content item that plays a similar role    in the application as a whole, in which case setting it to <code>locked</code> will    safeguard that content from changing out from under you.</li><li><strong>:created-at</strong> -- This is a timestamp that is set automatically when a piece    of content is created.  This way you always know when something was created!</li><li><strong>:updated-at</strong> -- This is another timestamp, but it gets set every time    something is updated.  Can be useful to order by this if you always want the    most recent content (or least recent!)</li></ul><h2>Retrieving Content</h2><p>Once models and content have been created, the ideal thing would be to be able to retrieve it again!  This capability is provided by the <code>caribou.model/gather</code> and <code>caribou.model/pick</code> functions.</p><p>To retrieve all Presentations in the system, we just gather them:</p><pre class="brush: clj">
+&#40;def all-presentations
+  &#40;caribou.model/gather :presentation&#41;&#41;
+  
+--&gt; &#91;{:id 1 :title &quot;Caribou Redux!&quot; :preview {...} ...}&#93; ;; a lot of information not shown here
+</pre><p><code>caribou.model/pick</code> is just like gather, except it only returns a single item:</p><pre class="brush: clj">
+&#40;def first-presentation
+  &#40;caribou.model/pick :presentation&#41;&#41;
+
+--&gt; {:id 1 :title &quot;Caribou Redux!&quot; :preview {...} ...}
+</pre><p>Without arguments, <code>pick</code> will return the first item, and <code>gather</code> will return all items.  To refine our results, an options map can be passed in as the second argument:</p><pre class="brush: clj">
+&#40;def all-presentations
+  &#40;caribou.model/gather
+   :presentation
+   {:where {:title &quot;Caribou Redux!&quot;}}&#41;&#41;
+  
+--&gt; &#91;{:id 1 :title &quot;Caribou Redux!&quot; :preview {...} ...}&#93;
+</pre><p>This map presents one of the features of a gather map, <code>:where</code>.  The full list is:</p><ul><li><strong>:where</strong> -- present conditions which narrow and refine the results.</li><li><strong>:include</strong> -- fetch associated content along with the primary results.</li><li><strong>:order</strong> -- order the gathered results based on given criteria.</li><li><strong>:limit</strong> -- limit primary results to a certain number.</li><li><strong>:offset</strong> -- index into results by the given offset.</li></ul><p>Let's take a look at these one by one.</p><h3><strong>:where</strong></h3><p>One of the great sources of power for the gather call is that the <code>:where</code> map can express conditions across associations:</p><pre class="brush: clj">
+&#40;def redux-slides
+  &#40;caribou.model/gather
+   :slide
+   {:where {:presentation {:title &quot;Caribou Redux!&quot;}}}&#41;&#41;
+  
+--&gt; &#91;{:id 1 :caption &quot;Welcome to Caribou!&quot; ...}
+     {:id 2 :caption &quot;Explaining Caribou Models&quot; ...} 
+     {:id 3 :caption &quot;How to Update a Caribou Model&quot; ...}&#93;
+</pre><p>The point here is that we are gathering slides based on a condition that exists on the associated Presentation item.  This is cool.</p><p>You can also have parallel conditions.  This acts like a logical "AND":</p><pre class="brush: clj">
+&#40;def redux-slides
+  &#40;caribou.model/gather
+   :slide
+   {:where {:presentation {:title &quot;Caribou Redux!&quot;}
+            :id {:&gt;= 2}}}&#41;&#41;
+  
+--&gt; &#91;{:id 2 :caption &quot;Explaining Caribou Models&quot; ...} 
+     {:id 3 :caption &quot;How to Update a Caribou Model&quot; ...}&#93;
+</pre><h3><strong>:include</strong></h3><p>One thing you will notice right away when gathering content is that though associations exist, associated items do not come through the regular <code>caribou.model/gather</code> call by default.  This is what the <code>:include</code> map is for. The <code>:include</code> map defines a nested set of association field names that trigger the retrieval of associated content.</p><pre class="brush: clj">
+&#40;def redux-and-slides
+  &#40;caribou.model/pick
+   :presentation
+   {:where {:title &quot;Caribou Redux!&quot;}
+    :include {:slides {}}}&#41;&#41;
+  
+--&gt; {:id 1 
+     :title &quot;Caribou Redux!&quot; 
+     :preview {...}
+     :slides &#91;{:id 1 :caption &quot;Welcome to Caribou!&quot; ...}
+              {:id 2 :caption &quot;Explaining Caribou Models&quot; ...} 
+              {:id 3 :caption &quot;How to Update a Caribou Model&quot; ...}&#93;}
+</pre><p>The <code>:include</code> map can travel arbitrarily deep along the model association graph, so if Slide had a collection of another model, say "Paragraphs", then you could retrieve those as well with another level of the <code>:include</code> map:</p><pre class="brush: clj">
+&#40;def redux-slides-and-paragraphs
+  &#40;caribou.model/pick
+   :presentation
+   {:where {:title &quot;Caribou Redux!&quot;}
+    :include {:slides {:paragraphs {}}}}&#41;&#41;
+  
+--&gt; {:id 1 
+     :title &quot;Caribou Redux!&quot; 
+     :preview {...}
+     :slides &#91;{:id 1 :caption &quot;Welcome to Caribou!&quot; :paragraphs &#91;...&#93; ...}
+              {:id 2 :caption &quot;Explaining Caribou Models&quot; :paragraphs &#91;...&#93; ...} 
+              {:id 3 :caption &quot;How to Update a Caribou Model&quot; :paragraphs &#91;...&#93; ...}&#93;}
+</pre><p>You can also perform parallel includes, so if a Presentation also had an association to an existing "Person" model called "Authors", you could retrieve the Presentation, all its Slides and their Paragraphs, and the Authors of the Presentation all in one gather call:</p><pre class="brush: clj">
+&#40;def redux-authors-and-slide-paragraphs
+  &#40;caribou.model/pick
+   :presentation
+   {:where {:title &quot;Caribou Redux!&quot;}
+    :include {:authors {}
+              :slides {:paragraphs {}}}}&#41;&#41;
+  
+--&gt; {:id 1 
+     :title &quot;Caribou Redux!&quot; 
+     :preview {...}
+     :authors &#91;{:name &quot;Donner&quot;} {:name &quot;Blitzen&quot;} ...&#93;
+     :slides &#91;{:id 1 :caption &quot;Welcome to Caribou!&quot; :paragraphs &#91;...&#93; ...}
+              {:id 2 :caption &quot;Explaining Caribou Models&quot; :paragraphs &#91;...&#93; ...} 
+              {:id 3 :caption &quot;How to Update a Caribou Model&quot; :paragraphs &#91;...&#93; ...}&#93;}
+</pre><p>Obviously this can get out of control, and it wouldn't be hard to pull in every content item in the site in a single call.  Any single gather call can be broken into individual gathers that fetch the content when needed.</p><h3><strong>:order</strong></h3><p>The <code>:order</code> map is used to control the order of the returned items.  By default, content is ordered based on that model's <code>:position</code> field, but any order can be used.  Here is an example of ordering by <code>:updated-at</code>:</p><pre class="brush: clj">
+&#40;def redux-slides-ordered-by-updated-at
+  &#40;caribou.model/gather
+   :slide
+   {:where {:presentation {:title &quot;Caribou Redux!&quot;}}
+    :order {:updated-at :desc}}&#41;&#41;
+  
+--&gt; &#91;{:id 3 :caption &quot;How to Update a Caribou Model&quot; :updated-at #inst &quot;2013-06-21T22:37:35.883000000-00:00&quot; ...}
+     {:id 2 :caption &quot;Explaining Caribou Models&quot; :updated-at #inst &quot;2013-06-21T22:37:34.883000000-00:00&quot; ...} 
+     {:id 1 :caption &quot;Welcome to Caribou!&quot; :updated-at #inst &quot;2013-06-21T22:37:33.883000000-00:00&quot; ...}&#93;
+</pre><p>The value for the property being ordered can be either <code>:asc</code> or <code>:desc</code>, representing ascending or descending respectively.</p><p>The <code>:order</code> map, like the <code>:where</code> and <code>:include</code> map, can propagate across associations, and order across many properties simultaneously:</p><pre class="brush: clj">
+&#40;def redux-slides-parallel-ordering
+  &#40;caribou.model/gather
+   :slide
+   {:order {:updated-at :desc
+            :id :asc
+            :presentation {:title :desc}}}&#41;&#41;
+  
+--&gt; &#91;{:id 3 :caption &quot;How to Update a Caribou Model&quot; :updated-at #inst &quot;2013-06-21T22:37:35.883000000-00:00&quot; ...}
+     {:id 1 :caption &quot;Welcome to Caribou!&quot; :updated-at #inst &quot;2013-06-21T22:37:34.883000000-00:00&quot; ...}
+     {:id 2 :caption &quot;Explaining Caribou Models&quot; :updated-at #inst &quot;2013-06-21T22:37:34.883000000-00:00&quot; ...}&#93;
+</pre><h3><strong>:limit</strong></h3><p>The <code>:limit</code> option specifies a maximum number of items to retrieve, in the case that there are more items than you wish to handle at any given time:</p><pre class="brush: clj">
+&#40;def redux-slides-limited
+  &#40;caribou.model/gather
+   :slide
+   {:order {:updated-at :desc
+            :id :asc
+            :presentation {:title :desc}}
+    :limit 2}&#41;&#41;
+  
+--&gt; &#91;{:id 3 :caption &quot;How to Update a Caribou Model&quot; :updated-at #inst &quot;2013-06-21T22:37:35.883000000-00:00&quot; ...}
+     {:id 1 :caption &quot;Welcome to Caribou!&quot; :updated-at #inst &quot;2013-06-21T22:37:34.883000000-00:00&quot; ...}&#93;
+</pre><p>One thing to note: only the outermost model is limited.  Any items included across associations will not be limited.  Keep this in mind if you have items with a large number of associated items in a collection or link.  In that case it is better to not include the content directly, but rather to make an additional gather on associated items once the outer item is retrieved:</p><pre class="brush: clj">
+&#40;let &#91;presentation   &#40;caribou.model/pick
+                      :presentation
+                      {:where {:title &quot;Caribou Redux!&quot;}}&#41;
+      limited-slides &#40;caribou.model/gather
+                      :slide
+                      {:where {:presentation {:id &#40;:id presentation&#41;}}
+                       :limit 2}&#41;&#93;
+  &#40;assoc presentation :slides limited-slides&#41;&#41;
+</pre><h3><strong>:offset</strong></h3><p><code>:offset</code> is used in conjunction with <code>:limit</code>.  It finds subsequent sets of content given whatever would be returned from the gather normally, but has been excluded through the use of a <code>:limit</code>.</p><pre class="brush: clj">
+&#40;def redux-slides-limited-and-offset
+  &#40;caribou.model/gather
+   :slide
+   {:order {:updated-at :desc
+            :id :asc
+            :presentation {:title :desc}}
+    :limit 2
+    :offset 1}&#41;&#41;
+  
+--&gt; &#91;{:id 1 :caption &quot;Welcome to Caribou!&quot; :updated-at #inst &quot;2013-06-21T22:37:34.883000000-00:00&quot; ...}
+     {:id 2 :caption &quot;Explaining Caribou Models&quot; :updated-at #inst &quot;2013-06-21T22:37:34.883000000-00:00&quot; ...}&#93;
+</pre><p>This can be used to implement pagination, for example.</p><h2>Data Migrations</h2><p>When making model changes (which ultimately change the schema of the tables you are working with), it is wise to implement them as migrations so that you can recreate your schema in any database environment you will eventually encounter. This makes it easy to switch databases or even database libraries and continue to use your existing code.</p><p>To create a migration, there are three steps:</p><ul><li>Writing the migration</li><li>Specifying the order of the migration</li><li>Running the migration</li></ul><p>Let's look at the first of these tasks.</p><h3>Writing a migration</h3><p>First, create a new namespace inside your <code>src/{project}/migrations/</code> directory. It should contain two functions, <code>migrate</code> and <code>rollback</code>:</p><pre class="brush: clj">
+&#40;ns taiga.migrations.example
+  &#40;:require &#91;caribou.model :as model&#93;&#41;&#41;
+  
+&#40;defn migrate
+  &#91;&#93;
+  &#40;model/create
+    :model
+    {:name &quot;Example&quot;
+     :fields &#91;{:name &quot;Content&quot; :type &quot;string&quot;}&#93;}&#41;&#41;
+     
+&#40;defn rollback
+  &#91;&#93;&#41;
+</pre><p>Once the migration exists, you have to add it into the order vector that keeps track of migration order.  This is required because migrations are not necessarily commutative: certain migrations must have already run before others can make sense.  This is most apparent for a migration that adds a field to an existing model: if the model hasn't been created yet, adding a field to it will fail!</p><p>Every project has an <code>{project}.migrations.order</code> namespace in the <code>src/{project}/migrations/order.clj</code> file.  Open this and add your migration to the list somewhere it makes sense:</p><pre class="brush: clj">
+&#40;def order &#91;&quot;default&quot; &quot;admin&quot; &quot;example&quot;&#93;&#41; ;; &lt;--- Here for example!
+</pre><p>Once order has been instated, time to run the migration:</p><pre>
+% lein caribou migrate resources/config/development.clj
+</pre><p>The <code>lein caribou migrate</code> command accepts the path to a config file because it needs to know what database to run the migration on.  This is helpful if you have many different environments each with their own database (that may or may not live on this local machine).  <code>lein caribou migrate</code> keeps track of which migrations have already been run in that database and ensures each migration only runs once and in the order specified in your <code>{project}.migrations.order</code> namespace.</p><h2>Content Localization</h2><p>Localizing content in Caribou means providing different values for the fields in a content item depending on what "locale" the application is receiving requests from.  Localization of a Model is done on a field by field basis.  This means that even what items are associated to what can be localized if desired.</p><p>To begin, let's create a model that will hold content that varies between locales (consider this example to be entirely contrived):</p><pre class="brush: clj">
+&#40;caribou.model/create 
+  :model 
+  {:name &quot;Wisdom&quot; 
+   :fields &#91;{:name &quot;quotation&quot; 
+             :type &quot;string&quot; 
+             :localized true}&#93;}&#41;
+</pre><p>Notice the line <code>:localized true</code>.  This signifies that values stored in this field will have different values based on which locale is being requested.</p><p>Next, let's create a new locale.  Because this is a tutorial, we will create a locale for Klingon (complete with utterly fabricated locale code):</p><pre class="brush: clj">
+&#40;caribou.model/create 
+  :locale 
+  {:language &quot;Klingon&quot; 
+   :region &quot;Qo'noS&quot; 
+   :code &quot;ql-QN&quot;}&#41;
+</pre><p>These are the three required fields for created a locale.  Notice that creating a locale is exactly the same as creating any other content in Caribou.  Locale is a model.  Everything is a model.  Even Model is a model.</p><p>Next, let's create a new instance of our new Wisdom model.  This is easy, we know how to do this:</p><pre class="brush: clj">
+&#40;caribou.model/create
+  :wisdom
+  {:quotation &quot;Trust, but verify&quot;}&#41;
+</pre><p>To get the basic instance back, we can call gather on the Wisdom model:</p><pre class="brush: clj">
+&#40;caribou.model/gather :wisdom&#41;
+
+---&gt; &#40;{:id 1 :quotation &quot;Trust, but verify&quot; ...}&#41;
+</pre><p>But the whole point is to pull the content for our new Klingon locale, "ql-QN". To do this, we simply specify the locale code in the gather:</p><pre class="brush: clj">
+&#40;caribou.model/gather :wisdom {:locale &quot;ql-QN&quot;}&#41;
+
+---&gt; &#40;{:id 1 :quotation &quot;Trust, but verify&quot; ...}&#41;
+</pre><p>This is great, but it still has the same value.  This is because we haven't specified what the localized value should be.  To do that, let's call <code>caribou.model/update</code> with the right locale:</p><pre class="brush: clj">
+&#40;caribou.model/update 
+  :wisdom
+  1
+  {:quotation &quot;yIvoq 'ach yI'ol&quot;}
+  {:locale &quot;ql-QN&quot;}&#41;
+</pre><p>Notice how <code>update</code> takes a second map.  The first map is only for specifying what values the content has, while the second is full of modifiers and options that won't actually be directly committed as values for this instance.</p><p>Now when we do our gather, we get the right values:</p><pre class="brush: clj">
+&#40;caribou.model/gather :wisdom {:locale &quot;ql-QN&quot;}&#41;
+
+---&gt; &#40;{:id 1 :quotation &quot;yIvoq 'ach yI'ol&quot; ...}&#41;
+</pre><p>Whereas the original non-localized version still exists:</p><pre class="brush: clj">
+&#40;caribou.model/gather :wisdom&#41;
+
+---&gt; &#40;{:id 1 :quotation &quot;Trust, but verify&quot; ...}&#41;
+</pre><p>This non-localized version is actually part of the "global" locale, which is always present.  The "global" locale also supplies values for instances that don't have a value in the localized field.  So until a specific value is given to the <code>quotation</code> for the "ql-QN" locale, it will inherit the value that exists in "global".  This allows you to just override the content that needs to be overridden and provide, for instance, the same image in all locales except the specific ones that need their own image.</p>
