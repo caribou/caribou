@@ -26,8 +26,12 @@
     <meta charset='utf-8'>
     <meta http-equiv=\"X-UA-Compatible\" content=\"chrome=1\">
 
+    <script type=\"text/javascript\" src=\"js/shCore.js\"></script>
+    <script type=\"text/javascript\" src=\"js/shBrushClojure.js\"></script>
     <link rel=\"stylesheet\" type=\"text/css\" href=\"stylesheets/stylesheet.css\" media=\"screen\" />
-    <link rel=\"stylesheet\" type=\"text/css\" href=\"stylesheets/pygment_trac.css\" media=\"screen\" />
+    <link rel=\"stylesheet\" type=\"text/css\" href=\"stylesheets/shCore.css\" media=\"screen\" />
+    <link rel=\"stylesheet\" type=\"text/css\" href=\"stylesheets/shThemeDefault.css\" media=\"screen\" />
+    <link rel=\"stylesheet\" type=\"text/css\" href=\"stylesheets/shClojureExtra.css\" media=\"screen\" />
 
     <title>Caribou Documentation</title>
   </head>
@@ -51,7 +55,12 @@
 
     
   </body>
-</html>")
+</html>
+
+<script type=\"text/javascript\">
+     SyntaxHighlighter.all()
+</script>
+")
 
 (defn wrap-layout
   [html]
