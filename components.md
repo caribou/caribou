@@ -41,12 +41,11 @@ deeper into the Caribou ecosystem.
 ### Frontend
 
 [Caribou Frontend](https://github.com/antler/caribou-frontend) uses Core as the
-data layer foundation and is built on the [Clojure Ring
-protocol](https://github.com/ring-clojure/ring).  Ring is a flexible HTTP
-protocol for Clojure that abstracts over the HTTP request and response
-lifecycle, turning them into plain Clojure maps.  In practice this is an
-extremely powerful way to compose handlers and functionality into a robust web
-server.
+data layer foundation and is built on the [Clojure Ring protocol](https://github.com/ring-clojure/ring).  
+Ring is a flexible HTTP protocol for Clojure that abstracts over the HTTP
+request and response lifecycle, turning them into plain Clojure maps.  In
+practice this is an extremely powerful way to compose handlers and functionality
+into a robust web server.
 
 Frontend adds onto the Core and Ring base a fully-functional routing, controller
 and rendering system.  If Core is the M, then Frontend is the VC.  At the heart
