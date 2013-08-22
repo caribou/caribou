@@ -81,7 +81,6 @@ create a git repo and set the remote heroku target:
 * open the deployed site
     % heroku open
 
-For any additional Heroku support, refer to the
-[Heroku docs](http://devcenter.heroku.com/articles/clojure).
+For any additional Heroku support, refer to the [Heroku docs](http://devcenter.heroku.com/articles/clojure).
 
 

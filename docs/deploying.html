@@ -49,7 +49,7 @@
                                   :env {&quot;environment&quot; &quot;production&quot;}}&#93;}}
 </pre><p>Then, run the <code>lein-beanstalk</code> command:</p><pre>
 % lein beanstalk deploy
-</pre><p>If your Beanstalk configuration with AWS is set up right, you now have a Caribou project running in the cloud somewhere!  Congratulations.</p><h2>Heroku</h2><p>Caribou by default is already set up to deploy to Heroku.  The main key is to create a git repo and set the remote heroku target:</p><ul><li>set up the git repository    % git init    % git add .    % git commit -m "init"</li><li>create the heroku remote and deploy    % heroku apps:create    % git push heroku master    % heroku ps:scale web=1</li><li>open the deployed site    % heroku open</li></ul><p>For any additional Heroku support, refer to the<a href='http://devcenter.heroku.com/articles/clojure'>Heroku docs</a>.</p><p></p>
+</pre><p>If your Beanstalk configuration with AWS is set up right, you now have a Caribou project running in the cloud somewhere!  Congratulations.</p><h2>Heroku</h2><p>Caribou by default is already set up to deploy to Heroku.  The main key is to create a git repo and set the remote heroku target:</p><ul><li>set up the git repository    % git init    % git add .    % git commit -m "init"</li><li>create the heroku remote and deploy    % heroku apps:create    % git push heroku master    % heroku ps:scale web=1</li><li>open the deployed site    % heroku open</li></ul><p>For any additional Heroku support, refer to the <a href='http://devcenter.heroku.com/articles/clojure'>Heroku docs</a>.</p><p></p>
       </section>
     </div>
 
