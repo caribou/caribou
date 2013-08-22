@@ -22,23 +22,17 @@ received on to the template to be rendered.  Inside `request` lives a key
 available to the template during render time.  Any key in this map can be
 accessed from inside a template like so:
 
-```html
-Hello template argument :tundra -- {{tundra}}
-```
+    Hello template argument :tundra -- {{tundra}}
 
 Now if the request map contains the value "Arctic" under the key `:tundra`,
 this will render as:
 
-```html
-Hello template argument :tundra -- Arctic
-```
+    Hello template argument :tundra -- Arctic
 
 If the map is nested, successive maps can be accessed through the '.' pattern.
 So if this is the template:
 
-```html
-Hello nested template argument -- {{tundra.denizens}} !
-```
+    Hello nested template argument -- {{tundra.denizens}} !
 
 And it is given a map like this:
 
@@ -48,9 +42,7 @@ And it is given a map like this:
 
 Then the template will render out like this:
 
-```html
-Hello nested template argument -- Caribou !
-```
+    Hello nested template argument -- Caribou !
 
 ## Using Loops with Sequences from the Render Map
 
@@ -77,11 +69,9 @@ Traversing a loop is simple.  In the "lake" template:
 
 This would render as: 
 
-```html
-Huron 
-Erie 
-Crater
-```
+    Huron 
+    Erie 
+    Crater
 
 But what if we want the last one to be emphasized?  This works:
 
@@ -90,11 +80,9 @@ But what if we want the last one to be emphasized?  This works:
     {{/lakes}}
 
 
-```html
-Huron 
-Erie 
-Crater!!!
-```
+    Huron 
+    Erie 
+    Crater!!!
 
 Other loop variables include:
 
@@ -121,9 +109,7 @@ the render map:
 
 Then in the template:
 
-```html
-{{excite "yellow"}}  -->   yellow!
-```
+    {{excite "yellow"}}  -->   yellow!
 
 Or with a value from the same map:
 
@@ -136,9 +122,7 @@ Or with a value from the same map:
      :excite (fn [s] (str s "!")))))
 ```
 
-```html
-{{excite antler}}  -->   Velvet!
-```
+    {{excite antler}}  -->   Velvet!
 
 ## Existing Helpers
 
@@ -162,23 +146,17 @@ the variable parts of the route.  So say you have a route defined like this:
 Then you need to link to this route in a template somewhere.  To generate the
 url using `route-for`, in your template:
 
-```html
-<a href="{{route-for :somewhere {:where "yellow"} }}">somewhere yellow</a>
-```
+    <a href="{{route-for :somewhere {:where "yellow"} }}">somewhere yellow</a>
 
 This will produce:
 
-```html
-<a href="/place/yellow">somewhere yellow</a>
-```
+    <a href="/place/yellow">somewhere yellow</a>
 
 Of course, the value of the params can also be a value in the request map.  So
 if you want the url to depend on the value of `:where` in the render map, simply
 refer to that in your params map:
 
-```html
-<a href="{{route-for :somewhere {:where where} }}">somewhere {{where}}</a>
-```
+    <a href="{{route-for :somewhere {:where where} }}">somewhere {{where}}</a>
 
 Then if you pass in a map to render like this:
 
@@ -188,9 +166,7 @@ Then if you pass in a map to render like this:
 
 Your template will render out as:
 
-```html
-<a href="/place/pink">somewhere pink</a>
-```
+    <a href="/place/pink">somewhere pink</a>
 
 * **resize**
 
@@ -214,21 +190,15 @@ In the controller:
 
 To render the image at the original size:
 
-```html
-<img src="/{{slide.image.path}}" />
-```
+    <img src="/{{slide.image.path}}" />
 
 To resize it to have a width of 500:
 
-```html
-<img src="{{resize slide.image {:width 500} }}" />
-```
+    <img src="{{resize slide.image {:width 500} }}" />
 
 Or a height of 200 with a quality of 0.7:
 
-```html
-<img src="{{resize slide.image {:height 200 :quality 0.7} }}" />
-```
+    <img src="{{resize slide.image {:height 200 :quality 0.7} }}" />
 
 You get the idea.
 
