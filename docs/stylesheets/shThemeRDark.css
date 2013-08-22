@@ -95,7 +95,9 @@
   color: #ffaa3e !important;
 }
 .syntaxhighlighter .constants {
-  color: #5bc1ff !important;
+  color: #f2bbd2 !important;
+  /* color: #f2aac2 !important; */
+  /* color: #5bc1ff !important; */
   /* color: #e0e8ff !important; */
 }
 .syntaxhighlighter .script {
