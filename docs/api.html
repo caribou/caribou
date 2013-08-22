@@ -7,6 +7,7 @@
     <script type="text/javascript" src="js/shCore.js"></script>
     <script type="text/javascript" src="js/shAutoloader.js"></script>
     <script type="text/javascript" src="js/shBrushClojure.js"></script>
+    <script type="text/javascript" src="js/shBrushBash.js"></script>
     <script type="text/javascript" src="js/shBrushXml.js"></script>
     <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
     <link rel="stylesheet" type="text/css" href="stylesheets/shCore.css" media="screen" />
@@ -65,7 +66,8 @@ http://localhost:33333/&#95;api/model?include=fields&amp;limit=2
   SyntaxHighlighter.defaults['toolbar'] = false;
   SyntaxHighlighter.autoloader(
     'clj clojure js/shBrushClojure.js',
-    'xml html js/shBrushXml.js'
+    'xml html js/shBrushXml.js',
+    'sh bash js/shBrushBash.js'
   );
   SyntaxHighlighter.all()
 </script>
