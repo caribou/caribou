@@ -95,7 +95,8 @@
   color: #ffaa3e !important;
 }
 .syntaxhighlighter .constants {
-  color: #e0e8ff !important;
+  color: #5bc1ff !important;
+  /* color: #e0e8ff !important; */
 }
 .syntaxhighlighter .script {
   font-weight: bold !important;

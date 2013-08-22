@@ -247,5 +247,7 @@ a {
 }
 
 code {
-  color: #f2aac2;
+  font-size: 14px;
+  color: #5bc1ff;
+  /* color: #f2aac2; */
 }
