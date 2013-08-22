@@ -62,7 +62,7 @@ configuration section on project.clj.
 
 ### resources
 
-The `resources` directory has three branches: `config`, `public`, and
+The `resources` directory has four branches: `cljs`, `config`, `public`, and
 `templates`.
 
 * **cljs**
