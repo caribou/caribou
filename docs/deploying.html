@@ -5,10 +5,12 @@
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
 
     <script type="text/javascript" src="js/shCore.js"></script>
+    <script type="text/javascript" src="js/shAutoloader.js"></script>
     <script type="text/javascript" src="js/shBrushClojure.js"></script>
+    <script type="text/javascript" src="js/shBrushXml.js"></script>
     <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
     <link rel="stylesheet" type="text/css" href="stylesheets/shCore.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="stylesheets/shThemeFadeToGrey.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/shThemeRDark.css" media="screen" />
     <link rel="stylesheet" type="text/css" href="stylesheets/shClojureExtra.css" media="screen" />
 
     <title>Caribou Documentation</title>
@@ -68,7 +70,11 @@
 </html>
 
 <script type="text/javascript">
-  SyntaxHighlighter.config.gutter = false;
-  SyntaxHighlighter.config.toolbar = false;
+  SyntaxHighlighter.defaults['gutter'] = false;
+  SyntaxHighlighter.defaults['toolbar'] = false;
+  SyntaxHighlighter.autoloader(
+    'clj clojure js/shBrushClojure.js',
+    'xml html js/shBrushXml.js'
+  );
   SyntaxHighlighter.all()
 </script>
