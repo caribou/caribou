@@ -4,9 +4,7 @@
 
 Using the built-in ring server is the simplest approach.  Simply run:
 
-```
-% lein ring server
-```
+    % lein ring server
 
 at the project root and your site will come to life!  To set the port you can
 change the options that live in your `project.clj`:
@@ -23,9 +21,7 @@ Set the port to any viable port number and restart!
 
 For Tomcat, the process is simple.
 
-```sh
-% lein ring uberwar
-```
+    % lein ring uberwar
 
 Once this has completed, drop the resulting jar into your running Tomcat
 container's webapps directory.  Voila!
@@ -36,9 +32,7 @@ To deploy to Immutant, set up the
 [lein-immutant](http://github.com/immutant/lein-immutant) plugin and then in
 your Caribou project root simply type:
 
-```sh
-% lein immutant deploy
-```
+    % lein immutant deploy
 
 There is a generated Immutant configuration file that lives in
 `src/immutant/init.clj`.  Any additional Immutant configuration can be done
@@ -64,9 +58,7 @@ the right set of values in your `project.clj`.  Here is an example configuration
 
 Then, run the `lein-beanstalk` command:
 
-```
-% lein beanstalk deploy
-```
+    % lein beanstalk deploy
 
 If your Beanstalk configuration with AWS is set up right, you now have a Caribou
 project running in the cloud somewhere!  Congratulations.
@@ -76,20 +68,18 @@ project running in the cloud somewhere!  Congratulations.
 Caribou by default is already set up to deploy to Heroku.  The main key is to
 create a git repo and set the remote heroku target:
 
-```sh
-# set up the git repository
-% git init
-% git add .
-% git commit -m "init"
+    # set up the git repository
+    % git init
+    % git add .
+    % git commit -m "init"
 
-# create the heroku remote and deploy
-% heroku apps:create
-% git push heroku master
-% heroku ps:scale web=1
+    # create the heroku remote and deploy
+    % heroku apps:create
+    % git push heroku master
+    % heroku ps:scale web=1
 
-# open the deployed site
-% heroku open
-```
+    # open the deployed site
+    % heroku open
 
 For any additional Heroku support, refer to the Heroku docs on this page:  
 http://devcenter.heroku.com/articles/clojure

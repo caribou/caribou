@@ -33,9 +33,9 @@
   :ring {:handler taiga.core/handler
          :init taiga.core/init
          :port 33333}&#41;
-</pre><p>Set the port to any viable port number and restart!</p><h2>Tomcat</h2><p>For Tomcat, the process is simple.</p><pre class="brush: sh">
+</pre><p>Set the port to any viable port number and restart!</p><h2>Tomcat</h2><p>For Tomcat, the process is simple.</p><pre>
 % lein ring uberwar
-</pre><p>Once this has completed, drop the resulting jar into your running Tomcat container's webapps directory.  Voila!</p><h2>Immutant (JBoss)</h2><p>To deploy to Immutant, set up the <a href='http://github.com/immutant/lein-immutant'>lein-immutant</a> plugin and then in your Caribou project root simply type:</p><pre class="brush: sh">
+</pre><p>Once this has completed, drop the resulting jar into your running Tomcat container's webapps directory.  Voila!</p><h2>Immutant (JBoss)</h2><p>To deploy to Immutant, set up the <a href='http://github.com/immutant/lein-immutant'>lein-immutant</a> plugin and then in your Caribou project root simply type:</p><pre>
 % lein immutant deploy
 </pre><p>There is a generated Immutant configuration file that lives in <code>src/immutant/init.clj</code>.  Any additional Immutant configuration can be done there.  See the Immutant docs for help:  http://immutant.org/</p><h2>Beanstalk</h2><p>To deploy to Beanstalk running Tomcat, the key is to use the <a href='http://github.com/weavejester/lein-beanstalk'>lein-beanstalk</a> plugin and have the right set of values in your <code>project.clj</code>.  Here is an example configuration:</p><pre class="brush: clj">
 :aws {:access-key &quot;YOUR-AWS-ACCESS-KEY&quot;
@@ -49,17 +49,17 @@
                                   :env {&quot;environment&quot; &quot;production&quot;}}&#93;}}
 </pre><p>Then, run the <code>lein-beanstalk</code> command:</p><pre>
 % lein beanstalk deploy
-</pre><p>If your Beanstalk configuration with AWS is set up right, you now have a Caribou project running in the cloud somewhere!  Congratulations.</p><h2>Heroku</h2><p>Caribou by default is already set up to deploy to Heroku.  The main key is to create a git repo and set the remote heroku target:</p><pre class="brush: sh">
+</pre><p>If your Beanstalk configuration with AWS is set up right, you now have a Caribou project running in the cloud somewhere!  Congratulations.</p><h2>Heroku</h2><p>Caribou by default is already set up to deploy to Heroku.  The main key is to create a git repo and set the remote heroku target:</p><pre>
 # set up the git repository
 % git init
 % git add .
 % git commit -m &quot;init&quot;
-
+</pre><pre>
 # create the heroku remote and deploy
 % heroku apps:create
 % git push heroku master
 % heroku ps:scale web=1
-
+</pre><pre>
 # open the deployed site
 % heroku open
 </pre><p>For any additional Heroku support, refer to the Heroku docs on this page:  <br /> http://devcenter.heroku.com/articles/clojure</p><p></p>
