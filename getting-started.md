@@ -1,30 +1,31 @@
 # Getting Started
 
+## System Requirements
+
+To run Caribou you will need: 
+
+* A [JVM](http://www.java.com/en/download/help/index_installing.xml) (6 or higher)
+* [Leiningen](http://leiningen.org/) (at least 2.0)
+
+If you can run `lein help`, you are ready to go!
+
 ## Installing Caribou
 
-Caribou depends on the java runtime, so the zeroth step would be to
-[install a JVM](http://www.java.com/en/download/help/index_installing.xml) if
-you don't have one already.
-
-Next, [install Leiningen](http://leiningen.org/) (which provides the `lein`
-command) if it is not already installed.
-
-Once you have the `lein` command, create a profile that includes `lein-caribou`
-(the Leiningen Caribou plugin).
+Everything you need to run Caribou is just a `lein` plugin.  It will fetch and
+install all the necessary dependencies for you.
 
 * Create a file called `~/.lein/profiles.clj` with the following contents:
 
 ```clj 
 {:user 
   {:plugins [[lein-ring "0.8.6"] 
-             [lein-caribou "2.3.0"]]}}
+             [lein-caribou "2.4.2"]]}}
 ```
 
 * (note these versions may have increased.  Check http://clojars.org for latest
   version information)
 
-* Run `lein help` to test out your setup.  If you see some helpful output you
-  are ready to go!
+That's it!  You are now ready to create a site.
 
 ## Creating a New Site
 
