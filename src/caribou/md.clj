@@ -58,7 +58,9 @@
 </html>
 
 <script type=\"text/javascript\">
-     SyntaxHighlighter.all()
+  SyntaxHighlighter.config.gutter = false;
+  SyntaxHighlighter.config.toolbar = false;
+  SyntaxHighlighter.all()
 </script>
 ")
 
