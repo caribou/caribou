@@ -25,7 +25,7 @@ the Admin.
 
 Model itself is a model, with a collection of Fields (which is also a model!)
 To read more, check out the [Introduction to Data
-Modeling](#introduction-to-data-modeling).
+Modeling](models.html).
 
 ## Pages
 
@@ -38,19 +38,35 @@ route and adds its own unique path onto it.  In this way the routing structure
 of an application can be organized hierarchically, simplifying what could
 otherwise be a complicated tangle of routes.
 
-Read more at [Defining Routes and Pages](#defining-routes-and-pages).
+Read more at [Defining Routes and Pages](routes.html).
 
-## Controllers and Templates
+## Controllers
 
 Once a route has been matched, the corresponding controller is triggered.  A
 controller in Caribou is just a Clojure function that takes a single argument,
-`request`, and renders to the browser whatever that function returns.
+`request`, and generates a response based on the information contained in the
+request.
+
+A controller can be thought of as the code glue that links requests to
+responses.  This can be as simple as directly rendering a static template in the
+most basic case to creating models, hitting remote apis, writing files, image
+manipulation, or really anything that can be programmatically accomplished
+(which is quite a lot these days!)
+
+Everything you need to know about [Controllers is here](controllers.html)
+
+## Templates
 
 In practice, a controller can use the built in template system called
 [Antlers](http://github.com/antler/antlers) to render html or json (or any other
 format for that matter).  Any parameters passed into the built in `render` call
 will be available in the template.
 
+Templates are simple text files with portions which can be substituted out
+dynamically.  This is the difference between static sites, which only ever
+display the same thing over and over again, and a fully dynamic website which
+can respond in endless ways depending on what is desired.
+
 To see more on how this is done, check out the section on
-[Rendering Templates](#rendering-templates)
+[Rendering Templates](templates.html)
 

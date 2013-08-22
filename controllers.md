@@ -219,7 +219,7 @@ instance,
 ```
 
 More information about template rendering can be found in the
-[Rendering Templates](#rendering-templates) section.
+[Rendering Templates](templates.html) section.
 
 ## Defining a Siphon
 

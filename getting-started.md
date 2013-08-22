@@ -22,7 +22,7 @@ install all the necessary dependencies for you.
              [lein-caribou "2.4.2"]]}}
 ```
 
-* (note these versions may have increased.  Check http://clojars.org for latest
+* (note these versions may have increased.  Check [Clojars](http://clojars.org) for latest
   version information)
 
 That's it!  You are now ready to create a site.
@@ -50,7 +50,7 @@ To run the site as it exists, simply:
 % lein ring server
 ```
 
-A new window will appear in your browser under http://localhost:33333 .  
+A new window will appear in your browser under [http://localhost:33333](http://localhost:33333).  
 
 Congratulations!  You are now running Caribou.
 

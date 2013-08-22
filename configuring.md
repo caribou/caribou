@@ -5,50 +5,49 @@
 The Caribou directory structure is designed to be simple and flexible.  
 Running `tree` in the root illuminates the structure:
 
-```
-├── app
-├── project.clj
-├── resources
-│   ├── config
-│   │   ├── development.clj
-│   │   ├── production.clj
-│   │   ├── staging.clj
-│   │   └── test.clj
-│   ├── public
-│   │   ├── css
-│   │   │   ├── fonts
-│   │   │   │   ├── caribou.eot
-│   │   │   │   ├── caribou.svg
-│   │   │   │   ├── caribou.ttf
-│   │   │   │   └── caribou.woff
-│   │   │   └── taiga.css
-│   │   ├── favicon.ico
-│   │   ├── ico
-│   │   │   └── favicon.ico
-│   │   └── js
-│   │       └── taiga.js
-│   └── templates
-│       ├── errors
-│       │   ├── 404.html
-│       │   └── 500.html
-│       └── home.html
-├── src
-│   ├── immutant
-│   │   └── init.clj
-│   └── taiga
-│       ├── boot.clj
-│       ├── controllers
-│       │   └── home.clj
-│       ├── core.clj
-│       ├── hooks
-│       │   └── model.clj
-│       └── migrations
-│           ├── admin.clj
-│           ├── default.clj
-│           └── order.clj
-├── taiga_development.h2.db
-├── taiga_development.trace.db
-```
+    ├── app
+    │   └── assets
+    ├── project.clj
+    ├── resources
+    │   ├── cljs
+    │   │   └── taiga.cljs
+    │   ├── config
+    │   │   ├── development.clj
+    │   │   ├── production.clj
+    │   │   ├── staging.clj
+    │   │   └── test.clj
+    │   ├── public
+    │   │   ├── css
+    │   │   │   ├── fonts
+    │   │   │   │   ├── caribou.eot
+    │   │   │   │   ├── caribou.svg
+    │   │   │   │   ├── caribou.ttf
+    │   │   │   │   └── caribou.woff
+    │   │   │   └── taiga.css
+    │   │   ├── favicon.ico
+    │   │   └── js
+    │   │       └── taiga.js
+    │   └── templates
+    │       ├── errors
+    │       │   ├── 404.html
+    │       │   └── 500.html
+    │       └── home.html
+    ├── src
+    │   └── taiga
+    │       ├── boot.clj
+    │       ├── controllers
+    │       │   └── home.clj
+    │       ├── core.clj
+    │       ├── hooks
+    │       │   └── model.clj
+    │       ├── immutant.clj
+    │       ├── migrations
+    │       │   ├── admin.clj
+    │       │   ├── default.clj
+    │       │   └── order.clj
+    │       └── routes.clj
+    ├── taiga_development.h2.db
+    ├── taiga_development.trace.db
 
 There are some main features to take note of for now.
 
@@ -66,16 +65,21 @@ configuration section on project.clj.
 The `resources` directory has three branches: `config`, `public`, and
 `templates`.
 
+* **cljs**
+
+This directory holds any clojurescript files for your Caribou project.  By
+default these files will be compiled to javascript every time they are changed. 
+
 * **config**
 
-The first, `config`, holds all the configuration files for the various
-environments that your Caribou app will eventually run in.  The name of each
-environment maps to a configuration file with the same name and suffixed by
-`.clj`.  So in the "development" environment Caribou will use the
-`development.clj` config file.  For now the app defaults to `development`, but
-there are things you will want to shut down for production that are helpful in
-development, like automatic code reloading.  For this Caribou provides a
-`production.clj` with its own set of configuration options.
+`config` holds all the configuration files for the various environments that
+your Caribou app will eventually run in.  The name of each environment maps to a
+configuration file with the same name and suffixed by `.clj`.  So in the
+"development" environment Caribou will use the `development.clj` config file.
+For now the app defaults to `development`, but there are things you will want to
+shut down for production that are helpful in development, like automatic code
+reloading.  For this Caribou provides a `production.clj` with its own set of
+configuration options.
 
 * **public**
 
@@ -89,16 +93,13 @@ nothing is set in stone.  Have at!
 
 Here is where all of the dynamic templates go.  In Caribou, you can create
 content that can then be accessed from templates.  Caribou uses a template
-engine called Antlers by default: https://github.com/antler/antlers .  The docs
-for using antlers are all on that page.
+engine called [Antlers](https://github.com/antler/antlers) by default.  
 
 ### src
 
-`src` holds all of the Clojure files that run your Caribou site.  There is an
-`immutant` subdirectory for configuring Immutant (which is an optional app
-container): http://immutant.org/ .  You can ignore this one for now.  Next to
-that is a directory named after your project (here that is "taiga").  All of
-your site specific code will go in here.
+`src` holds all of the Clojure files that run your Caribou site.  Inside is a
+directory named after your project (here that is "taiga").  All of your site
+specific code will go in here.
 
 There are some notable entries in your project source folder:
 
@@ -116,6 +117,12 @@ control of this.
 This file governs which configuration file gets loaded.  You can also change
 configuration options inside this file that apply to all running environments,
 if you wish.
+
+* **immutant.clj**
+
+There is an `immutant.clj` for configuring [Immutant](http://immutant.org/)
+(which is an optional app container).  If you are not using Immutant you don't
+need to worry about this one.
 
 * **migrations**
 
@@ -247,6 +254,10 @@ Here is a map of all default configuration options:
           :root ""}
  :aws {:bucket nil
        :credentials nil}
+ :cljs {:root "resources/clj"
+        :reload true
+        :options {:output-dir "resources/public/js/out"
+                  :pretty-print true}}
  :controller {:namespace "{project}.controllers"
               :reload true
               :session-defaults (atom {})}
@@ -631,14 +642,15 @@ under a key containing the slug of the Model.  If you want to define Models that
 are not represented in the Model table, you can add more keys to this map
 (though this is probably unnecessary).
 
-There is a whole section on [Creating Models](#creating-models) later on.
+There is a whole section on [Creating Models](models.html) later on.
 
 ### nrepl
 
 Nrepl provides a repl running inside the Caribou process that can be connected
-to from the command line or from inside an editor with nrepl support:
-https://github.com/clojure/tools.nrepl .  This is a great way to interact with a
-running Caribou process and inspect or alter state using a given configuration.
+to from the command line or from inside an editor with
+[nrepl](https://github.com/clojure/tools.nrepl) support.  This is a great way to
+interact with a running Caribou process and inspect or alter state using a given
+configuration.
 
 If a `:port` is provided, then an nrepl server will be booted at that port when
 Caribou is initialized.  In that case, a reference to the running server will be
@@ -653,15 +665,16 @@ likely this will be populated during the definition of the handler in your
 adds whatever routes you have to your site, which gets passed into the
 invocation of the root handler, `caribou.app.handler/handler`, so that it can
 reload the pages whenever necessary.  This is all covered in the section on
-[Defining Routes and Pages](#defining-routes-and-pages).
+[Defining Routes and Pages](routes.html).
 
 ### pre-actions
 
 This configuration option holds the current map of existing pre-actions for
 different pages.  Keyed by the slug of a page, pre-actions will be run before a
 given action is evaluated.  This could be used for things like authorization or
-processing of request parameters.  See the section on [Defining
-Pre-Actions](#defining-pre-actions) for more details.
+processing of request parameters.  See the section on
+[Defining Pre-Actions](controllers.html) in the documentation for controllers for
+more details.
 
 ### query
 
@@ -708,7 +721,7 @@ This is an ordered map of your routes.  The routes map url patterns to the
 actions that are triggered by them.  One by one each pattern is tested against
 an incoming url until it is matched or a 404 is issued.  Once a route is matched
 the corresponding action is called with the request map as a parameter.  See
-more at [Defining Routes and Pages](#defining-routes-and-pages).
+more at [Defining Routes and Pages](routes.html).
 
 ### template
 
@@ -723,5 +736,5 @@ possible values are currently `:never` or `:always`.
 
 This is a map containing the default helpers that will be available during the
 rendering of every template.  To find out all about helpers check out the
-section on [Template Helpers](#template-helpers).
+section on [Template Helpers](templates.html).
 

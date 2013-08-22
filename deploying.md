@@ -36,7 +36,7 @@ your Caribou project root simply type:
 
 There is a generated Immutant configuration file that lives in
 `src/immutant/init.clj`.  Any additional Immutant configuration can be done
-there.  See the Immutant docs for help:  http://immutant.org/
+there.  See the [Immutant docs](http://immutant.org/) for help.  
 
 ## Beanstalk
 
@@ -68,20 +68,20 @@ project running in the cloud somewhere!  Congratulations.
 Caribou by default is already set up to deploy to Heroku.  The main key is to
 create a git repo and set the remote heroku target:
 
-    # set up the git repository
+* set up the git repository
     % git init
     % git add .
     % git commit -m "init"
 
-    # create the heroku remote and deploy
+* create the heroku remote and deploy
     % heroku apps:create
     % git push heroku master
     % heroku ps:scale web=1
 
-    # open the deployed site
+* open the deployed site
     % heroku open
 
-For any additional Heroku support, refer to the Heroku docs on this page:  
-http://devcenter.heroku.com/articles/clojure
+For any additional Heroku support, refer to the
+[Heroku docs](http://devcenter.heroku.com/articles/clojure).
 
 

@@ -10,20 +10,16 @@ available.
 Once a new model is created, any instances of that model can be accessed at a
 URL of the form:
 
-```
-http://localhost:33333/_api/{model-name}
-```
+    http://localhost:33333/_api/{model-name}
 
 So, to access the Model API, simply navigate to
 http://localhost:33333/_api/model .  You will see a json representation of every
 model in the system.  If you want a specific representation, add it as a file
 extension to this basic URL structure:
 
-```
-http://localhost:33333/_api/model.json
-http://localhost:33333/_api/model.xml
-http://localhost:33333/_api/model.csv
-```
+    http://localhost:33333/_api/model.json
+    http://localhost:33333/_api/model.xml
+    http://localhost:33333/_api/model.csv
 
 ## Options in the API
 
@@ -31,9 +27,7 @@ All the options you would pass into a `caribou.model/gather` are available in
 the API.  Add any additional constraints as query parameters to refine your
 selection:
 
-```
-http://localhost:33333/_api/model?include=fields&limit=2
-```
+    http://localhost:33333/_api/model?include=fields&limit=2
 
 ## Changing the API root or removing the API
 

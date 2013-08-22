@@ -9,7 +9,7 @@ expanding on existing models.
 
 Creating a model is just like creating any other content in a Caribou project.
 The first step is to acquire a configuration map, which is detailed in the
-[How Configuration Works in Caribou](#how-configuration-works-in-caribou)
+[How Configuration Works in Caribou](configuring.html)
 section.  
 
 Assuming a configuration exists and it is called `config`, a model can be
@@ -80,7 +80,7 @@ There are a number of different field type models can have.  Here is a summary:
 * **password** - Store an encrypted value that can be matched but not read.
 * **position** - A value that automatically increments when new content is added.
 * **slug** - A string that depends on some other string field for its value, and
-    reformats that string according to the [field](#field) configuration.
+    reformats that string according to the [field](models.html) configuration.
 * **string** - The workhorse.  Represents a single short string.
 * **structure** - Stores arbitrary clojure data structures in EDN format.  
 * **text** - Used to store arbitrarily long text.  
@@ -119,7 +119,7 @@ The different types of associations available in Caribou are:
 
 ## Creating and Updating Content
 
-As detailed before at the end of [Creating Models](#creating-models), once a
+As detailed before at the end of [Creating Models](models.html), once a
 model has been created, new content can be created according to that model.
 
 ```clj
