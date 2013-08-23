@@ -19,7 +19,7 @@ install all the necessary dependencies for you.
 ```clj 
 {:user 
   {:plugins [[lein-ring "0.8.6"] 
-             [lein-caribou "2.4.2"]]}}
+             [antler/lein-caribou "2.4.2"]]}}
 ```
 
 * (note these versions may have increased.  Check [Clojars](http://clojars.org) for latest
