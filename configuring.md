@@ -642,7 +642,7 @@ under a key containing the slug of the Model.  If you want to define Models that
 are not represented in the Model table, you can add more keys to this map
 (though this is probably unnecessary).
 
-There is a whole section on [Creating Models](models.html) later on.
+There is a whole section on [Creating Models](models.md) later on.
 
 ### nrepl
 
@@ -665,7 +665,7 @@ likely this will be populated during the definition of the handler in your
 adds whatever routes you have to your site, which gets passed into the
 invocation of the root handler, `caribou.app.handler/handler`, so that it can
 reload the pages whenever necessary.  This is all covered in the section on
-[Defining Routes and Pages](routes.html).
+[Defining Routes and Pages](routes.md).
 
 ### pre-actions
 
@@ -673,7 +673,7 @@ This configuration option holds the current map of existing pre-actions for
 different pages.  Keyed by the slug of a page, pre-actions will be run before a
 given action is evaluated.  This could be used for things like authorization or
 processing of request parameters.  See the section on
-[Defining Pre-Actions](controllers.html) in the documentation for controllers for
+[Defining Pre-Actions](controllers.md) in the documentation for controllers for
 more details.
 
 ### query
@@ -721,7 +721,7 @@ This is an ordered map of your routes.  The routes map url patterns to the
 actions that are triggered by them.  One by one each pattern is tested against
 an incoming url until it is matched or a 404 is issued.  Once a route is matched
 the corresponding action is called with the request map as a parameter.  See
-more at [Defining Routes and Pages](routes.html).
+more at [Defining Routes and Pages](routes.md).
 
 ### template
 
@@ -736,5 +736,5 @@ possible values are currently `:never` or `:always`.
 
 This is a map containing the default helpers that will be available during the
 rendering of every template.  To find out all about helpers check out the
-section on [Template Helpers](templates.html).
+section on [Template Helpers](templates.md).
 

@@ -1,5 +1,6 @@
 (ns caribou.md
-  (:require [markdown.core :as md]))
+  (:require [clojure.string :as string]
+            [markdown.core :as md]))
 
 (def targets
   ["outline"
@@ -56,7 +57,6 @@
       </section>
     </div>
 
-    
   </body>
 </html>
 
@@ -76,10 +76,16 @@
   [html]
   (str pre-layout html post-layout))
 
+(defn convert-links
+  [md]
+  (string/replace md #"\(([^.]+)\.md\)" "($1.html)"))
+
 (defn compile-targets
   []
   (doseq [target targets]
-    (let [html (md/md-to-html-string (slurp (str target ".md")))
+    (let [original (slurp (str target ".md"))
+          converted (convert-links original)
+          html (md/md-to-html-string converted)
           wrapped (wrap-layout html)]
       (spit (str "docs/" target ".html") wrapped))))
 

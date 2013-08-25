@@ -27,20 +27,17 @@
 
     <div class="container">
       <section id="main_content">
-<h1>Getting Started</h1><h2>System Requirements</h2><p>To run Caribou you will need: </p><ul><li>A <a href='http://www.java.com/en/download/help/index&#95;installing.xml'>JVM</a> (6 or higher)</li><li><a href='http://leiningen.org/'>Leiningen</a> (at least 2.0)</li></ul><p>If you can run <code>lein help</code>, you are ready to go!</p><h2>Installing Caribou</h2><p>Everything you need to run Caribou is just a <code>lein</code> plugin.  It will fetch and install all the necessary dependencies for you.</p><ul><li>Create a file called <code>&#126;/.lein/profiles.clj</code> with the following contents:</li></ul><pre class="brush: clj">
-{:user 
-  {:plugins &#91;&#91;lein-ring &quot;0.8.6&quot;&#93; 
-             &#91;antler/lein-caribou &quot;2.4.2&quot;&#93;&#93;}}
-</pre><ul><li>(note these versions may have increased.  Check <a href='http://clojars.org'>Clojars</a> for latest  version information)</li></ul><p>That's it!  You are now ready to create a site.</p><h2>Creating a New Site</h2><p>To create a new Caribou project, type this at the command line:</p><pre>
-% lein caribou create taiga 
-</pre><p>This will create a new directory structure under the name <code>taiga</code> and prime a new H2 database for use with Caribou.</p><p>If you don't want to use H2 you can configure Caribou to use other database backends.</p><h2>Running the Site</h2><p>To run the site as it exists, simply:</p><pre>
+<h1>Getting Started</h1><h2>System Requirements</h2><p>To run Caribou you will need: </p><ul><li>A <a href='http://www.java.com/en/download/help/index&#95;installing.xml'>JVM</a> (6 or higher)</li><li><a href='http://leiningen.org/'>Leiningen</a> (at least 2.0)</li></ul><p>If you can run <code>lein help</code>, you are ready to go!</p><h2>Installing Caribou</h2><p>If you have Leiningen installed, there is nothing more to install!</p><h2>Creating a New Site</h2><p>To create a new Caribou project, type this at the command line:</p><pre>
+% lein new caribou taiga
+</pre><p>This will create a new Caribou directory structure under the name <code>taiga</code>.  Site created!</p><h2>Bootstrapping a Database</h2><p>To bootstrap a fresh database for Caribou to use, simply:</p><pre>
 % cd taiga
+% lein caribou migrate resources/config/development.clj
+</pre><p>Bootstrapped!</p><p>You can run Caribou without a database if you just want the routing, controllers and template rendering, but you need a database to use the Admin or API and much of the other functionality.</p><p>By default Caribou uses <a href='http://www.h2database.com/html/main.html'>H2</a> (an all Java database engine) so that it does not depend on anything besides the JVM. If you don't want to use H2 you can configure Caribou to use other database backends.  See the section on <a href='configuring.html'>database configuration</a> for more on how to do this.</p><h2>Running the Site</h2><p>To run the site as it exists, simply:</p><pre>
 % lein ring server
 </pre><p>A new window will appear in your browser under <a href='http://localhost:33333'>http://localhost:33333</a>.  <br /></p><p>Congratulations!  You are now running Caribou.</p>
       </section>
     </div>
 
-    
   </body>
 </html>
 

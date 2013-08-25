@@ -25,7 +25,7 @@ the Admin.
 
 Model itself is a model, with a collection of Fields (which is also a model!)
 To read more, check out the [Introduction to Data
-Modeling](models.html).
+Modeling](models.md).
 
 ## Pages
 
@@ -38,7 +38,7 @@ route and adds its own unique path onto it.  In this way the routing structure
 of an application can be organized hierarchically, simplifying what could
 otherwise be a complicated tangle of routes.
 
-Read more at [Defining Routes and Pages](routes.html).
+Read more at [Defining Routes and Pages](routes.md).
 
 ## Controllers
 
@@ -53,7 +53,7 @@ most basic case to creating models, hitting remote apis, writing files, image
 manipulation, or really anything that can be programmatically accomplished
 (which is quite a lot these days!)
 
-Everything you need to know about [Controllers is here](controllers.html)
+Everything you need to know about [Controllers is here](controllers.md)
 
 ## Templates
 
@@ -68,5 +68,5 @@ display the same thing over and over again, and a fully dynamic website which
 can respond in endless ways depending on what is desired.
 
 To see more on how this is done, check out the section on
-[Rendering Templates](templates.html)
+[Rendering Templates](templates.md)
 
