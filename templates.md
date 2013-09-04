@@ -1,7 +1,7 @@
 # Rendering Templates
 
 Caribou comes with a built-in template rendering system called
-[antlers](https://github.com/antler/antlers).  When a defined page specifies a
+[antlers](https://github.com/caribou/antlers).  When a defined page specifies a
 `:template` key, it will search for the given template in the
 `resources/templates` directory of your project and associate a function to
 render that template into the incoming request in a controller action under the

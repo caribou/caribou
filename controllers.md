@@ -169,7 +169,7 @@ Obo antler!
 ## Rendering Provides Data to Templates
 
 If you are using Caribou's default templating language,
-[Antlers](https://github.com/antler/antlers), you can use the built in
+[Antlers](https://github.com/caribou/antlers), you can use the built in
 `caribou.app.controller/render` method to render your templates.  It will use
 the template defined in the page that routed the request to this action in the
 first place.  So instead of returning a map with `:status` and `:body` in it,

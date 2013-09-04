@@ -13,7 +13,7 @@ that follows.
 
 ### Core
 
-[Caribou Core](http://github.com/antler/caribou-core) lays the foundation for
+[Caribou Core](http://github.com/caribou/caribou-core) lays the foundation for
 all of the other libraries by capturing the data model of a site as data!  A
 data model is traditionally only an implicitly defined being, existing as a
 conglomeration of migrations and tables whose relationships are only formed
@@ -22,7 +22,7 @@ data model in a way that allows it to serve a variety of other purposes,
 including the construction of queries that filter and order based on the
 relationships between models.
 
-[Caribou Core](https://github.com/antler/caribou-core) can be used on its own if
+[Caribou Core](https://github.com/caribou/caribou-core) can be used on its own if
 all you need is the dynamic models as an interface to a database backend.  In
 practice it is usually supporting a site running the Caribou Frontend, Admin and
 API, but nothing is stopping you from using it independently of an HTTP Ring
@@ -40,7 +40,7 @@ deeper into the Caribou ecosystem.
 
 ### Frontend
 
-[Caribou Frontend](https://github.com/antler/caribou-frontend) uses Core as the
+[Caribou Frontend](https://github.com/caribou/caribou-frontend) uses Core as the
 data layer foundation and is built on the [Clojure Ring protocol](https://github.com/ring-clojure/ring).  
 Ring is a flexible HTTP protocol for Clojure that abstracts over the HTTP
 request and response lifecycle, turning them into plain Clojure maps.  In
@@ -55,7 +55,7 @@ retrieved and defined in the controllers.
 
 ### Admin
 
-[Caribou Admin](https://github.com/antler/caribou-admin) provides a
+[Caribou Admin](https://github.com/caribou/caribou-admin) provides a
 browser-based interface to all of the Caribou functionality.  Things you would
 previously need someone to code for you can be done with the click of a button.
 Adding new Models, adding new Fields to those Models, creating content based on
@@ -68,7 +68,7 @@ site.
 
 ### API
 
-[Caribou API](http://github.com/antler/caribou-api) provides a RESTful API in a
+[Caribou API](http://github.com/caribou/caribou-api) provides a RESTful API in a
 variety of formats (json, xml or csv) which tap into any content you create in
 Caribou.  Create a new Model and instantly an endpoint representing that Model
 is available.  Add some content for that Model, the content magically appears in
@@ -83,7 +83,7 @@ exist on their own, but also contribute to the Caribou ecosystem.
 
 ### Lichen
 
-[Lichen](http://github.com/antler/lichen) is a standalone image resizing library
+[Lichen](http://github.com/caribou/lichen) is a standalone image resizing library
 that enables Caribou to define image sizes during template creation.  Lichen
 creates the newly resized version of the image the first time it is requested,
 then reuses the cached version on each subsequent request transparently, so the
@@ -92,7 +92,7 @@ about how to most efficiently perform the task.
 
 ### Antlers
 
-[Antlers](http://github.com/antler/antlers) is a templating library that grew
+[Antlers](http://github.com/caribou/antlers) is a templating library that grew
 out of the raw Mustache spec, but adapted to ever expanding demands from day to
 day use.  Today it is a fully functional templating system with blocks, helper
 functions, loop variables and a host of other practical features that makes it

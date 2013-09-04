@@ -96,7 +96,7 @@ Hello lichen!
     {:status 200 :body &#40;str greeting &quot; &quot; request-name &quot;!&quot;&#41;}&#41;&#41;
 </pre><p>The response for this would be:</p><pre>
 Obo antler!
-</pre><h2>Rendering Provides Data to Templates</h2><p>If you are using Caribou's default templating language, <a href='https://github.com/antler/antlers'>Antlers</a>, you can use the built in <code>caribou.app.controller/render</code> method to render your templates.  It will use the template defined in the page that routed the request to this action in the first place.  So instead of returning a map with <code>:status</code> and <code>:body</code> in it, you can just call render on some parameters instead.  A basic call looks like this:</p><pre class="brush: clj">
+</pre><h2>Rendering Provides Data to Templates</h2><p>If you are using Caribou's default templating language, <a href='https://github.com/caribou/antlers'>Antlers</a>, you can use the built in <code>caribou.app.controller/render</code> method to render your templates.  It will use the template defined in the page that routed the request to this action in the first place.  So instead of returning a map with <code>:status</code> and <code>:body</code> in it, you can just call render on some parameters instead.  A basic call looks like this:</p><pre class="brush: clj">
 &#40;defn pick-action
   &#91;request&#93;
   &#40;let &#91;request-name &#40;-&gt; request :params :name&#41;

@@ -27,7 +27,7 @@
 
     <div class="container">
       <section id="main_content">
-<h1>Rendering Templates</h1><p>Caribou comes with a built-in template rendering system called <a href='https://github.com/antler/antlers'>antlers</a>.  When a defined page specifies a <code>:template</code> key, it will search for the given template in the <code>resources/templates</code> directory of your project and associate a function to render that template into the incoming request in a controller action under the <code>:template</code> key.  When that action calls <code>caribou.app.controller/render</code>, it will look for this function under the <code>:template</code> key and pass it the map <code>render</code> receives as its main argument.  This is reflected in the canonical controller action pattern of usage:</p><pre class="brush: clj">
+<h1>Rendering Templates</h1><p>Caribou comes with a built-in template rendering system called <a href='https://github.com/caribou/antlers'>antlers</a>.  When a defined page specifies a <code>:template</code> key, it will search for the given template in the <code>resources/templates</code> directory of your project and associate a function to render that template into the incoming request in a controller action under the <code>:template</code> key.  When that action calls <code>caribou.app.controller/render</code>, it will look for this function under the <code>:template</code> key and pass it the map <code>render</code> receives as its main argument.  This is reflected in the canonical controller action pattern of usage:</p><pre class="brush: clj">
 &#40;defn some-action
   &#91;request&#93;
   &#40;caribou.app.controller/render request&#41;&#41;

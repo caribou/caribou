@@ -34,8 +34,8 @@
   <body>
     <div id="container">
 
-      <h1><a href="http://antler.github.com/caribou">caribou</a>      <img id="icon" src="caribou_alpha.png" width=120 height=160></h1>
-      <!-- <h1><a href="https://github.com/antler/lein-caribou">caribou</a>      <img id="icon" src="caribou_alpha.png" width=100 height=130></h1> -->
+      <h1><a href="http://caribou.github.com/caribou">caribou</a>      <img id="icon" src="caribou_alpha.png" width=120 height=160></h1>
+      <!-- <h1><a href="https://github.com/caribou/lein-caribou">caribou</a>      <img id="icon" src="caribou_alpha.png" width=100 height=130></h1> -->
 
       <div class="description">
         Caribou is a dynamic web application generator with antlers
@@ -60,12 +60,12 @@
       <h2>Core</h2>
 
       <p> 
-        <a href="http://github.com/antler/caribou-core">Caribou Core</a> lays the 
+        <a href="http://github.com/caribou/caribou-core">Caribou Core</a> lays the 
         foundation for all of the other libraries by capturing the data model of a site
         <em>as data!</em>  A data model is traditionally only an implicitly defined
         being, existing as a conglomeration of migrations and tables whose relationships
         are only formed through happy accidents within application code.  
-        <a href="http://github.com/antler/caribou-core">Caribou Core</a> structures
+        <a href="http://github.com/caribou/caribou-core">Caribou Core</a> structures
         the data model in a way that allows it to serve a variety of other purposes,
         including the construction of queries that filter and order based on the 
         relationships between models.
@@ -74,7 +74,7 @@
       <h2>API</h2>
 
       <p> 
-        <a href="http://github.com/antler/caribou-api">Caribou API</a> provides a
+        <a href="http://github.com/caribou/caribou-api">Caribou API</a> provides a
         free, working, out of the box api for every model you create.  You can retrieve
         data across HTTP in a variety of formats (JSON, XML, CSV) and with an endless
         degree of refinement and expressiveness, all without laying a finger!  Enjoy
@@ -84,7 +84,7 @@
       <h2>Frontend</h2>
 
       <p> 
-        <a href="http://github.com/antler/caribou-frontend">Caribou Frontend</a> 
+        <a href="http://github.com/caribou/caribou-frontend">Caribou Frontend</a> 
         is the basis for a fully functional web application, with everything done
         except for <em>what the site actually is</em>, the whole point of you 
         undertaking this endeavor.  It provides routing based on a tree of pages 
@@ -94,7 +94,7 @@
         a route and an action, defined by you, which is simply whatever 
         you want it to do.  Here is where the *code* goes, if you require any.  
         In case that turns out to be rendering responses, 
-        <a href="http://github.com/antler/caribou-frontend">Caribou Frontend</a> 
+        <a href="http://github.com/caribou/caribou-frontend">Caribou Frontend</a> 
         provides templates in the form of 
         <a href="http://mustache.github.com/mustache.5.html">Mustache</a>, 
         which are a graceful way of getting the point across.
@@ -104,7 +104,7 @@
 
       <p>
         Last but not least, 
-        <a href="http://github.com/antler/caribou-admin">Caribou Admin</a> 
+        <a href="http://github.com/caribou/caribou-admin">Caribou Admin</a> 
         allows you to govern everything from behind a swift and capable web 
         interface.  Build models, link them, add pages, create content, link that,
         do anything (currently allowable).  No tacked on admin thrown together at 
@@ -115,7 +115,7 @@
       
       <p>
         There are a number of supporting libraries in the Caribou family, 
-        (part of the <a href="http://github.com/antler">Antler</a>, if you will), 
+        (part of the <a href="http://github.com/caribou">Tundra</a>, if you will), 
         which contribute to Caribou but which also stand on their own as useful, 
         usable projects in their own right.  
       </p>
@@ -125,11 +125,11 @@
       </p>
 
       <ul>
-        <li><a href="http://github.com/antler/lichen">Lichen</a>, 
+        <li><a href="http://github.com/caribou/lichen">Lichen</a>, 
         image manipulation on the tundra.</li>
-        <li><a href="http://github.com/antler/antlers">Antlers</a>, 
+        <li><a href="http://github.com/caribou/antlers">Antlers</a>, 
         templating with speed and profundity.</li>
-        <li><a href="http://github.com/antler/zippix">Zippix</a>, 
+        <li><a href="http://github.com/caribou/zippix">Zippix</a>, 
         harnessing zip files from resources, so that no one ever has to do that again.</li>
       </ul>
 
@@ -154,7 +154,7 @@
         Caribou also uses 
         <a href="http://github.com/technomancy/leiningen">Leiningen</a> as a build tool
         and command line utility, with its own leiningen plugin, 
-        <a href="http://github.com/antler/lein-caribou">Lein Caribou</a>. 
+        <a href="http://github.com/caribou/lein-caribou">Lein Caribou</a>. 
       </p>
 
       <p> 
@@ -169,13 +169,11 @@
       <p>
         Install Java >= 1.6</br></br>
         Install <a href="http://github.com/technomancy/leiningen">Leiningen 2</a></br></br>
-        Add Caribou as a Leiningen plugin (add this line to your ~/.lein/profiles.clj):</br>
-        <pre>{:user {:plugins [[antler/lein-caribou "2.2.8"]
-                  [lein-ring "0.8.2"]]}}</pre>
         Create a new Caribou project:</br>
-        <pre>$ lein caribou create pictograph</pre>
+        <pre>$ lein new caribou pictograph</pre>
 
         Bootstrap and start the new project:</br>
+        <pre>$ lein caribou migrate resources/config/development.clj</pre>
         <pre>$ cd pictograph</br>$ lein ring server
         </pre>
         
@@ -187,14 +185,14 @@
       <h2>Learn</h2>
       <p>
         For building something with Caribou, there is extensive documentation of the various facets here:
-        <p><a href="https://github.com/antler/caribou-docs/blob/master/resources/outline.md">Caribou Docs</a></p>
+        <p><a href="https://caribou.github.io/caribou/docs/outline.html">Caribou Docs</a></p>
 
         Also, check out the various API Docs:
         <ul>
-          <li><a href="http://antler.github.com/caribou-core/">Caribou Core</a></li>
-          <li><a href="http://antler.github.com/caribou-api/">Caribou API</a></li>
-          <li><a href="http://antler.github.com/caribou-frontend/">Caribou Frontend</a></li>
-          <li><a href="http://antler.github.com/caribou-admin/">Caribou Admin</a></li>
+          <li><a href="http://caribou.github.com/caribou-core/">Caribou Core</a></li>
+          <li><a href="http://caribou.github.com/caribou-api/">Caribou API</a></li>
+          <li><a href="http://caribou.github.com/caribou-frontend/">Caribou Frontend</a></li>
+          <li><a href="http://caribou.github.com/caribou-admin/">Caribou Admin</a></li>
         </ul>
       </p>
       
@@ -211,7 +209,7 @@
       <p><a href="http://www.opensource.org/licenses/MIT">MIT License</a></p>
 
       <div class="footer">
-        get the source code on GitHub : <a href="https://github.com/antler/caribou-core">antler/caribou</a>
+        get the source code on GitHub : <a href="https://github.com/caribou/caribou">caribou/caribou</a>
       </div>
 
     </div>

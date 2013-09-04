@@ -58,7 +58,7 @@ Everything you need to know about [Controllers is here](controllers.md)
 ## Templates
 
 In practice, a controller can use the built in template system called
-[Antlers](http://github.com/antler/antlers) to render html or json (or any other
+[Antlers](http://github.com/caribou/antlers) to render html or json (or any other
 format for that matter).  Any parameters passed into the built in `render` call
 will be available in the template.
 

@@ -91,7 +91,7 @@ nothing is set in stone.  Have at!
 
 Here is where all of the dynamic templates go.  In Caribou, you can create
 content that can then be accessed from templates.  Caribou uses a template
-engine called [Antlers](https://github.com/antler/antlers) by default.  
+engine called [Antlers](https://github.com/caribou/antlers) by default.  
 
 ### src
 
