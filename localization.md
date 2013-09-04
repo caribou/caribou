@@ -1,4 +1,4 @@
-## Content Localization
+# Content Localization
 
 Localizing content in Caribou means providing different values for the fields in
 a content item depending on what "locale" the application is receiving requests
