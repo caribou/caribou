@@ -91,9 +91,9 @@ provided to help with rendering:
 * **:route-params** A map of any parameters extracted from the url when the
     route was matched.
 
-And then there are all the helpers.  A helper is simply a clojure function that
-lives inside request map.  Caribou provides a handful of helpers by default, and
-you can add any more that seem helpful.
+And then there are all the helpers.  A helper is simply a clojure function that 
+lives inside the request map.  Caribou provides a handful of helpers by default,
+and you can add any more that seem helpful.
 
 ```clj
 ;; value handling

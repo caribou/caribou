@@ -18,6 +18,10 @@ If you want to disable this simply remove this entry and the nrepl server will
 disappear.  To use it, specify a port (44444 by default) and connect using your
 favorite nrepl client!
 
+If you just want to connect with `lein`, it is as easy as:
+
+    lein repl :connect 44444
+
 ## Search Indexing
 
 

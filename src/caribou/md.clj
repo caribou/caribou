@@ -10,8 +10,12 @@
    "components"
    "basic-concepts"
    "philosophy"
+   "structure"
    "configuring"
    "models"
+   "content"
+   "migrations"
+   "localization"
    "routes"
    "controllers"
    "templates"
@@ -44,7 +48,7 @@
 
     <header>
       <div class=\"container\">
-        <h1>Caribou Documentation</h1>
+        <h1><a href=\"outline.html\">Caribou Documentation</a></h1>
       </div>
     </header>
 

@@ -210,7 +210,7 @@ template inheritance is for, which is provided in antlers in the form of blocks.
 
 To declare a block, use the `{{%...}}` syntax, as in the following example.
 
-Suppose you have a file "layout" which looks something like this:
+Suppose you have a file "layout.html" which looks something like this:
 
     HEADER
       MONOLITHIC BODY
@@ -224,12 +224,12 @@ case for a block:
       {{%body}}{{/body}}
     FOOTER
 
-Then, in another file "modular" can be the content:
+Then, in another file "modular.html" can be the content:
 
-    {{< templates/layout}}
+    {{< templates/layout.html}}
     {{%body}}BODY OF MODULARITY{{/body}}
 
-Which, when called with `(antlers/render-file "modular" {})` yields:
+Which, when called with `(antlers/render-file "modular.html" {})` yields:
 
     HEADER
       BODY OF MODULARITY
@@ -239,7 +239,7 @@ Now, you can have another file called "alternate" which can have totally
 different contents for the `body` block.  You only need to specify the changes
 in the blocks, not the rest of the file:
 
-    {{< layout}}
+    {{< layout.html}}
     {{%body}}This is a more conversational body for the same layout template{{/body}}
 
 Which yields when rendering "alternate":
