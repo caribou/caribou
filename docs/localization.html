@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+    <script type="text/javascript" src="js/shCore.js"></script>
+    <script type="text/javascript" src="js/shAutoloader.js"></script>
+    <script type="text/javascript" src="js/shBrushClojure.js"></script>
+    <script type="text/javascript" src="js/shBrushBash.js"></script>
+    <script type="text/javascript" src="js/shBrushXml.js"></script>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/shCore.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/shThemeRDark.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/shClojureExtra.css" media="screen" />
+
+    <title>Caribou Documentation</title>
+  </head>
+
+  <body>
+
+    <header>
+      <div class="container">
+        <h1><a href="outline.html">Caribou Documentation</a></h1>
+      </div>
+    </header>
+
+    <div class="container">
+      <section id="main_content">
+<h2>Content Localization</h2><p>Localizing content in Caribou means providing different values for the fields in a content item depending on what "locale" the application is receiving requests from.  Localization of a Model is done on a field by field basis.  This means that even what items are associated to what can be localized if desired.</p><p>To begin, let's create a model that will hold content that varies between locales (consider this example to be entirely contrived):</p><pre class="brush: clj">
+&#40;caribou.model/create 
+  :model 
+  {:name &quot;Wisdom&quot; 
+   :fields &#91;{:name &quot;quotation&quot; 
+             :type &quot;string&quot; 
+             :localized true}&#93;}&#41;
+</pre><p>Notice the line <code>:localized true</code>.  This signifies that values stored in this field will have different values based on which locale is being requested.</p><p>Next, let's create a new locale.  Because this is a tutorial, we will create a locale for Klingon (complete with utterly fabricated locale code):</p><pre class="brush: clj">
+&#40;caribou.model/create 
+  :locale 
+  {:language &quot;Klingon&quot; 
+   :region &quot;Qo'noS&quot; 
+   :code &quot;ql-QN&quot;}&#41;
+</pre><p>These are the three required fields for created a locale.  Notice that creating a locale is exactly the same as creating any other content in Caribou.  Locale is a model.  Everything is a model.  Even Model is a model.</p><p>Next, let's create a new instance of our new Wisdom model.  This is easy, we know how to do this:</p><pre class="brush: clj">
+&#40;caribou.model/create
+  :wisdom
+  {:quotation &quot;Trust, but verify&quot;}&#41;
+</pre><p>To get the basic instance back, we can call gather on the Wisdom model:</p><pre class="brush: clj">
+&#40;caribou.model/gather :wisdom&#41;
+
+---&gt; &#40;{:id 1 :quotation &quot;Trust, but verify&quot; ...}&#41;
+</pre><p>But the whole point is to pull the content for our new Klingon locale, "ql-QN". To do this, we simply specify the locale code in the gather:</p><pre class="brush: clj">
+&#40;caribou.model/gather :wisdom {:locale &quot;ql-QN&quot;}&#41;
+
+---&gt; &#40;{:id 1 :quotation &quot;Trust, but verify&quot; ...}&#41;
+</pre><p>This is great, but it still has the same value.  This is because we haven't specified what the localized value should be.  To do that, let's call <code>caribou.model/update</code> with the right locale:</p><pre class="brush: clj">
+&#40;caribou.model/update 
+  :wisdom
+  1
+  {:quotation &quot;yIvoq 'ach yI'ol&quot;}
+  {:locale &quot;ql-QN&quot;}&#41;
+</pre><p>Notice how <code>update</code> takes a second map.  The first map is only for specifying what values the content has, while the second is full of modifiers and options that won't actually be directly committed as values for this instance.</p><p>Now when we do our gather, we get the right values:</p><pre class="brush: clj">
+&#40;caribou.model/gather :wisdom {:locale &quot;ql-QN&quot;}&#41;
+
+---&gt; &#40;{:id 1 :quotation &quot;yIvoq 'ach yI'ol&quot; ...}&#41;
+</pre><p>Whereas the original non-localized version still exists:</p><pre class="brush: clj">
+&#40;caribou.model/gather :wisdom&#41;
+
+---&gt; &#40;{:id 1 :quotation &quot;Trust, but verify&quot; ...}&#41;
+</pre><p>This non-localized version is actually part of the "global" locale, which is always present.  The "global" locale also supplies values for instances that don't have a value in the localized field.  So until a specific value is given to the <code>quotation</code> for the "ql-QN" locale, it will inherit the value that exists in "global".  This allows you to just override the content that needs to be overridden and provide, for instance, the same image in all locales except the specific ones that need their own image.</p>
+      </section>
+    </div>
+
+  </body>
+</html>
+
+<script type="text/javascript">
+  SyntaxHighlighter.defaults['gutter'] = false;
+  SyntaxHighlighter.defaults['toolbar'] = false;
+  SyntaxHighlighter.autoloader(
+    'clj clojure js/shBrushClojure.js',
+    'xml html js/shBrushXml.js',
+    'sh bash js/shBrushBash.js'
+  );
+  SyntaxHighlighter.all()
+</script>

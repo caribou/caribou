@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+    <script type="text/javascript" src="js/shCore.js"></script>
+    <script type="text/javascript" src="js/shAutoloader.js"></script>
+    <script type="text/javascript" src="js/shBrushClojure.js"></script>
+    <script type="text/javascript" src="js/shBrushBash.js"></script>
+    <script type="text/javascript" src="js/shBrushXml.js"></script>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/shCore.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/shThemeRDark.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/shClojureExtra.css" media="screen" />
+
+    <title>Caribou Documentation</title>
+  </head>
+
+  <body>
+
+    <header>
+      <div class="container">
+        <h1><a href="outline.html">Caribou Documentation</a></h1>
+      </div>
+    </header>
+
+    <div class="container">
+      <section id="main_content">
+<h1>Creating and Updating Content</h1><p>As detailed before at the end of <a href='models.html'>Creating Models</a>, once a model has been created, new content can be created according to that model.</p><pre class="brush: clj">
+&#40;caribou.model/create 
+ :model
+ {:name &quot;Presentation&quot;
+  :fields &#91;{:name &quot;Title&quot; :type &quot;string&quot;}
+           {:name &quot;Preview&quot; :type &quot;asset&quot;}&#93;}&#41;&#41;
+
+&#40;def caribou-presentation
+  &#40;caribou.model/create 
+   :presentation
+   {:title &quot;Caribou!&quot;
+    :preview {:source &quot;path/to/preview/image.png&quot;}}&#41;&#41;&#41;
+</pre><p>The first call to <code>caribou.model/create</code> creates the Presentation <em>model</em>, and the second creates new Presentation <em>content</em>.  Notice the fields defined during model creation are available during content creation time.  Next, let's create a new Slide model and associate it to Presentation:</p><pre class="brush: clj">
+&#40;caribou.model/create 
+ :model
+ {:name &quot;Slide&quot;
+  :fields &#91;{:name &quot;Image&quot; :type &quot;asset&quot;}
+           {:name &quot;Caption&quot; :type &quot;string&quot;}
+           {:name &quot;Presentation&quot; :type &quot;part&quot;
+            :target-id &#40;caribou.config/draw :models :presentation :id&#41;}&#93;}&#41;&#41;
+</pre><p>The key here is that we made a new field called "Presentation" of type "part". In order to associate this new field to the Presentation model, we need the id of the Presentation model, which lives inside the current Caribou config.  It can be accessed using the <code>caribou.config/draw</code> method, which indexes anywhere inside the currently applied configuration map.  In this case, we need only the <code>:id</code>, which is passed in as the new association field's <code>:target-id</code>.</p><p>Since the new "Presentation" field inside the Slide model is of type "part", a reciprocal "collection" association is automatically created inside of the Presentation model.  Now, Slides can be created and associated to Presentations:</p><pre class="brush: clj">
+&#40;def first-slide
+  &#40;caribou.model/create 
+   :slide
+   {:caption &quot;Welcome to Caribou!&quot;
+    :image {:source &quot;welcome/to/caribou.jpg&quot;}
+    :presentation caribou-presentation}&#41;&#41;&#41;
+</pre><p>Since Presentation has a collection of Slides, you can also create Slides in the context of a given Presentation using <code>caribou.model/update</code>:</p><pre class="brush: clj">
+&#40;caribou.model/update
+ :presentation 
+ &#40;:id caribou-presentation&#41;
+ {:title &quot;Caribou Redux!&quot;
+  :slides &#91;{:caption &quot;Explaining Caribou Models&quot;
+            :image {:source &quot;explaining/caribou/models.jpg&quot;}}
+           {:caption &quot;How to Update a Caribou Model&quot;
+            :image {:source &quot;updating/caribou/models.jpg&quot;}}&#93;}&#41;&#41;
+</pre><p>This creates two new Slides and associates them to the given presentation.  A couple things to note about this update:</p><ul><li><code>caribou.model/update</code> requires an additional parameter which is the <code>:id</code> of  the preexisting content item you wish to update.  This is automatically  generated when a content item is first created, so is present in the map that  is returned from the original call to <code>caribou.model/create</code> that created that  content item (above this was stored under the var <code>caribou-presentation</code>).</li><li>To add items into the collection, we provide a vector of maps under the  <code>:slides</code> key in the update.  This works just as well for create.  Each map in  the collection vector will be created and associated to the given object.  In  fact, this is how we created the model originally, since <code>:fields</code> is a  collection that lives in the Model model.  If one of these maps contains an  <code>:id</code>, it will find the associated item with the given id and update it rather  than creating a new one.</li></ul><h1>Retrieving Content</h1><p>Once models and content have been created, the ideal thing would be to be able to retrieve it again!  This capability is provided by the <code>caribou.model/gather</code> and <code>caribou.model/pick</code> functions.</p><p>To retrieve all Presentations in the system, we just gather them:</p><pre class="brush: clj">
+&#40;def all-presentations
+  &#40;caribou.model/gather :presentation&#41;&#41;
+  
+--&gt; &#91;{:id 1 :title &quot;Caribou Redux!&quot; :preview {...} ...}&#93; ;; a lot of information not shown here
+</pre><p><code>caribou.model/pick</code> is just like gather, except it only returns a single item:</p><pre class="brush: clj">
+&#40;def first-presentation
+  &#40;caribou.model/pick :presentation&#41;&#41;
+
+--&gt; {:id 1 :title &quot;Caribou Redux!&quot; :preview {...} ...}
+</pre><p>Without arguments, <code>pick</code> will return the first item, and <code>gather</code> will return all items.  To refine our results, an options map can be passed in as the second argument:</p><pre class="brush: clj">
+&#40;def all-presentations
+  &#40;caribou.model/gather
+   :presentation
+   {:where {:title &quot;Caribou Redux!&quot;}}&#41;&#41;
+  
+--&gt; &#91;{:id 1 :title &quot;Caribou Redux!&quot; :preview {...} ...}&#93;
+</pre><p>This map presents one of the features of a gather map, <code>:where</code>.  The full list is:</p><ul><li><strong>:where</strong> -- present conditions which narrow and refine the results.</li><li><strong>:include</strong> -- fetch associated content along with the primary results.</li><li><strong>:order</strong> -- order the gathered results based on given criteria.</li><li><strong>:limit</strong> -- limit primary results to a certain number.</li><li><strong>:offset</strong> -- index into results by the given offset.</li></ul><p>Let's take a look at these one by one.</p><h2><strong>:where</strong></h2><p>One of the great sources of power for the gather call is that the <code>:where</code> map can express conditions across associations:</p><pre class="brush: clj">
+&#40;def redux-slides
+  &#40;caribou.model/gather
+   :slide
+   {:where {:presentation {:title &quot;Caribou Redux!&quot;}}}&#41;&#41;
+  
+--&gt; &#91;{:id 1 :caption &quot;Welcome to Caribou!&quot; ...}
+     {:id 2 :caption &quot;Explaining Caribou Models&quot; ...} 
+     {:id 3 :caption &quot;How to Update a Caribou Model&quot; ...}&#93;
+</pre><p>The point here is that we are gathering slides based on a condition that exists on the associated Presentation item.  This is cool.</p><p>You can also have parallel conditions.  This acts like a logical "AND":</p><pre class="brush: clj">
+&#40;def redux-slides
+  &#40;caribou.model/gather
+   :slide
+   {:where {:presentation {:title &quot;Caribou Redux!&quot;}
+            :id {:&gt;= 2}}}&#41;&#41;
+  
+--&gt; &#91;{:id 2 :caption &quot;Explaining Caribou Models&quot; ...} 
+     {:id 3 :caption &quot;How to Update a Caribou Model&quot; ...}&#93;
+</pre><h2><strong>:include</strong></h2><p>One thing you will notice right away when gathering content is that though associations exist, associated items do not come through the regular <code>caribou.model/gather</code> call by default.  This is what the <code>:include</code> map is for. The <code>:include</code> map defines a nested set of association field names that trigger the retrieval of associated content.</p><pre class="brush: clj">
+&#40;def redux-and-slides
+  &#40;caribou.model/pick
+   :presentation
+   {:where {:title &quot;Caribou Redux!&quot;}
+    :include {:slides {}}}&#41;&#41;
+  
+--&gt; {:id 1 
+     :title &quot;Caribou Redux!&quot; 
+     :preview {...}
+     :slides &#91;{:id 1 :caption &quot;Welcome to Caribou!&quot; ...}
+              {:id 2 :caption &quot;Explaining Caribou Models&quot; ...} 
+              {:id 3 :caption &quot;How to Update a Caribou Model&quot; ...}&#93;}
+</pre><p>The <code>:include</code> map can travel arbitrarily deep along the model association graph, so if Slide had a collection of another model, say "Paragraphs", then you could retrieve those as well with another level of the <code>:include</code> map:</p><pre class="brush: clj">
+&#40;def redux-slides-and-paragraphs
+  &#40;caribou.model/pick
+   :presentation
+   {:where {:title &quot;Caribou Redux!&quot;}
+    :include {:slides {:paragraphs {}}}}&#41;&#41;
+  
+--&gt; {:id 1 
+     :title &quot;Caribou Redux!&quot; 
+     :preview {...}
+     :slides &#91;{:id 1 :caption &quot;Welcome to Caribou!&quot; :paragraphs &#91;...&#93; ...}
+              {:id 2 :caption &quot;Explaining Caribou Models&quot; :paragraphs &#91;...&#93; ...} 
+              {:id 3 :caption &quot;How to Update a Caribou Model&quot; :paragraphs &#91;...&#93; ...}&#93;}
+</pre><p>You can also perform parallel includes, so if a Presentation also had an association to an existing "Person" model called "Authors", you could retrieve the Presentation, all its Slides and their Paragraphs, and the Authors of the Presentation all in one gather call:</p><pre class="brush: clj">
+&#40;def redux-authors-and-slide-paragraphs
+  &#40;caribou.model/pick
+   :presentation
+   {:where {:title &quot;Caribou Redux!&quot;}
+    :include {:authors {}
+              :slides {:paragraphs {}}}}&#41;&#41;
+  
+--&gt; {:id 1 
+     :title &quot;Caribou Redux!&quot; 
+     :preview {...}
+     :authors &#91;{:name &quot;Donner&quot;} {:name &quot;Blitzen&quot;} ...&#93;
+     :slides &#91;{:id 1 :caption &quot;Welcome to Caribou!&quot; :paragraphs &#91;...&#93; ...}
+              {:id 2 :caption &quot;Explaining Caribou Models&quot; :paragraphs &#91;...&#93; ...} 
+              {:id 3 :caption &quot;How to Update a Caribou Model&quot; :paragraphs &#91;...&#93; ...}&#93;}
+</pre><p>Obviously this can get out of control, and it wouldn't be hard to pull in every content item in the site in a single call.  Any single gather call can be broken into individual gathers that fetch the content when needed.</p><h2><strong>:order</strong></h2><p>The <code>:order</code> map is used to control the order of the returned items.  By default, content is ordered based on that model's <code>:position</code> field, but any order can be used.  Here is an example of ordering by <code>:updated-at</code>:</p><pre class="brush: clj">
+&#40;def redux-slides-ordered-by-updated-at
+  &#40;caribou.model/gather
+   :slide
+   {:where {:presentation {:title &quot;Caribou Redux!&quot;}}
+    :order {:updated-at :desc}}&#41;&#41;
+  
+--&gt; &#91;{:id 3 :caption &quot;How to Update a Caribou Model&quot; :updated-at #inst &quot;2013-06-21T22:37:35.883000000-00:00&quot; ...}
+     {:id 2 :caption &quot;Explaining Caribou Models&quot; :updated-at #inst &quot;2013-06-21T22:37:34.883000000-00:00&quot; ...} 
+     {:id 1 :caption &quot;Welcome to Caribou!&quot; :updated-at #inst &quot;2013-06-21T22:37:33.883000000-00:00&quot; ...}&#93;
+</pre><p>The value for the property being ordered can be either <code>:asc</code> or <code>:desc</code>, representing ascending or descending respectively.</p><p>The <code>:order</code> map, like the <code>:where</code> and <code>:include</code> map, can propagate across associations, and order across many properties simultaneously:</p><pre class="brush: clj">
+&#40;def redux-slides-parallel-ordering
+  &#40;caribou.model/gather
+   :slide
+   {:order {:updated-at :desc
+            :id :asc
+            :presentation {:title :desc}}}&#41;&#41;
+  
+--&gt; &#91;{:id 3 :caption &quot;How to Update a Caribou Model&quot; :updated-at #inst &quot;2013-06-21T22:37:35.883000000-00:00&quot; ...}
+     {:id 1 :caption &quot;Welcome to Caribou!&quot; :updated-at #inst &quot;2013-06-21T22:37:34.883000000-00:00&quot; ...}
+     {:id 2 :caption &quot;Explaining Caribou Models&quot; :updated-at #inst &quot;2013-06-21T22:37:34.883000000-00:00&quot; ...}&#93;
+</pre><h2><strong>:limit</strong></h2><p>The <code>:limit</code> option specifies a maximum number of items to retrieve, in the case that there are more items than you wish to handle at any given time:</p><pre class="brush: clj">
+&#40;def redux-slides-limited
+  &#40;caribou.model/gather
+   :slide
+   {:order {:updated-at :desc
+            :id :asc
+            :presentation {:title :desc}}
+    :limit 2}&#41;&#41;
+  
+--&gt; &#91;{:id 3 :caption &quot;How to Update a Caribou Model&quot; :updated-at #inst &quot;2013-06-21T22:37:35.883000000-00:00&quot; ...}
+     {:id 1 :caption &quot;Welcome to Caribou!&quot; :updated-at #inst &quot;2013-06-21T22:37:34.883000000-00:00&quot; ...}&#93;
+</pre><p>One thing to note: only the outermost model is limited.  Any items included across associations will not be limited.  Keep this in mind if you have items with a large number of associated items in a collection or link.  In that case it is better to not include the content directly, but rather to make an additional gather on associated items once the outer item is retrieved:</p><pre class="brush: clj">
+&#40;let &#91;presentation   &#40;caribou.model/pick
+                      :presentation
+                      {:where {:title &quot;Caribou Redux!&quot;}}&#41;
+      limited-slides &#40;caribou.model/gather
+                      :slide
+                      {:where {:presentation {:id &#40;:id presentation&#41;}}
+                       :limit 2}&#41;&#93;
+  &#40;assoc presentation :slides limited-slides&#41;&#41;
+</pre><h2><strong>:offset</strong></h2><p><code>:offset</code> is used in conjunction with <code>:limit</code>.  It finds subsequent sets of content given whatever would be returned from the gather normally, but has been excluded through the use of a <code>:limit</code>.</p><pre class="brush: clj">
+&#40;def redux-slides-limited-and-offset
+  &#40;caribou.model/gather
+   :slide
+   {:order {:updated-at :desc
+            :id :asc
+            :presentation {:title :desc}}
+    :limit 2
+    :offset 1}&#41;&#41;
+  
+--&gt; &#91;{:id 1 :caption &quot;Welcome to Caribou!&quot; :updated-at #inst &quot;2013-06-21T22:37:34.883000000-00:00&quot; ...}
+     {:id 2 :caption &quot;Explaining Caribou Models&quot; :updated-at #inst &quot;2013-06-21T22:37:34.883000000-00:00&quot; ...}&#93;
+</pre><p>This can be used to implement pagination, for example.</p>
+      </section>
+    </div>
+
+  </body>
+</html>
+
+<script type="text/javascript">
+  SyntaxHighlighter.defaults['gutter'] = false;
+  SyntaxHighlighter.defaults['toolbar'] = false;
+  SyntaxHighlighter.autoloader(
+    'clj clojure js/shBrushClojure.js',
+    'xml html js/shBrushXml.js',
+    'sh bash js/shBrushBash.js'
+  );
+  SyntaxHighlighter.all()
+</script>

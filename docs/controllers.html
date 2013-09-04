@@ -21,7 +21,7 @@
 
     <header>
       <div class="container">
-        <h1>Caribou Documentation</h1>
+        <h1><a href="outline.html">Caribou Documentation</a></h1>
       </div>
     </header>
 
@@ -56,7 +56,7 @@
 :query-params 
 :form-params 
 :multipart-params 
-</pre><p>There is a salad of params types that is an artifact of each being provided by a separate ring middleware handler.</p><p>Then there are the keys added by Caribou.  There are some basic ones which are provided to help with rendering:</p><ul><li><strong>:template</strong> A function which renders the template associated to this page    when called with a map of substitution values.</li><li><strong>:page</strong> A reference to the Page item that was matched during routing time.</li><li><strong>:is-xhr</strong> A boolean which signifies whether or not this request is xhr.</li><li><strong>:route-params</strong> A map of any parameters extracted from the url when the    route was matched.</li></ul><p>And then there are all the helpers.  A helper is simply a clojure function thatlives inside request map.  Caribou provides a handful of helpers by default, and you can add any more that seem helpful.</p><pre class="brush: clj">
+</pre><p>There is a salad of params types that is an artifact of each being provided by a separate ring middleware handler.</p><p>Then there are the keys added by Caribou.  There are some basic ones which are provided to help with rendering:</p><ul><li><strong>:template</strong> A function which renders the template associated to this page    when called with a map of substitution values.</li><li><strong>:page</strong> A reference to the Page item that was matched during routing time.</li><li><strong>:is-xhr</strong> A boolean which signifies whether or not this request is xhr.</li><li><strong>:route-params</strong> A map of any parameters extracted from the url when the    route was matched.</li></ul><p>And then there are all the helpers.  A helper is simply a clojure function that lives inside the request map.  Caribou provides a handful of helpers by default, and you can add any more that seem helpful.</p><pre class="brush: clj">
 ;; value handling
 :equals 
 

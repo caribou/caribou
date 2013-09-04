@@ -21,7 +21,7 @@
 
     <header>
       <div class="container">
-        <h1>Caribou Documentation</h1>
+        <h1><a href="outline.html">Caribou Documentation</a></h1>
       </div>
     </header>
 
@@ -114,7 +114,7 @@ loop.outer       --&gt;  a reference to any loop variables from an outer loop.  
 &lt;img src=&quot;{{resize slide.image {:width 500} }}&quot; /&gt;
 </pre><p>Or a height of 200 with a quality of 0.7:</p><pre>
 &lt;img src=&quot;{{resize slide.image {:height 200 :quality 0.7} }}&quot; /&gt;
-</pre><p>You get the idea.</p><h2>Templates can Inherit Structure from other Templates</h2><p>Sometimes you have a set of templates that all share a common markup layout, and really only differ in one content block somewhere in the middle.  This is what template inheritance is for, which is provided in antlers in the form of blocks.</p><p>To declare a block, use the <code>{{%...}}</code> syntax, as in the following example.</p><p>Suppose you have a file "layout" which looks something like this:</p><pre>
+</pre><p>You get the idea.</p><h2>Templates can Inherit Structure from other Templates</h2><p>Sometimes you have a set of templates that all share a common markup layout, and really only differ in one content block somewhere in the middle.  This is what template inheritance is for, which is provided in antlers in the form of blocks.</p><p>To declare a block, use the <code>{{%...}}</code> syntax, as in the following example.</p><p>Suppose you have a file "layout.html" which looks something like this:</p><pre>
 HEADER
   MONOLITHIC BODY
 FOOTER
@@ -122,15 +122,15 @@ FOOTER
 HEADER
   {{%body}}{{/body}}
 FOOTER
-</pre><p>Then, in another file "modular" can be the content:</p><pre>
-{{&lt; templates/layout}}
+</pre><p>Then, in another file "modular.html" can be the content:</p><pre>
+{{&lt; templates/layout.html}}
 {{%body}}BODY OF MODULARITY{{/body}}
-</pre><p>Which, when called with <code>&#40;antlers/render-file &quot;modular&quot; {}&#41;</code> yields:</p><pre>
+</pre><p>Which, when called with <code>&#40;antlers/render-file &quot;modular.html&quot; {}&#41;</code> yields:</p><pre>
 HEADER
   BODY OF MODULARITY
 FOOTER
 </pre><p>Now, you can have another file called "alternate" which can have totally different contents for the <code>body</code> block.  You only need to specify the changes in the blocks, not the rest of the file:</p><pre>
-{{&lt; layout}}
+{{&lt; layout.html}}
 {{%body}}This is a more conversational body for the same layout template{{/body}}
 </pre><p>Which yields when rendering "alternate":</p><pre>
 HEADER
