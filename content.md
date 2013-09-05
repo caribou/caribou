@@ -152,13 +152,58 @@ on the associated Presentation item.  This is cool.
 You can also have parallel conditions.  This acts like a logical "AND":
 
 ```clj
-(def redux-slides
+(def redux-slides-with-id-greater-than-or-equal-to-two
   (caribou.model/gather
    :slide
    {:where {:presentation {:title "Caribou Redux!"}
             :id {:>= 2}}}))
   
 --> [{:id 2 :caption "Explaining Caribou Models" ...} 
+     {:id 3 :caption "How to Update a Caribou Model" ...}]
+```
+
+There are also means to express more complex logical queries.  These are
+available as the `'and`, `'or` and `'not` symbols inside a where map:
+
+```clj
+(def redux-slides-with-id-not-equal-to-two
+  (caribou.model/gather
+   :slide
+   {:where {'and [{:presentation {:title "Caribou Redux!"}}
+                  {'not {:id 2}}]}}))
+  
+--> [{:id 1 :caption "Welcome to Caribou!" ...}
+     {:id 3 :caption "How to Update a Caribou Model" ...}]
+```
+
+Notice the `'and` operator takes a vector of subsequent conditions.  These
+conditions take the same form as a regular where map and can be nested
+recursively to provide arbitrarily complex logical predicates.  `'or` works the
+same way:
+
+```clj
+(def redux-slides-welcome-or-id-of-two
+  (caribou.model/gather
+   :slide
+   {:where {'and [{:presentation {:title "Caribou Redux!"}}
+                  {'or [{:caption "Welcome to Caribou!"}
+                        {:id 2}]}]}}))
+  
+--> [{:id 1 :caption "Welcome to Caribou!" ...}
+     {:id 2 :caption "Explaining Caribou Models" ...}]
+```
+
+The other where condition facility available is the ability to do "IN" queries.
+This is accomplished by providing a vector of values for a given field rather
+than just a single value:
+
+```clj
+(def redux-slides-id-in
+  (caribou.model/gather
+   :slide
+   {:where {:id [2 3]}}))
+  
+--> [{:id 2 :caption "Explaining Caribou Models" ...}
      {:id 3 :caption "How to Update a Caribou Model" ...}]
 ```
 

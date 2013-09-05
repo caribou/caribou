@@ -90,13 +90,40 @@
      {:id 2 :caption &quot;Explaining Caribou Models&quot; ...} 
      {:id 3 :caption &quot;How to Update a Caribou Model&quot; ...}&#93;
 </pre><p>The point here is that we are gathering slides based on a condition that exists on the associated Presentation item.  This is cool.</p><p>You can also have parallel conditions.  This acts like a logical "AND":</p><pre class="brush: clj">
-&#40;def redux-slides
+&#40;def redux-slides-with-id-greater-than-or-equal-to-two
   &#40;caribou.model/gather
    :slide
    {:where {:presentation {:title &quot;Caribou Redux!&quot;}
             :id {:&gt;= 2}}}&#41;&#41;
   
 --&gt; &#91;{:id 2 :caption &quot;Explaining Caribou Models&quot; ...} 
+     {:id 3 :caption &quot;How to Update a Caribou Model&quot; ...}&#93;
+</pre><p>There are also means to express more complex logical queries.  These are available as the <code>'and</code>, <code>'or</code> and <code>'not</code> symbols inside a where map:</p><pre class="brush: clj">
+&#40;def redux-slides-with-id-not-equal-to-two
+  &#40;caribou.model/gather
+   :slide
+   {:where {'and &#91;{:presentation {:title &quot;Caribou Redux!&quot;}}
+                  {'not {:id 2}}&#93;}}&#41;&#41;
+  
+--&gt; &#91;{:id 1 :caption &quot;Welcome to Caribou!&quot; ...}
+     {:id 3 :caption &quot;How to Update a Caribou Model&quot; ...}&#93;
+</pre><p>Notice the <code>'and</code> operator takes a vector of subsequent conditions.  These conditions take the same form as a regular where map and can be nested recursively to provide arbitrarily complex logical predicates.  <code>'or</code> works the same way:</p><pre class="brush: clj">
+&#40;def redux-slides-welcome-or-id-of-two
+  &#40;caribou.model/gather
+   :slide
+   {:where {'and &#91;{:presentation {:title &quot;Caribou Redux!&quot;}}
+                  {'or &#91;{:caption &quot;Welcome to Caribou!&quot;}
+                        {:id 2}&#93;}&#93;}}&#41;&#41;
+  
+--&gt; &#91;{:id 1 :caption &quot;Welcome to Caribou!&quot; ...}
+     {:id 2 :caption &quot;Explaining Caribou Models&quot; ...}&#93;
+</pre><p>The other where condition facility available is the ability to do "IN" queries. This is accomplished by providing a vector of values for a given field rather than just a single value:</p><pre class="brush: clj">
+&#40;def redux-slides-id-in
+  &#40;caribou.model/gather
+   :slide
+   {:where {:id &#91;2 3&#93;}}&#41;&#41;
+  
+--&gt; &#91;{:id 2 :caption &quot;Explaining Caribou Models&quot; ...}
      {:id 3 :caption &quot;How to Update a Caribou Model&quot; ...}&#93;
 </pre><h2><strong>:include</strong></h2><p>One thing you will notice right away when gathering content is that though associations exist, associated items do not come through the regular <code>caribou.model/gather</code> call by default.  This is what the <code>:include</code> map is for. The <code>:include</code> map defines a nested set of association field names that trigger the retrieval of associated content.</p><pre class="brush: clj">
 &#40;def redux-and-slides
