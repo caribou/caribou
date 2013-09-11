@@ -14,7 +14,7 @@ Caribou is a web ecosystem composed of a number of libraries:
 
 Docs are constantly evolving.  To get started, check out:
 
-[Caribou Documentation](https://github.com/antler/caribou-docs/blob/master/resources/outline.md)
+[Caribou Documentation](http://caribou.github.io/caribou/docs/outline.html)
 
 # LICENSE
 
