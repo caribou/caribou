@@ -158,7 +158,7 @@ You can also have parallel conditions.  This acts like a logical "AND":
    {:where {:presentation {:title "Caribou Redux!"}
             :id {:>= 2}}}))
   
---> [{:id 2 :caption "Explaining Caribou Models" ...} 
+--> [{:id 2 :caption "Explaining Caribou Models" ...}
      {:id 3 :caption "How to Update a Caribou Model" ...}]
 ```
 
