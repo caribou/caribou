@@ -1,32 +1,29 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <meta charset='utf-8'>
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-
-    <script type="text/javascript" src="js/shCore.js"></script>
-    <script type="text/javascript" src="js/shAutoloader.js"></script>
-    <script type="text/javascript" src="js/shBrushClojure.js"></script>
-    <script type="text/javascript" src="js/shBrushBash.js"></script>
-    <script type="text/javascript" src="js/shBrushXml.js"></script>
-    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="stylesheets/shCore.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="stylesheets/shThemeRDark.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="stylesheets/shClojureExtra.css" media="screen" />
-
-    <title>Caribou Documentation</title>
+    <meta charset="utf-8">
+    <title>let-caribou-in - Powered By Caribou</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <script type="text/javascript" src="//use.typekit.net/cuo4exs.js"></script>
+    <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+    <link href="//let-caribou.in/css/let-caribou-in.css" type="text/css" rel="stylesheet">
+    <link href="stylesheets/styles.css" type="text/css" rel="stylesheet">
+    <!-- link href="/highlight/styles/default.css" type="text/css" rel="stylesheet" -->
+    <link href="/highlight/styles/rainbow.css" type="text/css" rel="stylesheet">
+    <script type="text/javascript" src="/highlight/highlight.pack.js"></script>
+    <link rel="shortcut icon" href="favicon.ico">
   </head>
 
   <body>
-
     <header>
-      <div class="container">
-        <h1><a href="outline.html">Caribou Documentation</a></h1>
-      </div>
+      <img src="//let-caribou.in/img/caribou-logo.png" width="158" height="139">
+      <h2>Build scalable performant websites with the tools you need and the flexibility you want.</h2>
     </header>
-
     <div class="container">
-      <section id="main_content">
+      <div class="grid-block">
+        <div class="col-6">
 <h1>Content Localization</h1><p>Localizing content in Caribou means providing different values for the fields in a content item depending on what "locale" the application is receiving requests from.  Localization of a Model is done on a field by field basis.  This means that even what items are associated to what can be localized if desired.</p><p>To begin, let's create a model that will hold content that varies between locales (consider this example to be entirely contrived):</p><pre class="brush: clj">
 &#40;caribou.model/create 
   :model 
@@ -66,20 +63,28 @@
 &#40;caribou.model/gather :wisdom&#41;
 
 ---&gt; &#40;{:id 1 :quotation &quot;Trust, but verify&quot; ...}&#41;
-</pre><p>This non-localized version is actually part of the "global" locale, which is always present.  The "global" locale also supplies values for instances that don't have a value in the localized field.  So until a specific value is given to the <code>quotation</code> for the "ql-QN" locale, it will inherit the value that exists in "global".  This allows you to just override the content that needs to be overridden and provide, for instance, the same image in all locales except the specific ones that need their own image.</p>
-      </section>
+</pre><p>This non-localized version is actually part of the "global" locale, which is always present.  The "global" locale also supplies values for instances that don't have a value in the localized field.  So until a specific value is given to the <code>quotation</code> for the "ql-QN" locale, it will inherit the value that exists in "global".  This allows you to just override the content that needs to be overridden and provide, for instance, the same image in all locales except the specific ones that need their own image.</p>        </div>
+      </div>
     </div>
+    <footer>
+      <a href="http://www.weareinstrument.com" target="_blank"><img src="//let-caribou.in/img/instrument.svg"></a>
+    </footer>
 
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(document).ready(function() {
+      $('pre').each(function(i, e) {
+          var $e = $(e);
+          if ($e.hasClass("clj")) {
+              $e.html("<code>" + $e.html() + "</code>");
+          }
+          hljs.highlightBlock(e)
+      });
+    });
+    </script>
+    <!-- <script type="text/javascript" src="/js/let-caribou-in.js"></script> -->
+    <!-- script type="text/javascript" src="/js/app/out/goog/base.js"></script -->
+    <!-- script type="text/javascript" src="/js/app/let-caribou-in.js"></script -->
+    <!-- script type="text/javascript">goog.require('let-caribou-in');</script -->
   </body>
 </html>
-
-<script type="text/javascript">
-  SyntaxHighlighter.defaults['gutter'] = false;
-  SyntaxHighlighter.defaults['toolbar'] = false;
-  SyntaxHighlighter.autoloader(
-    'clj clojure js/shBrushClojure.js',
-    'xml html js/shBrushXml.js',
-    'sh bash js/shBrushBash.js'
-  );
-  SyntaxHighlighter.all()
-</script>

@@ -1,32 +1,29 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <meta charset='utf-8'>
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-
-    <script type="text/javascript" src="js/shCore.js"></script>
-    <script type="text/javascript" src="js/shAutoloader.js"></script>
-    <script type="text/javascript" src="js/shBrushClojure.js"></script>
-    <script type="text/javascript" src="js/shBrushBash.js"></script>
-    <script type="text/javascript" src="js/shBrushXml.js"></script>
-    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="stylesheets/shCore.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="stylesheets/shThemeRDark.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="stylesheets/shClojureExtra.css" media="screen" />
-
-    <title>Caribou Documentation</title>
+    <meta charset="utf-8">
+    <title>let-caribou-in - Powered By Caribou</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <script type="text/javascript" src="//use.typekit.net/cuo4exs.js"></script>
+    <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+    <link href="//let-caribou.in/css/let-caribou-in.css" type="text/css" rel="stylesheet">
+    <link href="stylesheets/styles.css" type="text/css" rel="stylesheet">
+    <!-- link href="/highlight/styles/default.css" type="text/css" rel="stylesheet" -->
+    <link href="/highlight/styles/rainbow.css" type="text/css" rel="stylesheet">
+    <script type="text/javascript" src="/highlight/highlight.pack.js"></script>
+    <link rel="shortcut icon" href="favicon.ico">
   </head>
 
   <body>
-
     <header>
-      <div class="container">
-        <h1><a href="outline.html">Caribou Documentation</a></h1>
-      </div>
+      <img src="//let-caribou.in/img/caribou-logo.png" width="158" height="139">
+      <h2>Build scalable performant websites with the tools you need and the flexibility you want.</h2>
     </header>
-
     <div class="container">
-      <section id="main_content">
+      <div class="grid-block">
+        <div class="col-6">
 <h1>Tutorial</h1><p>As part of this tutorial, you'll create a sample application.  You can call it whatever you like but for the purposes of this tutorial, we will call it <em>pictograph</em>.</p><p><h2>1. Create your app</h2></p><p>To create your app, you only need to run one command:</p><pre>
 lein caribou create pictograph
 </pre><p>This will create your application, with a working configuration right out of the box, including its own database (which you can change at any time).</p><p>The project structure initially looks like this:</p><pre>
@@ -127,20 +124,28 @@ lein caribou start
 {{#previous}}&lt;p&gt;&lt;&lt;&lt; &lt;a href=&quot;{{route-for :slide {:title slide.presentation.title :slide previous.title} }}&quot;&gt;{{previous.title}}&lt;/a&gt;&lt;/p&gt;{{/previous}}
 {{#following}}&lt;p&gt;&lt;a href=&quot;{{route-for :slide {:title slide.presentation.title :slide following.title} }}&quot;&gt;{{following.title}}&lt;/a&gt; &gt;&gt;&gt;&lt;/p&gt;{{/following}}
 {{/body}}
-</pre><p>and now here's your slide page:</p><p><img src="images/tutorial/Screenshot&#95;3&#95;21&#95;13&#95;5&#95;09&#95;PM.png" alt="Slide page" title="Slide page" /></p><p>and you can click the links at the bottom to go to the next and previous slides.</p><h2>10. Bonus Feature!</h2><p>Go into the admin, and edit your presentation under "Presentations" -> "See all" -> "edit". Click <i>"Edit"</i> in the <em>Slides</em> field, taking you to a view of the slides association with your <em>Presentation</em>.  Drag them into a different order, and click <em>Save</em>.</p><p><img src="images/tutorial/Screenshot&#95;3&#95;21&#95;13&#95;5&#95;13&#95;PM.png" alt="Presentation editor page" title="Presentation editor page" /></p><p>Now refresh your "Presentation" page, and the order of the slides will have changed!</p><p><img src="images/tutorial/Screenshot&#95;3&#95;21&#95;13&#95;5&#95;15&#95;PM.png" alt="Presentation with reordered slides" title="Presentation with reordered slides" /></p><p></p>
-      </section>
+</pre><p>and now here's your slide page:</p><p><img src="images/tutorial/Screenshot&#95;3&#95;21&#95;13&#95;5&#95;09&#95;PM.png" alt="Slide page" title="Slide page" /></p><p>and you can click the links at the bottom to go to the next and previous slides.</p><h2>10. Bonus Feature!</h2><p>Go into the admin, and edit your presentation under "Presentations" -> "See all" -> "edit". Click <i>"Edit"</i> in the <em>Slides</em> field, taking you to a view of the slides association with your <em>Presentation</em>.  Drag them into a different order, and click <em>Save</em>.</p><p><img src="images/tutorial/Screenshot&#95;3&#95;21&#95;13&#95;5&#95;13&#95;PM.png" alt="Presentation editor page" title="Presentation editor page" /></p><p>Now refresh your "Presentation" page, and the order of the slides will have changed!</p><p><img src="images/tutorial/Screenshot&#95;3&#95;21&#95;13&#95;5&#95;15&#95;PM.png" alt="Presentation with reordered slides" title="Presentation with reordered slides" /></p><p></p>        </div>
+      </div>
     </div>
+    <footer>
+      <a href="http://www.weareinstrument.com" target="_blank"><img src="//let-caribou.in/img/instrument.svg"></a>
+    </footer>
 
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(document).ready(function() {
+      $('pre').each(function(i, e) {
+          var $e = $(e);
+          if ($e.hasClass("clj")) {
+              $e.html("<code>" + $e.html() + "</code>");
+          }
+          hljs.highlightBlock(e)
+      });
+    });
+    </script>
+    <!-- <script type="text/javascript" src="/js/let-caribou-in.js"></script> -->
+    <!-- script type="text/javascript" src="/js/app/out/goog/base.js"></script -->
+    <!-- script type="text/javascript" src="/js/app/let-caribou-in.js"></script -->
+    <!-- script type="text/javascript">goog.require('let-caribou-in');</script -->
   </body>
 </html>
-
-<script type="text/javascript">
-  SyntaxHighlighter.defaults['gutter'] = false;
-  SyntaxHighlighter.defaults['toolbar'] = false;
-  SyntaxHighlighter.autoloader(
-    'clj clojure js/shBrushClojure.js',
-    'xml html js/shBrushXml.js',
-    'sh bash js/shBrushBash.js'
-  );
-  SyntaxHighlighter.all()
-</script>

@@ -24,7 +24,9 @@
    "api"
    "deploying"])
 
-(def pre-layout
+(def pre-layout (slurp "resources/header.html"))
+
+(comment
   "<!DOCTYPE html>
 <html>
   <head>
@@ -56,7 +58,9 @@
       <section id=\"main_content\">
 ")
 
-(def post-layout
+(def post-layout (slurp "resources/footer.html"))
+
+(comment
   "
       </section>
     </div>

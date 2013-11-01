@@ -1,51 +1,56 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <meta charset='utf-8'>
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-
-    <script type="text/javascript" src="js/shCore.js"></script>
-    <script type="text/javascript" src="js/shAutoloader.js"></script>
-    <script type="text/javascript" src="js/shBrushClojure.js"></script>
-    <script type="text/javascript" src="js/shBrushBash.js"></script>
-    <script type="text/javascript" src="js/shBrushXml.js"></script>
-    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="stylesheets/shCore.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="stylesheets/shThemeRDark.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="stylesheets/shClojureExtra.css" media="screen" />
-
-    <title>Caribou Documentation</title>
+    <meta charset="utf-8">
+    <title>let-caribou-in - Powered By Caribou</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <script type="text/javascript" src="//use.typekit.net/cuo4exs.js"></script>
+    <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+    <link href="//let-caribou.in/css/let-caribou-in.css" type="text/css" rel="stylesheet">
+    <link href="stylesheets/styles.css" type="text/css" rel="stylesheet">
+    <!-- link href="/highlight/styles/default.css" type="text/css" rel="stylesheet" -->
+    <link href="/highlight/styles/rainbow.css" type="text/css" rel="stylesheet">
+    <script type="text/javascript" src="/highlight/highlight.pack.js"></script>
+    <link rel="shortcut icon" href="favicon.ico">
   </head>
 
   <body>
-
     <header>
-      <div class="container">
-        <h1><a href="outline.html">Caribou Documentation</a></h1>
-      </div>
+      <img src="//let-caribou.in/img/caribou-logo.png" width="158" height="139">
+      <h2>Build scalable performant websites with the tools you need and the flexibility you want.</h2>
     </header>
-
     <div class="container">
-      <section id="main_content">
+      <div class="grid-block">
+        <div class="col-6">
 <h1>Quickstart Guide</h1><p>Once you have <i>lein</i> installed and working, you can create your first Caribou application:</p><pre>
 lein caribou create &lt;application&gt;
 </pre><p>This will make the project structure, and create a database (using the pure Java database, (h2)[http://www.h2database.com/]) ready for you to start developing with.</p><p>You can start your new application and begin creating content immediately:</p><pre>
 cd &lt;application&gt;
 lein caribou start
-</pre><p>Navigate to [http://localhost:33333] to see a skeleton homepage, and follow the link to login to the administrative back-end tool.  A user <i>caribou</i> has been created for you, with password <i>caribou</i>.</p>
-      </section>
+</pre><p>Navigate to [http://localhost:33333] to see a skeleton homepage, and follow the link to login to the administrative back-end tool.  A user <i>caribou</i> has been created for you, with password <i>caribou</i>.</p>        </div>
+      </div>
     </div>
+    <footer>
+      <a href="http://www.weareinstrument.com" target="_blank"><img src="//let-caribou.in/img/instrument.svg"></a>
+    </footer>
 
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(document).ready(function() {
+      $('pre').each(function(i, e) {
+          var $e = $(e);
+          if ($e.hasClass("clj")) {
+              $e.html("<code>" + $e.html() + "</code>");
+          }
+          hljs.highlightBlock(e)
+      });
+    });
+    </script>
+    <!-- <script type="text/javascript" src="/js/let-caribou-in.js"></script> -->
+    <!-- script type="text/javascript" src="/js/app/out/goog/base.js"></script -->
+    <!-- script type="text/javascript" src="/js/app/let-caribou-in.js"></script -->
+    <!-- script type="text/javascript">goog.require('let-caribou-in');</script -->
   </body>
 </html>
-
-<script type="text/javascript">
-  SyntaxHighlighter.defaults['gutter'] = false;
-  SyntaxHighlighter.defaults['toolbar'] = false;
-  SyntaxHighlighter.autoloader(
-    'clj clojure js/shBrushClojure.js',
-    'xml html js/shBrushXml.js',
-    'sh bash js/shBrushBash.js'
-  );
-  SyntaxHighlighter.all()
-</script>

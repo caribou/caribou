@@ -1,32 +1,29 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <meta charset='utf-8'>
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-
-    <script type="text/javascript" src="js/shCore.js"></script>
-    <script type="text/javascript" src="js/shAutoloader.js"></script>
-    <script type="text/javascript" src="js/shBrushClojure.js"></script>
-    <script type="text/javascript" src="js/shBrushBash.js"></script>
-    <script type="text/javascript" src="js/shBrushXml.js"></script>
-    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="stylesheets/shCore.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="stylesheets/shThemeRDark.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="stylesheets/shClojureExtra.css" media="screen" />
-
-    <title>Caribou Documentation</title>
+    <meta charset="utf-8">
+    <title>let-caribou-in - Powered By Caribou</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <script type="text/javascript" src="//use.typekit.net/cuo4exs.js"></script>
+    <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+    <link href="//let-caribou.in/css/let-caribou-in.css" type="text/css" rel="stylesheet">
+    <link href="stylesheets/styles.css" type="text/css" rel="stylesheet">
+    <!-- link href="/highlight/styles/default.css" type="text/css" rel="stylesheet" -->
+    <link href="/highlight/styles/rainbow.css" type="text/css" rel="stylesheet">
+    <script type="text/javascript" src="/highlight/highlight.pack.js"></script>
+    <link rel="shortcut icon" href="favicon.ico">
   </head>
 
   <body>
-
     <header>
-      <div class="container">
-        <h1><a href="outline.html">Caribou Documentation</a></h1>
-      </div>
+      <img src="//let-caribou.in/img/caribou-logo.png" width="158" height="139">
+      <h2>Build scalable performant websites with the tools you need and the flexibility you want.</h2>
     </header>
-
     <div class="container">
-      <section id="main_content">
+      <div class="grid-block">
+        <div class="col-6">
 <h1>Writing Controllers</h1><p>The whole point of the Caribou router is to funnel requests to the appropriate controller action with the right parameters.  Once a request comes through, an action is simply a function that is called with the request map as an argument, and evaluates to a valid response map.  In between of course, all kinds of magic can happen.</p><h2>Controllers are Namespaces which contain Actions</h2><p>To define a controller namespace, add a new file to your <code>src/{project}/controllers</code> directory with the name of the new controller.  So for this example it would be <code>src/taiga/controllers/example&#95;controller.clj</code> with the following contents:</p><pre class="brush: clj">
 &#40;ns taiga.controllers.example-controller
   &#40;:require &#91;caribou.model :as model&#93;
@@ -153,20 +150,28 @@ Salutations Tundra Warrior!
     {:status 401 :body &quot;Not authorized!&quot;}&#41;&#41;
 </pre><p>Then you could register this pre-action in the same way as before: </p><pre class="brush: clj">
 &#40;caribou.app.routing/register-pre-action :protected ensure-authorized&#41;
-</pre><p>Now this action will only be run if the call to <code>&#40;authorized? request&#41;</code> returns true.</p>
-      </section>
+</pre><p>Now this action will only be run if the call to <code>&#40;authorized? request&#41;</code> returns true.</p>        </div>
+      </div>
     </div>
+    <footer>
+      <a href="http://www.weareinstrument.com" target="_blank"><img src="//let-caribou.in/img/instrument.svg"></a>
+    </footer>
 
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(document).ready(function() {
+      $('pre').each(function(i, e) {
+          var $e = $(e);
+          if ($e.hasClass("clj")) {
+              $e.html("<code>" + $e.html() + "</code>");
+          }
+          hljs.highlightBlock(e)
+      });
+    });
+    </script>
+    <!-- <script type="text/javascript" src="/js/let-caribou-in.js"></script> -->
+    <!-- script type="text/javascript" src="/js/app/out/goog/base.js"></script -->
+    <!-- script type="text/javascript" src="/js/app/let-caribou-in.js"></script -->
+    <!-- script type="text/javascript">goog.require('let-caribou-in');</script -->
   </body>
 </html>
-
-<script type="text/javascript">
-  SyntaxHighlighter.defaults['gutter'] = false;
-  SyntaxHighlighter.defaults['toolbar'] = false;
-  SyntaxHighlighter.autoloader(
-    'clj clojure js/shBrushClojure.js',
-    'xml html js/shBrushXml.js',
-    'sh bash js/shBrushBash.js'
-  );
-  SyntaxHighlighter.all()
-</script>

@@ -1,32 +1,29 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <meta charset='utf-8'>
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-
-    <script type="text/javascript" src="js/shCore.js"></script>
-    <script type="text/javascript" src="js/shAutoloader.js"></script>
-    <script type="text/javascript" src="js/shBrushClojure.js"></script>
-    <script type="text/javascript" src="js/shBrushBash.js"></script>
-    <script type="text/javascript" src="js/shBrushXml.js"></script>
-    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="stylesheets/shCore.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="stylesheets/shThemeRDark.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="stylesheets/shClojureExtra.css" media="screen" />
-
-    <title>Caribou Documentation</title>
+    <meta charset="utf-8">
+    <title>let-caribou-in - Powered By Caribou</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <script type="text/javascript" src="//use.typekit.net/cuo4exs.js"></script>
+    <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+    <link href="//let-caribou.in/css/let-caribou-in.css" type="text/css" rel="stylesheet">
+    <link href="stylesheets/styles.css" type="text/css" rel="stylesheet">
+    <!-- link href="/highlight/styles/default.css" type="text/css" rel="stylesheet" -->
+    <link href="/highlight/styles/rainbow.css" type="text/css" rel="stylesheet">
+    <script type="text/javascript" src="/highlight/highlight.pack.js"></script>
+    <link rel="shortcut icon" href="favicon.ico">
   </head>
 
   <body>
-
     <header>
-      <div class="container">
-        <h1><a href="outline.html">Caribou Documentation</a></h1>
-      </div>
+      <img src="//let-caribou.in/img/caribou-logo.png" width="158" height="139">
+      <h2>Build scalable performant websites with the tools you need and the flexibility you want.</h2>
     </header>
-
     <div class="container">
-      <section id="main_content">
+      <div class="grid-block">
+        <div class="col-6">
 <h1>Using the API</h1><p>The API is already running when you fire up a Caribou project.  Its function is to make available all the content in your system as json, xml or csv.  Every time a model is created, a corresponding API for that model is instantly available.</p><h2>All Content is Accessible from the API</h2><p>Once a new model is created, any instances of that model can be accessed at a URL of the form:</p><pre>
 http://localhost:33333/&#95;api/{model-name}
 </pre><p>So, to access the Model API, simply navigate to http://localhost:33333/_api/model .  You will see a json representation of every model in the system.  If you want a specific representation, add it as a file extension to this basic URL structure:</p><pre>
@@ -53,20 +50,28 @@ http://localhost:33333/&#95;api/model?include=fields&amp;limit=2
   &#40;pages/add-page-routes
    &#40;pages/all-pages&#41;
    &#40;config/draw :controller :namespace&#41;&#41;&#41;
-</pre><p>As you can see, the Admin is loaded first, then the API.  If you want to change where the API is located, just change the string "/_api" to your desired API root.  And if you don't want the API enabled at all, simply remove the whole <code>pages/add-page-routes</code> call to add the API routes.</p>
-      </section>
+</pre><p>As you can see, the Admin is loaded first, then the API.  If you want to change where the API is located, just change the string "/_api" to your desired API root.  And if you don't want the API enabled at all, simply remove the whole <code>pages/add-page-routes</code> call to add the API routes.</p>        </div>
+      </div>
     </div>
+    <footer>
+      <a href="http://www.weareinstrument.com" target="_blank"><img src="//let-caribou.in/img/instrument.svg"></a>
+    </footer>
 
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(document).ready(function() {
+      $('pre').each(function(i, e) {
+          var $e = $(e);
+          if ($e.hasClass("clj")) {
+              $e.html("<code>" + $e.html() + "</code>");
+          }
+          hljs.highlightBlock(e)
+      });
+    });
+    </script>
+    <!-- <script type="text/javascript" src="/js/let-caribou-in.js"></script> -->
+    <!-- script type="text/javascript" src="/js/app/out/goog/base.js"></script -->
+    <!-- script type="text/javascript" src="/js/app/let-caribou-in.js"></script -->
+    <!-- script type="text/javascript">goog.require('let-caribou-in');</script -->
   </body>
 </html>
-
-<script type="text/javascript">
-  SyntaxHighlighter.defaults['gutter'] = false;
-  SyntaxHighlighter.defaults['toolbar'] = false;
-  SyntaxHighlighter.autoloader(
-    'clj clojure js/shBrushClojure.js',
-    'xml html js/shBrushXml.js',
-    'sh bash js/shBrushBash.js'
-  );
-  SyntaxHighlighter.all()
-</script>

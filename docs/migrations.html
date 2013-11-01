@@ -1,32 +1,29 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <meta charset='utf-8'>
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-
-    <script type="text/javascript" src="js/shCore.js"></script>
-    <script type="text/javascript" src="js/shAutoloader.js"></script>
-    <script type="text/javascript" src="js/shBrushClojure.js"></script>
-    <script type="text/javascript" src="js/shBrushBash.js"></script>
-    <script type="text/javascript" src="js/shBrushXml.js"></script>
-    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="stylesheets/shCore.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="stylesheets/shThemeRDark.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="stylesheets/shClojureExtra.css" media="screen" />
-
-    <title>Caribou Documentation</title>
+    <meta charset="utf-8">
+    <title>let-caribou-in - Powered By Caribou</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <script type="text/javascript" src="//use.typekit.net/cuo4exs.js"></script>
+    <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+    <link href="//let-caribou.in/css/let-caribou-in.css" type="text/css" rel="stylesheet">
+    <link href="stylesheets/styles.css" type="text/css" rel="stylesheet">
+    <!-- link href="/highlight/styles/default.css" type="text/css" rel="stylesheet" -->
+    <link href="/highlight/styles/rainbow.css" type="text/css" rel="stylesheet">
+    <script type="text/javascript" src="/highlight/highlight.pack.js"></script>
+    <link rel="shortcut icon" href="favicon.ico">
   </head>
 
   <body>
-
     <header>
-      <div class="container">
-        <h1><a href="outline.html">Caribou Documentation</a></h1>
-      </div>
+      <img src="//let-caribou.in/img/caribou-logo.png" width="158" height="139">
+      <h2>Build scalable performant websites with the tools you need and the flexibility you want.</h2>
     </header>
-
     <div class="container">
-      <section id="main_content">
+      <div class="grid-block">
+        <div class="col-6">
 <h1>Data Migrations</h1><p>When making model changes (which ultimately change the schema of the tables you are working with), it is wise to implement them as migrations so that you can recreate your schema in any database environment you will eventually encounter. This makes it easy to switch databases or even database libraries and continue to use your existing code.</p><p>To create a migration, there are three steps:</p><ul><li>Writing the migration</li><li>Specifying the order of the migration</li><li>Running the migration</li></ul><p>Let's look at the first of these tasks.</p><h2>Writing a migration</h2><p>First, create a new namespace inside your <code>src/{project}/migrations/</code> directory. It should contain two functions, <code>migrate</code> and <code>rollback</code>:</p><pre class="brush: clj">
 &#40;ns taiga.migrations.example
   &#40;:require &#91;caribou.model :as model&#93;&#41;&#41;
@@ -44,20 +41,28 @@
 &#40;def order &#91;&quot;default&quot; &quot;admin&quot; &quot;example&quot;&#93;&#41; ;; &lt;--- Here for example!
 </pre><p>Once order has been instated, time to run the migration:</p><pre>
 % lein caribou migrate resources/config/development.clj
-</pre><p>The <code>lein caribou migrate</code> command accepts the path to a config file because it needs to know what database to run the migration on.  This is helpful if you have many different environments each with their own database (that may or may not live on this local machine).  <code>lein caribou migrate</code> keeps track of which migrations have already been run in that database and ensures each migration only runs once and in the order specified in your <code>{project}.migrations.order</code> namespace.</p>
-      </section>
+</pre><p>The <code>lein caribou migrate</code> command accepts the path to a config file because it needs to know what database to run the migration on.  This is helpful if you have many different environments each with their own database (that may or may not live on this local machine).  <code>lein caribou migrate</code> keeps track of which migrations have already been run in that database and ensures each migration only runs once and in the order specified in your <code>{project}.migrations.order</code> namespace.</p>        </div>
+      </div>
     </div>
+    <footer>
+      <a href="http://www.weareinstrument.com" target="_blank"><img src="//let-caribou.in/img/instrument.svg"></a>
+    </footer>
 
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(document).ready(function() {
+      $('pre').each(function(i, e) {
+          var $e = $(e);
+          if ($e.hasClass("clj")) {
+              $e.html("<code>" + $e.html() + "</code>");
+          }
+          hljs.highlightBlock(e)
+      });
+    });
+    </script>
+    <!-- <script type="text/javascript" src="/js/let-caribou-in.js"></script> -->
+    <!-- script type="text/javascript" src="/js/app/out/goog/base.js"></script -->
+    <!-- script type="text/javascript" src="/js/app/let-caribou-in.js"></script -->
+    <!-- script type="text/javascript">goog.require('let-caribou-in');</script -->
   </body>
 </html>
-
-<script type="text/javascript">
-  SyntaxHighlighter.defaults['gutter'] = false;
-  SyntaxHighlighter.defaults['toolbar'] = false;
-  SyntaxHighlighter.autoloader(
-    'clj clojure js/shBrushClojure.js',
-    'xml html js/shBrushXml.js',
-    'sh bash js/shBrushBash.js'
-  );
-  SyntaxHighlighter.all()
-</script>

@@ -1,32 +1,29 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <meta charset='utf-8'>
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-
-    <script type="text/javascript" src="js/shCore.js"></script>
-    <script type="text/javascript" src="js/shAutoloader.js"></script>
-    <script type="text/javascript" src="js/shBrushClojure.js"></script>
-    <script type="text/javascript" src="js/shBrushBash.js"></script>
-    <script type="text/javascript" src="js/shBrushXml.js"></script>
-    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="stylesheets/shCore.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="stylesheets/shThemeRDark.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="stylesheets/shClojureExtra.css" media="screen" />
-
-    <title>Caribou Documentation</title>
+    <meta charset="utf-8">
+    <title>let-caribou-in - Powered By Caribou</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <script type="text/javascript" src="//use.typekit.net/cuo4exs.js"></script>
+    <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+    <link href="//let-caribou.in/css/let-caribou-in.css" type="text/css" rel="stylesheet">
+    <link href="stylesheets/styles.css" type="text/css" rel="stylesheet">
+    <!-- link href="/highlight/styles/default.css" type="text/css" rel="stylesheet" -->
+    <link href="/highlight/styles/rainbow.css" type="text/css" rel="stylesheet">
+    <script type="text/javascript" src="/highlight/highlight.pack.js"></script>
+    <link rel="shortcut icon" href="favicon.ico">
   </head>
 
   <body>
-
     <header>
-      <div class="container">
-        <h1><a href="outline.html">Caribou Documentation</a></h1>
-      </div>
+      <img src="//let-caribou.in/img/caribou-logo.png" width="158" height="139">
+      <h2>Build scalable performant websites with the tools you need and the flexibility you want.</h2>
     </header>
-
     <div class="container">
-      <section id="main_content">
+      <div class="grid-block">
+        <div class="col-6">
 <h1>Getting Started</h1><h2>System Requirements</h2><p>To run Caribou you will need: </p><ul><li>A <a href='http://www.java.com/en/download/help/index&#95;installing.xml'>JVM</a> (6 or higher)</li><li><a href='http://leiningen.org/'>Leiningen</a> (at least 2.0)</li></ul><p>If you can run <code>lein help</code>, you are ready to go!</p><h2>Installing Caribou</h2><p>If you have Leiningen installed, there is nothing more to install!</p><h2>Creating a New Site</h2><p>To create a new Caribou project, type this at the command line:</p><pre>
 % lein new caribou taiga
 </pre><p>This will create a new Caribou directory structure under the name <code>taiga</code>.  Site created!</p><h2>Bootstrapping a Database</h2><p>To bootstrap a fresh database for Caribou to use, simply:</p><pre>
@@ -34,20 +31,28 @@
 % lein caribou migrate resources/config/development.clj
 </pre><p>Bootstrapped!</p><p>You can run Caribou without a database if you just want the routing, controllers and template rendering, but you need a database to use the Admin or API and much of the other functionality.</p><p>By default Caribou uses <a href='http://www.h2database.com/html/main.html'>H2</a> (an all Java database engine) so that it does not depend on anything besides the JVM. If you don't want to use H2 you can configure Caribou to use other database backends.  See the section on <a href='configuring.html'>database configuration</a> for more on how to do this.</p><h2>Running the Site</h2><p>To run the site as it exists, simply:</p><pre>
 % lein ring server
-</pre><p>A new window will appear in your browser under <a href='http://localhost:33333'>http://localhost:33333</a>.  <br /></p><p>Congratulations!  You are now running Caribou.</p>
-      </section>
+</pre><p>A new window will appear in your browser under <a href='http://localhost:33333'>http://localhost:33333</a>.  <br /></p><p>Congratulations!  You are now running Caribou.</p>        </div>
+      </div>
     </div>
+    <footer>
+      <a href="http://www.weareinstrument.com" target="_blank"><img src="//let-caribou.in/img/instrument.svg"></a>
+    </footer>
 
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(document).ready(function() {
+      $('pre').each(function(i, e) {
+          var $e = $(e);
+          if ($e.hasClass("clj")) {
+              $e.html("<code>" + $e.html() + "</code>");
+          }
+          hljs.highlightBlock(e)
+      });
+    });
+    </script>
+    <!-- <script type="text/javascript" src="/js/let-caribou-in.js"></script> -->
+    <!-- script type="text/javascript" src="/js/app/out/goog/base.js"></script -->
+    <!-- script type="text/javascript" src="/js/app/let-caribou-in.js"></script -->
+    <!-- script type="text/javascript">goog.require('let-caribou-in');</script -->
   </body>
 </html>
-
-<script type="text/javascript">
-  SyntaxHighlighter.defaults['gutter'] = false;
-  SyntaxHighlighter.defaults['toolbar'] = false;
-  SyntaxHighlighter.autoloader(
-    'clj clojure js/shBrushClojure.js',
-    'xml html js/shBrushXml.js',
-    'sh bash js/shBrushBash.js'
-  );
-  SyntaxHighlighter.all()
-</script>

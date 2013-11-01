@@ -1,32 +1,29 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <meta charset='utf-8'>
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-
-    <script type="text/javascript" src="js/shCore.js"></script>
-    <script type="text/javascript" src="js/shAutoloader.js"></script>
-    <script type="text/javascript" src="js/shBrushClojure.js"></script>
-    <script type="text/javascript" src="js/shBrushBash.js"></script>
-    <script type="text/javascript" src="js/shBrushXml.js"></script>
-    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="stylesheets/shCore.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="stylesheets/shThemeRDark.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="stylesheets/shClojureExtra.css" media="screen" />
-
-    <title>Caribou Documentation</title>
+    <meta charset="utf-8">
+    <title>let-caribou-in - Powered By Caribou</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <script type="text/javascript" src="//use.typekit.net/cuo4exs.js"></script>
+    <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+    <link href="//let-caribou.in/css/let-caribou-in.css" type="text/css" rel="stylesheet">
+    <link href="stylesheets/styles.css" type="text/css" rel="stylesheet">
+    <!-- link href="/highlight/styles/default.css" type="text/css" rel="stylesheet" -->
+    <link href="/highlight/styles/rainbow.css" type="text/css" rel="stylesheet">
+    <script type="text/javascript" src="/highlight/highlight.pack.js"></script>
+    <link rel="shortcut icon" href="favicon.ico">
   </head>
 
   <body>
-
     <header>
-      <div class="container">
-        <h1><a href="outline.html">Caribou Documentation</a></h1>
-      </div>
+      <img src="//let-caribou.in/img/caribou-logo.png" width="158" height="139">
+      <h2>Build scalable performant websites with the tools you need and the flexibility you want.</h2>
     </header>
-
     <div class="container">
-      <section id="main_content">
+      <div class="grid-block">
+        <div class="col-6">
 <h1>Introduction to Data Modeling</h1><p>Defining models for an application is the heart of a Caribou project.  Once a model is created a host of capabilities are automatically generated for that newly created model.  This section details the means for creating new models and expanding on existing models.</p><h2>Creating Models</h2><p>Creating a model is just like creating any other content in a Caribou project. The first step is to acquire a configuration map, which is detailed in the <a href='configuring.html'>How Configuration Works in Caribou</a> section.  <br /></p><p>Assuming a configuration exists and it is called <code>config</code>, a model can be created from the repl with the following call:</p><pre class="brush: clj">
 &#40;caribou.core/with-caribou config 
   &#40;caribou.model/create 
@@ -39,20 +36,28 @@
  :presentation
  {:title &quot;Caribou!&quot;
   :preview {:source &quot;path/to/preview/image.png&quot;}}&#41;&#41;
-</pre><p>In this way, creating a model allows new kinds of content to be created. Everything else in Caribou flows from this basic idea.</p><h2>Field Types</h2><p>There are a number of different field type models can have.  Here is a summary:</p><ul><li><strong>address</strong> - Store a location as a set of fields or lat/lng pairs.</li><li><strong>asset</strong> - Represents any kind of file, including images.</li><li><strong>boolean</strong> - Represent a single true/false value.</li><li><strong>decimal</strong> - Store a single decimal value of arbitrary precision.</li><li><strong>enum</strong> - Represent a finite set of possible values.</li><li><strong>integer</strong> - A single number with no decimal digits.</li><li><strong>password</strong> - Store an encrypted value that can be matched but not read.</li><li><strong>position</strong> - A value that automatically increments when new content is added.</li><li><strong>slug</strong> - A string that depends on some other string field for its value, and    reformats that string according to the <a href='models.html'>field</a> configuration.</li><li><strong>string</strong> - The workhorse.  Represents a single short string.</li><li><strong>structure</strong> - Stores arbitrary clojure data structures in EDN format.</li><li><strong>text</strong> - Used to store arbitrarily long text.</li><li><strong>timestamp</strong> - Represents dates and times of all varieties.</li></ul><h2>Associations</h2><p>Beyond the simple field types, much of the richness of a Caribou model structure lies in the associations that are created between models in the system.  Model and Field have this relationship, where Model has a "collection" of Fields and Fields are a "part" of Model.  This provides a one to many relationship between the Model model and the Field model.</p><p>Every association in Caribou is represented by a field in the corresponding models, which means that there is an association field in each model representing the two sides of the association.  This means each association type has a reciprocal type, and that every association has one and only one reciprocal association field that lives in another model somewhere.</p><p>The different types of associations available in Caribou are:</p><ul><li><strong>collection</strong> - This association field type represents a collection of    things, meaning there are potentially many pieces of content associated to    any content of this model type.  The reciprocal type of association is the    "part".    </li><li><strong>part</strong> - The reciprocal to "collection", this means that any content of this    model variety will potentially belong to content of the model that it is a    "part" of.  Any content that is part of another collection cannot belong to    another collection.    </li><li><strong>link</strong> - The link association type is its own reciprocal, and represents a    many to many relationship to another model.  This behaves just like a    collection except that the associated content can have many associations as    well.</li></ul><h2>Default Model Fields</h2><p>There are a number of default fields that are added to a model automatically. These play various roles in managing the content internally, and also provide some handy features that all content is likely to need.  These fields are:</p><ul><li><strong>:id</strong> -- The <code>:id</code> represents a unique integer identifier that is used    throughout Caribou.  Every content item in Caribou is given an <code>:id</code>, and    all content can be retrieved based on its model type and its <code>:id</code>.  This is    also the mechanism under the scenes that tracks how different items are    associated to one another.  <code>:id</code> always increments starting from <code>1</code>, so    every item obtains a unique <code>:id</code> within its model table.</li><li><strong>:position</strong> -- The <code>:position</code> field allows content to be ordered in an    arbitrary fasion.  Without the <code>:position</code> field we would be stuck    retrieving content only by name, or id or title or something.  <code>:position</code>    allows people to order content exactly how it should appear.  Without    outside intervention, <code>:position</code> increments automatically starting from    <code>1</code>, just like <code>:id</code>.  <code>:position</code> however can change, whereas once an <code>:id</code>    is acquired it is invariant for the lifetime of the application.</li><li><strong>:locked</strong> -- This boolean field, if <code>true</code>, prevents the given content item    from being modified by a <code>caribou.model/update</code> call.  This is handy to    protect the built in model fields from arbitrary changes which could    undermine the very functioning of Caribou itself.  That is not to say built    in models are unchangeable: new fields can be added to any model.  But    someone cannot remove the "Name" field from a model, for instance.  Caribou    needs this field to run.  Probably you will not need to set this field    yourself, but you could have a vital content item that plays a similar role    in the application as a whole, in which case setting it to <code>locked</code> will    safeguard that content from changing out from under you.</li><li><strong>:created-at</strong> -- This is a timestamp that is set automatically when a piece    of content is created.  This way you always know when something was created!</li><li><strong>:updated-at</strong> -- This is another timestamp, but it gets set every time    something is updated.  Can be useful to order by this if you always want the    most recent content (or least recent!)</li></ul>
-      </section>
+</pre><p>In this way, creating a model allows new kinds of content to be created. Everything else in Caribou flows from this basic idea.</p><h2>Field Types</h2><p>There are a number of different field type models can have.  Here is a summary:</p><ul><li><strong>address</strong> - Store a location as a set of fields or lat/lng pairs.</li><li><strong>asset</strong> - Represents any kind of file, including images.</li><li><strong>boolean</strong> - Represent a single true/false value.</li><li><strong>decimal</strong> - Store a single decimal value of arbitrary precision.</li><li><strong>enum</strong> - Represent a finite set of possible values.</li><li><strong>integer</strong> - A single number with no decimal digits.</li><li><strong>password</strong> - Store an encrypted value that can be matched but not read.</li><li><strong>position</strong> - A value that automatically increments when new content is added.</li><li><strong>slug</strong> - A string that depends on some other string field for its value, and    reformats that string according to the <a href='models.html'>field</a> configuration.</li><li><strong>string</strong> - The workhorse.  Represents a single short string.</li><li><strong>structure</strong> - Stores arbitrary clojure data structures in EDN format.</li><li><strong>text</strong> - Used to store arbitrarily long text.</li><li><strong>timestamp</strong> - Represents dates and times of all varieties.</li></ul><h2>Associations</h2><p>Beyond the simple field types, much of the richness of a Caribou model structure lies in the associations that are created between models in the system.  Model and Field have this relationship, where Model has a "collection" of Fields and Fields are a "part" of Model.  This provides a one to many relationship between the Model model and the Field model.</p><p>Every association in Caribou is represented by a field in the corresponding models, which means that there is an association field in each model representing the two sides of the association.  This means each association type has a reciprocal type, and that every association has one and only one reciprocal association field that lives in another model somewhere.</p><p>The different types of associations available in Caribou are:</p><ul><li><strong>collection</strong> - This association field type represents a collection of    things, meaning there are potentially many pieces of content associated to    any content of this model type.  The reciprocal type of association is the    "part".    </li><li><strong>part</strong> - The reciprocal to "collection", this means that any content of this    model variety will potentially belong to content of the model that it is a    "part" of.  Any content that is part of another collection cannot belong to    another collection.    </li><li><strong>link</strong> - The link association type is its own reciprocal, and represents a    many to many relationship to another model.  This behaves just like a    collection except that the associated content can have many associations as    well.</li></ul><h2>Default Model Fields</h2><p>There are a number of default fields that are added to a model automatically. These play various roles in managing the content internally, and also provide some handy features that all content is likely to need.  These fields are:</p><ul><li><strong>:id</strong> -- The <code>:id</code> represents a unique integer identifier that is used    throughout Caribou.  Every content item in Caribou is given an <code>:id</code>, and    all content can be retrieved based on its model type and its <code>:id</code>.  This is    also the mechanism under the scenes that tracks how different items are    associated to one another.  <code>:id</code> always increments starting from <code>1</code>, so    every item obtains a unique <code>:id</code> within its model table.</li><li><strong>:position</strong> -- The <code>:position</code> field allows content to be ordered in an    arbitrary fasion.  Without the <code>:position</code> field we would be stuck    retrieving content only by name, or id or title or something.  <code>:position</code>    allows people to order content exactly how it should appear.  Without    outside intervention, <code>:position</code> increments automatically starting from    <code>1</code>, just like <code>:id</code>.  <code>:position</code> however can change, whereas once an <code>:id</code>    is acquired it is invariant for the lifetime of the application.</li><li><strong>:locked</strong> -- This boolean field, if <code>true</code>, prevents the given content item    from being modified by a <code>caribou.model/update</code> call.  This is handy to    protect the built in model fields from arbitrary changes which could    undermine the very functioning of Caribou itself.  That is not to say built    in models are unchangeable: new fields can be added to any model.  But    someone cannot remove the "Name" field from a model, for instance.  Caribou    needs this field to run.  Probably you will not need to set this field    yourself, but you could have a vital content item that plays a similar role    in the application as a whole, in which case setting it to <code>locked</code> will    safeguard that content from changing out from under you.</li><li><strong>:created-at</strong> -- This is a timestamp that is set automatically when a piece    of content is created.  This way you always know when something was created!</li><li><strong>:updated-at</strong> -- This is another timestamp, but it gets set every time    something is updated.  Can be useful to order by this if you always want the    most recent content (or least recent!)</li></ul>        </div>
+      </div>
     </div>
+    <footer>
+      <a href="http://www.weareinstrument.com" target="_blank"><img src="//let-caribou.in/img/instrument.svg"></a>
+    </footer>
 
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(document).ready(function() {
+      $('pre').each(function(i, e) {
+          var $e = $(e);
+          if ($e.hasClass("clj")) {
+              $e.html("<code>" + $e.html() + "</code>");
+          }
+          hljs.highlightBlock(e)
+      });
+    });
+    </script>
+    <!-- <script type="text/javascript" src="/js/let-caribou-in.js"></script> -->
+    <!-- script type="text/javascript" src="/js/app/out/goog/base.js"></script -->
+    <!-- script type="text/javascript" src="/js/app/let-caribou-in.js"></script -->
+    <!-- script type="text/javascript">goog.require('let-caribou-in');</script -->
   </body>
 </html>
-
-<script type="text/javascript">
-  SyntaxHighlighter.defaults['gutter'] = false;
-  SyntaxHighlighter.defaults['toolbar'] = false;
-  SyntaxHighlighter.autoloader(
-    'clj clojure js/shBrushClojure.js',
-    'xml html js/shBrushXml.js',
-    'sh bash js/shBrushBash.js'
-  );
-  SyntaxHighlighter.all()
-</script>
