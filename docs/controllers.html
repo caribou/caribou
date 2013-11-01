@@ -153,7 +153,7 @@ Salutations Tundra Warrior!
       </div>
     </div>
     <footer>
-      <a href="http://www.weareinstrument.com" target="_blank"><img src="//let-caribou.in/img/instrument.svg"></a>
+        <a href="http://www.weareinstrument.com" target="_blank"><img src="//let-caribou.in/img/teepee_golden.svg"></a>
     </footer>
 
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
@@ -161,7 +161,8 @@ Salutations Tundra Warrior!
     $(document).ready(function() {
       $('pre').each(function(i, e) {
           var $e = $(e);
-          if ($e.hasClass("clj") || $(e).hasClass("bash") || $e.hasClass("javascript")) {
+          if ($e.hasClass("clj") || $(e).hasClass("bash") || $e.hasClass("javascript") ||
+              $e.hasClass("html") || $(e).hasClass("handlebars") || $(e).hasClass("txt")) {
               $e.html("<code>" + $e.html() + "</code>");
           }
           hljs.highlightBlock(e)

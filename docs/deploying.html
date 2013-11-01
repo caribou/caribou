@@ -23,16 +23,16 @@
     <div class="container">
       <div class="grid-block">
         <div class="col-6">
-<h1>Deploying Caribou</h1><h2>Ring Server (Jetty)</h2><p>Using the built-in ring server is the simplest approach.  Simply run:</p><pre>
-% lein ring server
+<h1>Deploying Caribou</h1><h2>Ring Server (Jetty)</h2><p>Using the built-in ring server is the simplest approach.  Simply run:</p><pre class="brush: bash">
+    % lein ring server
 </pre><p>at the project root and your site will come to life!  To set the port you can change the options that live in your <code>project.clj</code>:</p><pre class="brush: clj">
   :ring {:handler taiga.core/handler
          :init taiga.core/init
          :port 33333}&#41;
-</pre><p>Set the port to any viable port number and restart!</p><h2>Tomcat</h2><p>For Tomcat, the process is simple.</p><pre>
-% lein ring uberwar
-</pre><p>Once this has completed, drop the resulting jar into your running Tomcat container's webapps directory.  Voila!</p><h2>Immutant (JBoss)</h2><p>To deploy to Immutant, set up the <a href='http://github.com/immutant/lein-immutant'>lein-immutant</a> plugin and then in your Caribou project root simply type:</p><pre>
-% lein immutant deploy
+</pre><p>Set the port to any viable port number and restart!</p><h2>Tomcat</h2><p>For Tomcat, the process is simple.</p><pre class="brush: bash">
+    % lein ring uberwar
+</pre><p>Once this has completed, drop the resulting jar into your running Tomcat container's webapps directory.  Voila!</p><h2>Immutant (JBoss)</h2><p>To deploy to Immutant, set up the <a href='http://github.com/immutant/lein-immutant'>lein-immutant</a> plugin and then in your Caribou project root simply type:</p><pre class="brush: bash">
+    % lein immutant deploy
 </pre><p>There is a generated Immutant configuration file that lives in <code>src/immutant/init.clj</code>.  Any additional Immutant configuration can be done there.  See the <a href='http://immutant.org/'>Immutant docs</a> for help.</p><h2>Beanstalk</h2><p>To deploy to Beanstalk running Tomcat, the key is to use the <a href='http://github.com/weavejester/lein-beanstalk'>lein-beanstalk</a> plugin and have the right set of values in your <code>project.clj</code>.  Here is an example configuration:</p><pre class="brush: clj">
 :aws {:access-key &quot;YOUR-AWS-ACCESS-KEY&quot;
       :secret-key &quot;YOUR-AWS-SECRET-KEY&quot;
@@ -59,7 +59,7 @@
       </div>
     </div>
     <footer>
-      <a href="http://www.weareinstrument.com" target="_blank"><img src="//let-caribou.in/img/instrument.svg"></a>
+        <a href="http://www.weareinstrument.com" target="_blank"><img src="//let-caribou.in/img/teepee_golden.svg"></a>
     </footer>
 
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
@@ -67,7 +67,8 @@
     $(document).ready(function() {
       $('pre').each(function(i, e) {
           var $e = $(e);
-          if ($e.hasClass("clj") || $(e).hasClass("bash") || $e.hasClass("javascript")) {
+          if ($e.hasClass("clj") || $(e).hasClass("bash") || $e.hasClass("javascript") ||
+              $e.hasClass("html") || $(e).hasClass("handlebars") || $(e).hasClass("txt")) {
               $e.html("<code>" + $e.html() + "</code>");
           }
           hljs.highlightBlock(e)

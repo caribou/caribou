@@ -22,17 +22,23 @@ received on to the template to be rendered.  Inside `request` lives a key
 available to the template during render time.  Any key in this map can be
 accessed from inside a template like so:
 
+```handlebars
     Hello template argument :tundra -- {{tundra}}
+```
 
 Now if the request map contains the value "Arctic" under the key `:tundra`,
 this will render as:
 
+```handlebars
     Hello template argument :tundra -- Arctic
+```
 
 If the map is nested, successive maps can be accessed through the '.' pattern.
 So if this is the template:
 
+```handlebars
     Hello nested template argument -- {{tundra.denizens}} !
+```
 
 And it is given a map like this:
 
@@ -42,12 +48,14 @@ And it is given a map like this:
 
 Then the template will render out like this:
 
+```html
     Hello nested template argument -- Caribou !
+```
 
 ## Using Loops with Sequences from the Render Map
 
 Any sequence of items (list or vector) in the render map can be looped over
-inside a template.  
+inside a template.
 
 ```clj
 (defn find-lakes
@@ -56,33 +64,40 @@ inside a template.
     (render (assoc request :lakes lakes))))
 
 ;; now the request map looks something like this:
-{:lakes [{:name "Huron"} 
-         {:name "Erie"} 
+{:lakes [{:name "Huron"}
+         {:name "Erie"}
          {:name "Crater"}]}
 ```
 
 Traversing a loop is simple.  In the "lake" template:
 
+```handlebars
     {{#lakes}}
       {{name}}
     {{/lakes}}
+```
 
-This would render as: 
+This would render as:
 
-    Huron 
-    Erie 
+```txt
+    Huron
+    Erie
     Crater
+```
 
 But what if we want the last one to be emphasized?  This works:
 
+```handlebars
     {{#lakes}}
       {{name}}{{#loop.last}}!!!{{/loop.last}}
     {{/lakes}}
+```
 
-
-    Huron 
-    Erie 
+```txt
+    Huron
+    Erie
     Crater!!!
+```
 
 Other loop variables include:
 
@@ -103,7 +118,7 @@ the render map:
 ```clj
 (defn some-action
   [request]
-  (caribou.app.controller/render 
+  (caribou.app.controller/render
    (assoc request :excite (fn [s] (str s "!")))))
 ```
 
@@ -116,8 +131,8 @@ Or with a value from the same map:
 ```clj
 (defn some-action
   [request]
-  (caribou.app.controller/render 
-   (assoc request 
+  (caribou.app.controller/render
+   (assoc request
      :antler "Velvet"
      :excite (fn [s] (str s "!")))))
 ```
@@ -146,17 +161,23 @@ the variable parts of the route.  So say you have a route defined like this:
 Then you need to link to this route in a template somewhere.  To generate the
 url using `route-for`, in your template:
 
+```html
     <a href="{{route-for :somewhere {:where "yellow"} }}">somewhere yellow</a>
+```
 
 This will produce:
 
+```html
     <a href="/place/yellow">somewhere yellow</a>
+```
 
 Of course, the value of the params can also be a value in the request map.  So
 if you want the url to depend on the value of `:where` in the render map, simply
 refer to that in your params map:
 
+```html
     <a href="{{route-for :somewhere {:where where} }}">somewhere {{where}}</a>
+```
 
 Then if you pass in a map to render like this:
 
@@ -190,15 +211,21 @@ In the controller:
 
 To render the image at the original size:
 
+```html
     <img src="/{{slide.image.path}}" />
+```
 
 To resize it to have a width of 500:
 
+```html
     <img src="{{resize slide.image {:width 500} }}" />
+```
 
 Or a height of 200 with a quality of 0.7:
 
+```html
     <img src="{{resize slide.image {:height 200 :quality 0.7} }}" />
+```
 
 You get the idea.
 
@@ -212,41 +239,53 @@ To declare a block, use the `{{%...}}` syntax, as in the following example.
 
 Suppose you have a file "layout.html" which looks something like this:
 
+```handlebars
     HEADER
       MONOLITHIC BODY
     FOOTER
+```
 
 But you would like to have other bodies, like `BODY OF MODULARITY`, without
 replicating `HEADER` and `FOOTER` over and over again.  Here is the perfect use
 case for a block:
 
+```handlebars
     HEADER
       {{%body}}{{/body}}
     FOOTER
+```
 
 Then, in another file "modular.html" can be the content:
 
+```handlebars
     {{< templates/layout.html}}
     {{%body}}BODY OF MODULARITY{{/body}}
+```
 
 Which, when called with `(antlers/render-file "modular.html" {})` yields:
 
+```handlebars
     HEADER
       BODY OF MODULARITY
     FOOTER
+```
 
 Now, you can have another file called "alternate" which can have totally
 different contents for the `body` block.  You only need to specify the changes
 in the blocks, not the rest of the file:
 
+```handlebars
     {{< layout.html}}
     {{%body}}This is a more conversational body for the same layout template{{/body}}
+```
 
 Which yields when rendering "alternate":
 
+```handlebars
     HEADER
       This is a more conversational body for the same layout template
     FOOTER
+```
 
 In this way you can reuse layouts repeatedly and only need to specify what is
 different.
@@ -255,7 +294,7 @@ different.
 
 There is nothing special about the function that lives under the `:template` key
 passed into `caribou.app.controller/render` besides the fact that it takes a map
-of values as an argument and produces a string representing a rendered template.  
+of values as an argument and produces a string representing a rendered template.
 
 If you want to use a different template engine simply swap out the function
 living under `:template` with your own, as long as you can wrap it into the same

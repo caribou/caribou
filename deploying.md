@@ -4,7 +4,9 @@
 
 Using the built-in ring server is the simplest approach.  Simply run:
 
+```bash
     % lein ring server
+```
 
 at the project root and your site will come to life!  To set the port you can
 change the options that live in your `project.clj`:
@@ -21,7 +23,9 @@ Set the port to any viable port number and restart!
 
 For Tomcat, the process is simple.
 
+```bash
     % lein ring uberwar
+```
 
 Once this has completed, drop the resulting jar into your running Tomcat
 container's webapps directory.  Voila!
@@ -32,7 +36,9 @@ To deploy to Immutant, set up the
 [lein-immutant](http://github.com/immutant/lein-immutant) plugin and then in
 your Caribou project root simply type:
 
+```bash
     % lein immutant deploy
+```
 
 There is a generated Immutant configuration file that lives in
 `src/immutant/init.clj`.  Any additional Immutant configuration can be done
