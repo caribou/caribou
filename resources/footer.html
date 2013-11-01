@@ -10,7 +10,7 @@
     $(document).ready(function() {
       $('pre').each(function(i, e) {
           var $e = $(e);
-          if ($e.hasClass("clj")) {
+          if ($e.hasClass("clj") || $(e).hasClass("bash") || $e.hasClass("javascript")) {
               $e.html("<code>" + $e.html() + "</code>");
           }
           hljs.highlightBlock(e)

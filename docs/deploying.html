@@ -10,7 +10,6 @@
     <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
     <link href="//let-caribou.in/css/let-caribou-in.css" type="text/css" rel="stylesheet">
       <link href="/caribou/docs/stylesheets/styles.css" type="text/css" rel="stylesheet">
-    <!-- link href="/highlight/styles/default.css" type="text/css" rel="stylesheet" -->
       <link href="/caribou/docs/highlight/styles/rainbow.css" type="text/css" rel="stylesheet">
       <script type="text/javascript" src="/caribou/docs/highlight/highlight.pack.js"></script>
     <link rel="shortcut icon" href="favicon.ico">
@@ -34,7 +33,7 @@
 % lein ring uberwar
 </pre><p>Once this has completed, drop the resulting jar into your running Tomcat container's webapps directory.  Voila!</p><h2>Immutant (JBoss)</h2><p>To deploy to Immutant, set up the <a href='http://github.com/immutant/lein-immutant'>lein-immutant</a> plugin and then in your Caribou project root simply type:</p><pre>
 % lein immutant deploy
-</pre><p>There is a generated Immutant configuration file that lives in <code>src/immutant/init.clj</code>.  Any additional Immutant configuration can be done there.  See the <a href='http://immutant.org/'>Immutant docs</a> for help.  <br /></p><h2>Beanstalk</h2><p>To deploy to Beanstalk running Tomcat, the key is to use the <a href='http://github.com/weavejester/lein-beanstalk'>lein-beanstalk</a> plugin and have the right set of values in your <code>project.clj</code>.  Here is an example configuration:</p><pre class="brush: clj">
+</pre><p>There is a generated Immutant configuration file that lives in <code>src/immutant/init.clj</code>.  Any additional Immutant configuration can be done there.  See the <a href='http://immutant.org/'>Immutant docs</a> for help.</p><h2>Beanstalk</h2><p>To deploy to Beanstalk running Tomcat, the key is to use the <a href='http://github.com/weavejester/lein-beanstalk'>lein-beanstalk</a> plugin and have the right set of values in your <code>project.clj</code>.  Here is an example configuration:</p><pre class="brush: clj">
 :aws {:access-key &quot;YOUR-AWS-ACCESS-KEY&quot;
       :secret-key &quot;YOUR-AWS-SECRET-KEY&quot;
       :region &quot;us-west-1&quot;
@@ -44,9 +43,19 @@
                   :s3-bucket &quot;taiga-prod&quot;
                   :environments &#91;{:name &quot;taiga-production&quot;
                                   :env {&quot;environment&quot; &quot;production&quot;}}&#93;}}
-</pre><p>Then, run the <code>lein-beanstalk</code> command:</p><pre>
-% lein beanstalk deploy
-</pre><p>If your Beanstalk configuration with AWS is set up right, you now have a Caribou project running in the cloud somewhere!  Congratulations.</p><h2>Heroku</h2><p>Caribou by default is already set up to deploy to Heroku.  The main key is to create a git repo and set the remote heroku target:</p><ul><li>set up the git repository    % git init    % git add .    % git commit -m "init"</li><li>create the heroku remote and deploy    % heroku apps:create    % git push heroku master    % heroku ps:scale web=1</li><li>open the deployed site    % heroku open</li></ul><p>For any additional Heroku support, refer to the <a href='http://devcenter.heroku.com/articles/clojure'>Heroku docs</a>.</p><p></p>        </div>
+</pre><p>Then, run the <code>lein-beanstalk</code> command:</p><pre class="brush: bash">
+    % lein beanstalk deploy
+</pre><p>If your Beanstalk configuration with AWS is set up right, you now have a Caribou project running in the cloud somewhere!  Congratulations.</p><h2>Heroku</h2><p>Caribou by default is already set up to deploy to Heroku.  The main key is to create a git repo and set the remote heroku target:</p><ul><li>set up the git repository</li></ul><pre class="brush: bash">
+    % git init
+    % git add .
+    % git commit -m &quot;init&quot;
+</pre><ul><li>create the heroku remote and deploy</li></ul><pre class="brush: bash">
+    % heroku apps:create
+    % git push heroku master
+    % heroku ps:scale web=1
+</pre><ul><li>open the deployed site</li></ul><pre class="brush: bash">
+    % heroku open
+</pre><p>For any additional Heroku support, refer to the <a href='http://devcenter.heroku.com/articles/clojure'>Heroku docs</a>.</p><p></p>        </div>
       </div>
     </div>
     <footer>
@@ -58,7 +67,7 @@
     $(document).ready(function() {
       $('pre').each(function(i, e) {
           var $e = $(e);
-          if ($e.hasClass("clj")) {
+          if ($e.hasClass("clj") || $(e).hasClass("bash") || $e.hasClass("javascript")) {
               $e.html("<code>" + $e.html() + "</code>");
           }
           hljs.highlightBlock(e)

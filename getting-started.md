@@ -2,12 +2,13 @@
 
 ## System Requirements
 
-To run Caribou you will need: 
+To run Caribou you will need:
 
 * A [JVM](http://www.java.com/en/download/help/index_installing.xml) (6 or higher)
 * [Leiningen](http://leiningen.org/) (at least 2.0)
 
 If you can run `lein help`, you are ready to go!
+*Note*: You do *not* need to install Clojure!
 
 ## Installing Caribou
 
@@ -17,7 +18,9 @@ If you have Leiningen installed, there is nothing more to install!
 
 To create a new Caribou project, type this at the command line:
 
+```bash
     % lein new caribou taiga
+```
 
 This will create a new Caribou directory structure under the name `taiga`.  Site
 created!
@@ -26,8 +29,10 @@ created!
 
 To bootstrap a fresh database for Caribou to use, simply:
 
+```bash
     % cd taiga
     % lein caribou migrate resources/config/development.clj
+```
 
 Bootstrapped!
 
@@ -45,9 +50,11 @@ on how to do this.
 
 To run the site as it exists, simply:
 
+```bash
     % lein ring server
+```
 
-A new window will appear in your browser under [http://localhost:33333](http://localhost:33333).  
+A new window will appear in your browser under [http://localhost:33333](http://localhost:33333).
 
 Congratulations!  You are now running Caribou.
 

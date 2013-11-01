@@ -36,7 +36,7 @@ your Caribou project root simply type:
 
 There is a generated Immutant configuration file that lives in
 `src/immutant/init.clj`.  Any additional Immutant configuration can be done
-there.  See the [Immutant docs](http://immutant.org/) for help.  
+there.  See the [Immutant docs](http://immutant.org/) for help.
 
 ## Beanstalk
 
@@ -58,7 +58,9 @@ the right set of values in your `project.clj`.  Here is an example configuration
 
 Then, run the `lein-beanstalk` command:
 
+```bash
     % lein beanstalk deploy
+```
 
 If your Beanstalk configuration with AWS is set up right, you now have a Caribou
 project running in the cloud somewhere!  Congratulations.
@@ -69,17 +71,26 @@ Caribou by default is already set up to deploy to Heroku.  The main key is to
 create a git repo and set the remote heroku target:
 
 * set up the git repository
+
+```bash
     % git init
     % git add .
     % git commit -m "init"
+```
 
 * create the heroku remote and deploy
+
+```bash
     % heroku apps:create
     % git push heroku master
     % heroku ps:scale web=1
+```
 
 * open the deployed site
+
+```bash
     % heroku open
+```
 
 For any additional Heroku support, refer to the [Heroku docs](http://devcenter.heroku.com/articles/clojure).
 

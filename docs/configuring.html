@@ -10,7 +10,6 @@
     <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
     <link href="//let-caribou.in/css/let-caribou-in.css" type="text/css" rel="stylesheet">
       <link href="/caribou/docs/stylesheets/styles.css" type="text/css" rel="stylesheet">
-    <!-- link href="/highlight/styles/default.css" type="text/css" rel="stylesheet" -->
       <link href="/caribou/docs/highlight/styles/rainbow.css" type="text/css" rel="stylesheet">
       <script type="text/javascript" src="/caribou/docs/highlight/highlight.pack.js"></script>
     <link rel="shortcut icon" href="favicon.ico">
@@ -154,7 +153,7 @@
     $(document).ready(function() {
       $('pre').each(function(i, e) {
           var $e = $(e);
-          if ($e.hasClass("clj")) {
+          if ($e.hasClass("clj") || $(e).hasClass("bash") || $e.hasClass("javascript")) {
               $e.html("<code>" + $e.html() + "</code>");
           }
           hljs.highlightBlock(e)
