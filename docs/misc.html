@@ -23,13 +23,13 @@
     <div class="container">
       <div class="grid-block">
         <div class="col-6">
-<h1>Miscellaneous Topics</h1><h2>Connecting to a Caribou Repl</h2><p>Caribou provides an embedded nrepl server that lives inside the context of the currently running configuration.  This means you won't have to call every <code>caribou.model/gather</code> or <code>caribou.model/create</code> inside a <code>caribou.core/with-caribou</code> call.</p><p>For a new Caribou project the repl is enabled by default.  It lives under the  configuration option </p><pre class="brush: clj">
+<h1>Miscellaneous Topics</h1><h2>Connecting to a Caribou Repl</h2><p>Caribou provides an embedded nrepl server that lives inside the context of the currently running configuration.  This means you won't have to call every <code>caribou.model/gather</code> or <code>caribou.model/create</code> inside a <code>caribou.core/with-caribou</code> call.</p><p>For a new Caribou project the repl is enabled by default.  It lives under the configuration option</p><pre class="brush: clj">
 {:nrepl {:port 44444}}
-</pre><p>If you want to disable this simply remove this entry and the nrepl server will disappear.  To use it, specify a port (44444 by default) and connect using your favorite nrepl client!</p><p>If you just want to connect with <code>lein</code>, it is as easy as:</p><pre>
-lein repl :connect 44444
+</pre><p>If you want to disable this simply remove this entry and the nrepl server will disappear.  To use it, specify a port (44444 by default) and connect using your favorite nrepl client!</p><p>If you just want to connect with <code>lein</code>, it is as easy as:</p><pre class="brush: bash">
+% lein repl :connect 44444
 </pre><h2>Search Indexing</h2><p></p><h2>Query Cache</h2><p>There is an optional query cache available in Caribou that you can use to avoid executing the same query over and over again if the content fetched by that query hasn't changed.  The model system keeps track of each model that was involved in a given query and it knows whenever content for a given model changes, so it can automatically expire the cache for any queries tied to a model involved in a recent update.  This way, all the results can be returned in constant time without hitting the database for any content that hasn't changed, which in an environment with more reads than writes is a huge win.</p><p>To enable the query cache, simply set the <code>:enable-query-cache</code> key to true in your config:</p><pre class="brush: clj">
 {:query {:enable-query-cache true}}
-</pre><p>Caribou will handle the rest.  <br /></p>        </div>
+</pre><p>Caribou will handle the rest.</p>        </div>
       </div>
     </div>
     <footer>

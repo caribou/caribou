@@ -70,14 +70,15 @@ loop.item        --&gt;  the current item in the loop
 loop.index       --&gt;  the current index
 loop.inc-index   --&gt;  one-based index &#40;useful for things&#41;
 loop.count       --&gt;  total count of items in this list
-loop.outer       --&gt;  a reference to any loop variables from an outer loop.  outer can also have an outer, ad infinitum.
+loop.outer       --&gt;  a reference to any loop variables from an outer loop.
+                         outer can also have an outer, ad infinitum.
 </pre><h2>Template Helpers</h2><p>Template helpers are simply functions which live in the render map.  They are easy to invoke, and accept arguments which can be literals or other values from the render map:</p><pre class="brush: clj">
 &#40;defn some-action
   &#91;request&#93;
   &#40;caribou.app.controller/render
    &#40;assoc request :excite &#40;fn &#91;s&#93; &#40;str s &quot;!&quot;&#41;&#41;&#41;&#41;&#41;
-</pre><p>Then in the template:</p><pre>
-{{excite &quot;yellow&quot;}}  --&gt;   yellow!
+</pre><p>Then in the template:</p><pre class="brush: handlebars">
+    {{excite &quot;yellow&quot;}}  --&gt;   yellow!
 </pre><p>Or with a value from the same map:</p><pre class="brush: clj">
 &#40;defn some-action
   &#91;request&#93;
@@ -85,8 +86,8 @@ loop.outer       --&gt;  a reference to any loop variables from an outer loop.  
    &#40;assoc request
      :antler &quot;Velvet&quot;
      :excite &#40;fn &#91;s&#93; &#40;str s &quot;!&quot;&#41;&#41;&#41;&#41;&#41;
-</pre><pre>
-{{excite antler}}  --&gt;   Velvet!
+</pre><pre class="brush: handlebars">
+    {{excite antler}}  --&gt;   Velvet!
 </pre><h2>Existing Helpers</h2><p>There are many helpers Caribou provides by default, but the two most important are <code>route-for</code> and <code>resize</code>.  These are explained here.</p><ul><li><strong>route-for</strong></li></ul><p><code>route-for</code> is a way to generate a url based on a key and some parameters.  Thisis a helpful alternative to simply hard-coding urls throughout your templates, since it means that you are free to change your routes at will and all of the urls in your templates will immediately reflect this.</p><p><code>route-for</code> takes the key for a route and a map of params to be substituted into the variable parts of the route.  So say you have a route defined like this:</p><pre class="brush: clj">
 &#91;&quot;/place/:where&quot; :somewhere &#91;&#93;&#93;
 </pre><p>Then you need to link to this route in a template somewhere.  To generate the url using <code>route-for</code>, in your template:</p><pre class="brush: html">
@@ -97,8 +98,8 @@ loop.outer       --&gt;  a reference to any loop variables from an outer loop.  
     &lt;a href=&quot;{{route-for :somewhere {:where where} }}&quot;&gt;somewhere {{where}}&lt;/a&gt;
 </pre><p>Then if you pass in a map to render like this:</p><pre class="brush: clj">
 {:where &quot;pink&quot;}
-</pre><p>Your template will render out as:</p><pre>
-&lt;a href=&quot;/place/pink&quot;&gt;somewhere pink&lt;/a&gt;
+</pre><p>Your template will render out as:</p><pre class="brush: html">
+    &lt;a href=&quot;/place/pink&quot;&gt;somewhere pink&lt;/a&gt;
 </pre><ul><li><strong>resize</strong></li></ul><p><code>resize</code> takes existing images and resizes them to dimensions given by <code>:width</code>and <code>:height</code> parameters.  If only <code>:width</code> or only <code>:height</code> is supplied, it scales the image to maintain the aspect ratio of the original image.  There is also a <code>:quality</code> option that governs the image quality of the resized image.</p><p>The first argument to <code>resize</code> is an image map, which can be obtained from a model containing an "asset" field.  So if you have a Slide model with an "image" field of type "asset", the resize call would work like the following.</p><p>In the controller:</p><pre class="brush: clj">
 &#40;defn display-slide
   &#91;request&#93;

@@ -22,14 +22,14 @@ It should contain two functions, `migrate` and `rollback`:
 ```clj
 (ns taiga.migrations.example
   (:require [caribou.model :as model]))
-  
+
 (defn migrate
   []
   (model/create
     :model
     {:name "Example"
      :fields [{:name "Content" :type "string"}]}))
-     
+
 (defn rollback
   [])
 ```
@@ -51,7 +51,7 @@ the list somewhere it makes sense:
 
 Once order has been instated, time to run the migration:
 
-```
+```bash
 % lein caribou migrate resources/config/development.clj
 ```
 

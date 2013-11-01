@@ -26,19 +26,19 @@
 <h1>Data Migrations</h1><p>When making model changes (which ultimately change the schema of the tables you are working with), it is wise to implement them as migrations so that you can recreate your schema in any database environment you will eventually encounter. This makes it easy to switch databases or even database libraries and continue to use your existing code.</p><p>To create a migration, there are three steps:</p><ul><li>Writing the migration</li><li>Specifying the order of the migration</li><li>Running the migration</li></ul><p>Let's look at the first of these tasks.</p><h2>Writing a migration</h2><p>First, create a new namespace inside your <code>src/{project}/migrations/</code> directory. It should contain two functions, <code>migrate</code> and <code>rollback</code>:</p><pre class="brush: clj">
 &#40;ns taiga.migrations.example
   &#40;:require &#91;caribou.model :as model&#93;&#41;&#41;
-  
+
 &#40;defn migrate
   &#91;&#93;
   &#40;model/create
     :model
     {:name &quot;Example&quot;
      :fields &#91;{:name &quot;Content&quot; :type &quot;string&quot;}&#93;}&#41;&#41;
-     
+
 &#40;defn rollback
   &#91;&#93;&#41;
 </pre><p>Once the migration exists, you have to add it into the order vector that keeps track of migration order.  This is required because migrations are not necessarily commutative: certain migrations must have already run before others can make sense.  This is most apparent for a migration that adds a field to an existing model: if the model hasn't been created yet, adding a field to it will fail!</p><p>Every project has an <code>{project}.migrations.order</code> namespace in the <code>src/{project}/migrations/order.clj</code> file.  Open this and add your migration to the list somewhere it makes sense:</p><pre class="brush: clj">
 &#40;def order &#91;&quot;default&quot; &quot;admin&quot; &quot;example&quot;&#93;&#41; ;; &lt;--- Here for example!
-</pre><p>Once order has been instated, time to run the migration:</p><pre>
+</pre><p>Once order has been instated, time to run the migration:</p><pre class="brush: bash">
 % lein caribou migrate resources/config/development.clj
 </pre><p>The <code>lein caribou migrate</code> command accepts the path to a config file because it needs to know what database to run the migration on.  This is helpful if you have many different environments each with their own database (that may or may not live on this local machine).  <code>lein caribou migrate</code> keeps track of which migrations have already been run in that database and ensures each migration only runs once and in the order specified in your <code>{project}.migrations.order</code> namespace.</p>        </div>
       </div>

@@ -18,10 +18,10 @@ configuration maps.
 Once you have a configuration map, you can call any Caribou methods inside of a
 `caribou.core/with-caribou` block.
 
-```clj 
-(let [config (pull-config-map-from-somewhere)] 
-  (caribou.core/with-caribou config 
-    (... ))  ;; block of code that assumes a caribou config 
+```clj
+(let [config (pull-config-map-from-somewhere)]
+  (caribou.core/with-caribou config
+    (... ))  ;; block of code that assumes a caribou config
 ```
 
 As we progress we will illuminate a number of Caribou calls that work in this
@@ -47,10 +47,10 @@ this map is obtained as a result of calling the
 `caribou.config/config-from-environment` method on a default configuration map
 obtained from `caribou.app.config/default-config`.
 
-```clj 
-(let [default (caribou.app.config/default-config) 
+```clj
+(let [default (caribou.app.config/default-config)
       local (config/merge-config default local-config)
-      config (caribou.config/config-from-environment local)] 
+      config (caribou.config/config-from-environment local)]
   (caribou.core/init config))
 ```
 
@@ -65,8 +65,8 @@ and merges that map into the default map you provide.  By default the
 environment is "development", but it can be set as a java option (which can be
 done in a number of ways).  One of the easiest is to set it in your env like so:
 
-``` 
-% export _JAVA_OPTIONS=-Denvironment=production 
+```bash
+% export _JAVA_OPTIONS=-Denvironment=production
 ```
 
 This is a standard method for setting JVM options from the command line.  (For
@@ -140,7 +140,7 @@ Here is a map of all default configuration options:
          :store (atom nil)}
  :logging {:loggers [{:type :stdout :level :debug}]}
  :models (atom {})
- :nrepl {:port nil 
+ :nrepl {:port nil
          :server (atom nil)}
  :pages (atom ())
  :pre-actions (atom {})
@@ -302,25 +302,25 @@ Here are a couple of examples of database configurations to get you started:
 * Postgresql
 
 ```clj
-{:database 
-  {:classname "org.postgresql.Driver" 
+{:database
+  {:classname "org.postgresql.Driver"
    :subprotocol "postgresql"
-   :host "127.0.0.1" 
-   :database "caribou_test" 
-   :user "caribou" 
+   :host "127.0.0.1"
+   :database "caribou_test"
+   :user "caribou"
    :password "TUNDRA"}}
 ```
 
 * Mysql
 
 ```clj
-{:database 
-  {:classname "com.mysql.jdbc.Driver" 
-   :subprotocol "mysql" 
-   :host "localhost" 
-   :database "caribou_test" 
-   :user "caribou" 
-   :password "TUNDRA"}} 
+{:database
+  {:classname "com.mysql.jdbc.Driver"
+   :subprotocol "mysql"
+   :host "localhost"
+   :database "caribou_test"
+   :user "caribou"
+   :password "TUNDRA"}}
 ```
 
 * H2
@@ -330,14 +330,14 @@ database and to specify the path.  (notice `:protocol` and `:path` are both
 present, but not `:host`)
 
 ```clj
-{:database 
-  {:classname "org.h2.Driver" 
-   :subprotocol "h2" 
+{:database
+  {:classname "org.h2.Driver"
+   :subprotocol "h2"
    :protocol "file"
-   :path "./" 
-   :database "caribou_development" 
-   :user "h2" 
-   :password ""}} 
+   :path "./"
+   :database "caribou_development"
+   :user "h2"
+   :password ""}}
 ```
 
 ### error
@@ -365,7 +365,7 @@ a custom 500 page, but in development this can be handy (especially if you
 conjure a lot of stacktraces!)  Otherwise, the stacktrace is rendered out to the
 logs and a 500 template is rendered in the browser.  Defaults to false.
 
-### field 
+### field
 
 * **constructors**
 
@@ -394,29 +394,29 @@ dash (-).  Want underscores instead?  Override this config option.
 Hooks are run at specific point during every piece of content's lifecycle.  The
 various hook points are:
 
-* **During create these hooks are called in order:** 
+* **During create these hooks are called in order:**
 
 ```clj
 :before-save
-:before-create 
-:after-create 
-:after-save 
+:before-create
+:after-create
+:after-save
 ```
 
-* **During an update, these hooks are called in order:** 
-
-```clj 
-:before-save
-:before-update 
-:after-update 
-:after-save 
-```
-
-* **When a piece of content is destroyed, these hooks are run:** 
+* **During an update, these hooks are called in order:**
 
 ```clj
-:before-destroy 
-:after-destroy 
+:before-save
+:before-update
+:after-update
+:after-save
+```
+
+* **When a piece of content is destroyed, these hooks are run:**
+
+```clj
+:before-destroy
+:after-destroy
 ```
 
 * **namespace**
@@ -429,7 +429,7 @@ added in a function called {hooks-namespace}.{model-name}/add-hooks.
 
 The actual hooks that get run.  Rather than modifying this directly, just call
 `caribou.hooks/add-hooks` from a file named after that model in your hooks
-namespace.  
+namespace.
 
 ### index
 
@@ -471,18 +471,18 @@ must be configured to allow access from the server sending the packets.
 
 The levels in order from most critical to least critical are:
 
-```clj 
-:emergency 0 
-:alert 1 
-:critical 2 
-:error 3 
-:warning 4 
-:warn 4 
+```clj
+:emergency 0
+:alert 1
+:critical 2
+:error 3
+:warning 4
+:warn 4
 :notice 5
-:informational 6 
-:info 6 
-:debug 7 
-:trace 7 
+:informational 6
+:info 6
+:debug 7
+:trace 7
 ```
 
 If you set a logger to watch at `:warn` level for instance, it will ignore any

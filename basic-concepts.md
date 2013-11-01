@@ -11,8 +11,8 @@ the model keeps track of.  These fields can be of a variety of types, things
 like text, images, numbers, dates, and even associations to other models.
 
 As an example, to create an application that lets you create presentations, you
-could have a Presentation model that would have a "title" text field and maybe a
-"preview" image field, and a Slide model with a "caption" text field and an
+could have a Presentation model that would have a “title” text field and maybe a
+“preview” image field, and a Slide model with a “caption” text field and an
 "image" field with an image containing the slide content.  Then, you could
 create an association between Presentation and Slide so that Presentation has a
 collection of Slide objects.  Once these models are created, you could start
@@ -24,8 +24,7 @@ exists in the system, you can read data from the API or create new content in
 the Admin.
 
 Model itself is a model, with a collection of Fields (which is also a model!)
-To read more, check out the [Introduction to Data
-Modeling](models.md).
+To read more, check out the [Introduction to Data Modeling](models.md).
 
 ## Pages
 

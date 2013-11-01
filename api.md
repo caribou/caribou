@@ -10,16 +10,20 @@ available.
 Once a new model is created, any instances of that model can be accessed at a
 URL of the form:
 
-    http://localhost:33333/_api/{model-name}
+```txt
+http://localhost:33333/_api/{model-name}
+```
 
 So, to access the Model API, simply navigate to
 http://localhost:33333/_api/model .  You will see a json representation of every
 model in the system.  If you want a specific representation, add it as a file
 extension to this basic URL structure:
 
-    http://localhost:33333/_api/model.json
-    http://localhost:33333/_api/model.xml
-    http://localhost:33333/_api/model.csv
+```txt
+http://localhost:33333/_api/model.json
+http://localhost:33333/_api/model.xml
+http://localhost:33333/_api/model.csv
+```
 
 ## Options in the API
 
@@ -27,7 +31,9 @@ All the options you would pass into a `caribou.model/gather` are available in
 the API.  Add any additional constraints as query parameters to refine your
 selection:
 
+```txt
     http://localhost:33333/_api/model?include=fields&limit=2
+```
 
 ## Changing the API root or removing the API
 
@@ -38,16 +44,16 @@ to `{project}.core/reload-pages`.  It will look something like this:
 (defn reload-pages
   []
   (pages/add-page-routes
-   admin-routes/admin-routes
-   'caribou.admin.controllers
-   "/_admin"
-   admin-core/admin-wrapper)
+    admin-routes/admin-routes
+    'caribou.admin.controllers
+    "/_admin"
+    admin-core/admin-wrapper)
 
   (pages/add-page-routes
-   api-routes/api-routes
-   'caribou.api.controllers
-   "/_api"
-   api-core/api-wrapper)
+    api-routes/api-routes
+    'caribou.api.controllers
+    "/_api"
+    api-core/api-wrapper)
 
   (pages/add-page-routes
    (pages/all-pages)

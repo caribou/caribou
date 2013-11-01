@@ -41,7 +41,7 @@ deeper into the Caribou ecosystem.
 ### Frontend
 
 [Caribou Frontend](https://github.com/caribou/caribou-frontend) uses Core as the
-data layer foundation and is built on the [Clojure Ring protocol](https://github.com/ring-clojure/ring).  
+data layer foundation and is built on the [Clojure Ring protocol](https://github.com/ring-clojure/ring).
 Ring is a flexible HTTP protocol for Clojure that abstracts over the HTTP
 request and response lifecycle, turning them into plain Clojure maps.  In
 practice this is an extremely powerful way to compose handlers and functionality
@@ -74,7 +74,7 @@ Caribou.  Create a new Model and instantly an endpoint representing that Model
 is available.  Add some content for that Model, the content magically appears in
 the API results.  Use any of the options for filtering and selecting content as
 URL parameters that would previously only be available programmatically.  The
-API again is a tangible upshot of Caribou's Model as Data approach.
+API again is a tangible upshot of Caribou's Model-as-Data approach.
 
 ## Peripheral Libraries
 
@@ -93,9 +93,9 @@ about how to most efficiently perform the task.
 ### Antlers
 
 [Antlers](http://github.com/caribou/antlers) is a templating library that grew
-out of the raw Mustache spec, but adapted to ever expanding demands from day to
-day use.  Today it is a fully functional templating system with blocks, helper
-functions, loop variables and a host of other practical features that makes it
+out of the raw Mustache spec, but adapted to ever-expanding demands from day-to-day
+use.  Today it is a fully functional templating system with blocks, helper
+functions, loop variables and a host of other practical features that make it
 the cornerstone of rendering in Caribou.  Of course, nothing is stopping you
 from using whatever template system you want, but if you need it, it's there.
 

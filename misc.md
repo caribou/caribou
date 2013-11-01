@@ -7,8 +7,8 @@ currently running configuration.  This means you won't have to call every
 `caribou.model/gather` or `caribou.model/create` inside a
 `caribou.core/with-caribou` call.
 
-For a new Caribou project the repl is enabled by default.  It lives under the 
-configuration option 
+For a new Caribou project the repl is enabled by default.  It lives under the
+configuration option
 
 ```clj
 {:nrepl {:port 44444}}
@@ -20,7 +20,9 @@ favorite nrepl client!
 
 If you just want to connect with `lein`, it is as easy as:
 
-    lein repl :connect 44444
+```bash
+% lein repl :connect 44444
+```
 
 ## Search Indexing
 
@@ -44,5 +46,5 @@ your config:
 {:query {:enable-query-cache true}}
 ```
 
-Caribou will handle the rest.  
+Caribou will handle the rest.
 

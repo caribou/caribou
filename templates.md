@@ -107,7 +107,8 @@ Other loop variables include:
     loop.index       -->  the current index
     loop.inc-index   -->  one-based index (useful for things)
     loop.count       -->  total count of items in this list
-    loop.outer       -->  a reference to any loop variables from an outer loop.  outer can also have an outer, ad infinitum.
+    loop.outer       -->  a reference to any loop variables from an outer loop.
+                             outer can also have an outer, ad infinitum.
 
 ## Template Helpers
 
@@ -124,7 +125,9 @@ the render map:
 
 Then in the template:
 
+```handlebars
     {{excite "yellow"}}  -->   yellow!
+```
 
 Or with a value from the same map:
 
@@ -137,7 +140,9 @@ Or with a value from the same map:
      :excite (fn [s] (str s "!")))))
 ```
 
+```handlebars
     {{excite antler}}  -->   Velvet!
+```
 
 ## Existing Helpers
 
@@ -187,7 +192,9 @@ Then if you pass in a map to render like this:
 
 Your template will render out as:
 
+```html
     <a href="/place/pink">somewhere pink</a>
+```
 
 * **resize**
 

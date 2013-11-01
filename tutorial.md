@@ -9,7 +9,9 @@ the purposes of this tutorial, we will call it *pictograph*.
 
 To create your app, you only need to run one command:
 
-    lein caribou create pictograph
+```bash
+% lein new caribou pictograph
+```
 
 This will create your application, with a working configuration
 right out of the box, including its own database (which you can
@@ -17,7 +19,7 @@ change at any time).
 
 The project structure initially looks like this:
 
-```
+```bash
 > tree pictograph
 pictograph
 ├── api
@@ -71,8 +73,11 @@ pictograph
 
 Now that your application exists, you can start it:
 
-    cd pictograph
-    lein caribou start
+```bash
+% cd pictograph
+% lein caribou migrate resources/config/development.clj
+% lein ring server
+```
 
 Your Caribou application is now running on port 33333.
 
@@ -97,7 +102,7 @@ called *Presentation*.
 After you've created your model, you'll be shown a page of all of
 the fields in your new model.   Initially, the fields will only
 be the default set of fields that Caribou uses to maintain your
-model, but you can add new fields. 
+model, but you can add new fields.
 
 ![Models page](images/tutorial/Screenshot_3_21_13_9_37_AM.png)
 ![Models page](images/tutorial/Screenshot_3_21_13_9_37_AM 2.png)
@@ -238,7 +243,7 @@ exactly what to do.   Let's create a new template for the page in _site/resource
 {{/body}}
 ```
 
-Refresh your browser, and presto!  Here are your presentation's slides.  
+Refresh your browser, and presto!  Here are your presentation's slides.
 
 ![Presentation page](images/tutorial/Screenshot_3_21_13_4_44_PM.png "Presentation page")
 
