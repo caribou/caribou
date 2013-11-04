@@ -8,7 +8,8 @@ To run Caribou you will need:
 * [Leiningen](http://leiningen.org/) (at least 2.0)
 
 If you can run `lein help`, you are ready to go!
-*Note*: You do *not* need to install Clojure!
+
+**Note**: You do *not* need to install Clojure!
 
 ## Installing Caribou
 
