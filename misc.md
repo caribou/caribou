@@ -26,6 +26,12 @@ If you just want to connect with `lein`, it is as easy as:
 
 ## Search Indexing
 
+By default, Caribou automatically indexes your content using Lucene.  Any fields
+that you mark as "searchable" will be indexed and you can search the index
+programmatically (or using the Admin interface).
+
+The index files will be stored in "caribou-index/" at the top level
+of your application, unless you change it in the configuration.
 
 
 ## Query Cache
