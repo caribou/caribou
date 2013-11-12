@@ -1,24 +1,24 @@
 [submodule "caribou-core"]
 	path = caribou-core
-	url = git@github.com:antler/caribou-core.git
+	url = git@github.com:caribou/caribou-core.git
 [submodule "caribou-frontend"]
 	path = caribou-frontend
-	url = git@github.com:antler/caribou-frontend.git
+	url = git@github.com:caribou/caribou-frontend.git
 [submodule "caribou-admin"]
 	path = caribou-admin
-	url = git@github.com:antler/caribou-admin.git
+	url = git@github.com:caribou/caribou-admin.git
 [submodule "caribou-api"]
 	path = caribou-api
-	url = git@github.com:antler/caribou-api.git
+	url = git@github.com:caribou/caribou-api.git
 [submodule "caribou-docs"]
 	path = caribou-docs
-	url = git@github.com:antler/caribou-docs.git
+	url = git@github.com:caribou/caribou-docs.git
 [submodule "caribou-development"]
 	path = caribou-development
-	url = git@github.com:antler/caribou-development.git
+	url = git@github.com:caribou/caribou-development.git
 [submodule "lein-caribou"]
 	path = lein-caribou
-	url = git@github.com:antler/lein-caribou.git
+	url = git@github.com:caribou/lein-caribou.git
 [submodule "caribou-template"]
 	path = caribou-template
-	url = git@github.com:antler/caribou-template.git
+	url = git@github.com:caribou/caribou-template.git

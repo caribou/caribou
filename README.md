@@ -2,13 +2,13 @@
 
 Caribou is a web ecosystem composed of a number of libraries:
 
-* [caribou-core](https://github.com/antler/caribou-core)
-* [caribou-frontend](https://github.com/antler/caribou-frontend)
-* [caribou-admin](https://github.com/antler/caribou-admin)
-* [caribou-api](https://github.com/antler/caribou-api)
-* [caribou-docs](https://github.com/antler/caribou-docs)
-* [caribou-development](https://github.com/antler/caribou-development)
-* [lein-caribou](https://github.com/antler/lein-caribou)
+* [caribou-core](https://github.com/caribou/caribou-core)
+* [caribou-frontend](https://github.com/caribou/caribou-frontend)
+* [caribou-admin](https://github.com/caribou/caribou-admin)
+* [caribou-api](https://github.com/caribou/caribou-api)
+* [caribou-docs](https://github.com/caribou/caribou-docs)
+* [caribou-development](https://github.com/caribou/caribou-development)
+* [lein-caribou](https://github.com/caribou/lein-caribou)
 
 # Docs
 
@@ -18,6 +18,6 @@ Docs are constantly evolving.  To get started, check out:
 
 # LICENSE
 
-Copyright (C) Instrument 2013
+Copyright (C) Instrument
 
 Distributed under the MIT License
