@@ -20,4 +20,4 @@ Docs are constantly evolving.  To get started, check out:
 
 Copyright (C) Instrument
 
-Distributed under the MIT License
+Distributed under the Eclipse Public License
