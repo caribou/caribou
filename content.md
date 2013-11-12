@@ -369,3 +369,43 @@ excluded through the use of a `:limit`.
 
 This can be used to implement pagination, for example.
 
+## **:fields**
+
+You can ask for the query to return only certain given fields available in a
+model.  This is helpful if you just need certain information from a model rather
+than every value that lives in that row:
+
+```clj
+(def redux-slides-limited-and-offset-only-id
+  (caribou.model/gather
+   :slide
+   {:order {:updated-at :desc
+            :id :asc
+            :presentation {:title :desc}}
+    :limit 2
+    :offset 1
+    :fields [:id]}))
+
+--> [{:id 1} {:id 2}]
+
+```
+
+You can even specify fields from included associations using this method:
+
+```clj
+(def redux-authors-and-slides-limit-fields
+  (caribou.model/pick
+   :presentation
+   {:where {:title "Caribou Redux!"}
+    :fields [:title {:slides [:caption] :authors [:name]}]
+    :include {:authors {}
+              :slides {}}}))
+  
+--> {:id 1 
+     :title "Caribou Redux!" 
+     :preview {...}
+     :authors [{:name "Donner"} {:name "Blitzen"} ...]
+     :slides [{:caption "Welcome to Caribou!"}
+              {:caption "Explaining Caribou Models"} 
+              {:caption "How to Update a Caribou Model"}]}
+```

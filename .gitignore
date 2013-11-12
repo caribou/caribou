@@ -7,3 +7,12 @@ caribou*.jar
 /lib/
 /nginx/
 /target
+
+/caribou-core
+/caribou-api
+/caribou-frontend
+/caribou-admin
+/lein-caribou
+/caribou-docs
+/caribou-template
+/caribou-development

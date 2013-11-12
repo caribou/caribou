@@ -215,7 +215,36 @@
   
 --&gt; &#91;{:id 1 :caption &quot;Welcome to Caribou!&quot; :updated-at #inst &quot;2013-06-21T22:37:34.883000000-00:00&quot; ...}
      {:id 2 :caption &quot;Explaining Caribou Models&quot; :updated-at #inst &quot;2013-06-21T22:37:34.883000000-00:00&quot; ...}&#93;
-</pre><p>This can be used to implement pagination, for example.</p>        </div>
+</pre><p>This can be used to implement pagination, for example.</p><h2><strong>:fields</strong></h2><p>You can ask for the query to return only certain given fields available in a model.  This is helpful if you just need certain information from a model rather than every value that lives in that row:</p><pre class="brush: clj">
+&#40;def redux-slides-limited-and-offset-only-id
+  &#40;caribou.model/gather
+   :slide
+   {:order {:updated-at :desc
+            :id :asc
+            :presentation {:title :desc}}
+    :limit 2
+    :offset 1
+    :fields &#91;:id&#93;}&#41;&#41;
+
+--&gt; &#91;{:id 1} {:id 2}&#93;
+<p>
+</pre></p><p>You can even specify fields from included associations using this method:</p><pre class="brush: clj">
+&#40;def redux-authors-and-slides-limit-fields
+  &#40;caribou.model/pick
+   :presentation
+   {:where {:title &quot;Caribou Redux!&quot;}
+    :fields &#91;:title {:slides &#91;:caption&#93; :authors &#91;:name&#93;}&#93;
+    :include {:authors {}
+              :slides {}}}&#41;&#41;
+  
+--&gt; {:id 1 
+     :title &quot;Caribou Redux!&quot; 
+     :preview {...}
+     :authors &#91;{:name &quot;Donner&quot;} {:name &quot;Blitzen&quot;} ...&#93;
+     :slides &#91;{:caption &quot;Welcome to Caribou!&quot;}
+              {:caption &quot;Explaining Caribou Models&quot;} 
+              {:caption &quot;How to Update a Caribou Model&quot;}&#93;}
+</pre>        </div>
       </div>
     </div>
     <footer>

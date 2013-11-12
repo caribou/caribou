@@ -22,7 +22,9 @@
    "misc"
    "tutorial"
    "api"
-   "deploying"])
+   "deploying"
+   "debugging"
+   "roadmap"])
 
 (def pre-layout (slurp "resources/header.html"))
 (def post-layout (slurp "resources/footer.html"))
