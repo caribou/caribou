@@ -27,7 +27,7 @@ created from the repl with the following call:
 Some things to note about this code:
 
 * The first line calls `caribou.core/with-caribou` with an existing 
-configuration map.  This configuration map among other things contains 
+ configuration map.  This configuration map among other things contains 
 information about the database connection.  Since this call is creating a new 
 model, this will actually generate a new table for that model inside whatever 
 database is referred to by the given configuration map under its `:database` 
