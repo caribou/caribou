@@ -26,35 +26,35 @@ created from the repl with the following call:
 
 Some things to note about this code:
 
-* The first line calls `caribou.core/with-caribou` with an existing
-configuration map.  This configuration map among other things contains
-information about the database connection.  Since this call is creating a new
-model, this will actually generate a new table for that model inside whatever
+* The first line calls `caribou.core/with-caribou` with an existing 
+configuration map.  This configuration map among other things contains 
+information about the database connection.  Since this call is creating a new 
+model, this will actually generate a new table for that model inside whatever 
 database is referred to by the given configuration map under its `:database`
- key.  This means of configuration means that you can create models in different
-databases just by swapping out the configuration map.  For clarity, from here on
+ key.  This means of configuration means that you can create models in different 
+databases just by swapping out the configuration map.  For clarity, from here on 
 out we will assume the config map is provided.
 
-* The next line calls the fundamental function `caribou.model/create`.  This
-call is used to create any content inside of a Caribou project, and corresponds
+* The next line calls the fundamental function `caribou.model/create`.  This 
+call is used to create any content inside of a Caribou project, and corresponds 
 to inserting a new row in the database given by the configuration map.
 
-* The next line contains only the key `:model`, and signifies that we are
-creating a model, as opposed to any other content type currently known to the
-system.  Once a model is created (in this case the Presentation model), content
-of that variety can be created using the same call, but swapping out the key
-here (which for the case of Presentations, would be `:presentation`).  If a call
-to `caribou.model/create` is made with a key that does not represent a current
+* The next line contains only the key `:model`, and signifies that we are 
+creating a model, as opposed to any other content type currently known to the 
+system.  Once a model is created (in this case the Presentation model), content 
+of that variety can be created using the same call, but swapping out the key 
+here (which for the case of Presentations, would be `:presentation`).  If a call 
+to `caribou.model/create` is made with a key that does not represent a current 
 model known to the system this will throw an exception.
 
-* Next comes a map of properties that define the model being created.  This list
-of properties has a key for each Field in the Model model.  Given a different
+* Next comes a map of properties that define the model being created.  This list 
+of properties has a key for each Field in the Model model.  Given a different 
 model, the available keys in this map would be different.
 
-* Ultimately, the definition of a model really depends on the fields in that
-model.  In this case, two custom fields are created for the Presentation model,
-a Title of type "string", and a Preview of type "asset".  Once this model
-exists, new Presentations can be created that have titles and previews in the
+* Ultimately, the definition of a model really depends on the fields in that 
+model.  In this case, two custom fields are created for the Presentation model, 
+a Title of type "string", and a Preview of type "asset".  Once this model 
+exists, new Presentations can be created that have titles and previews in the 
 same manner:
 
 ```clj
