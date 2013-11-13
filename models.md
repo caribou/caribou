@@ -30,8 +30,8 @@ Some things to note about this code:
 configuration map.  This configuration map among other things contains 
 information about the database connection.  Since this call is creating a new 
 model, this will actually generate a new table for that model inside whatever 
-database is referred to by the given configuration map under its `:database`
- key.  This means of configuration means that you can create models in different 
+database is referred to by the given configuration map under its `:database` 
+key.  This means of configuration means that you can create models in different 
 databases just by swapping out the configuration map.  For clarity, from here on 
 out we will assume the config map is provided.
 
