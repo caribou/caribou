@@ -105,12 +105,13 @@ The different types of associations available in Caribou are:
 * **collection** - This association field type represents a collection of
     things, meaning there are potentially many pieces of content associated to
     any content of this model type.  The reciprocal type of association is the
-    "part".
+    "part".  This is the classic many-to-one relationship.
     
 * **part** - The reciprocal to "collection", this means that any content of this
-    model variety will potentially belong to content of the model that it is a
-    "part" of.  Any content that is part of another collection cannot belong to
-    another collection.
+    model type will potentially belong to content of the model that it is a
+    "part" of.  Each item can only be a part of one collection of that variety,
+    but it can be a part of many different kinds of collections.  Each
+    collection maintains an independent set of parts.  
     
 * **link** - The link association type is its own reciprocal, and represents a
     many to many relationship to another model.  This behaves just like a
