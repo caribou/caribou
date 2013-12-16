@@ -6,6 +6,13 @@ These are our goals for the immediate term.  Please let us know if there is
 anything you consider a pressing flaw or omission and we will add it to this
 list.
 
+* Abstract persistence layer to accommodate Datomic and other NoSQL databases.
+
+Caribou currently supports SQL databases, but there is a lot of demand for
+supporting NoSQL databases as well.  This would require creating a
+PersistenceLayer protocol and abstracting the current SQL persistence into being
+a SQL implementation of that protocol.
+
 * Synchronization of state between instances using [Avout](http://avout.io/).
 
 Right now if you use Caribou in a clustered or distributed environment and 
