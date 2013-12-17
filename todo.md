@@ -35,6 +35,8 @@
 
 - Improve Docs:
 
+    - Boot http-kit rather than ring now (lein run vs lein ring server)
+
     - Explain how to create values of all the various field types (addresses, assets, enums)
 
     - Explain associations
