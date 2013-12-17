@@ -16,9 +16,9 @@
 
 - Provide blacklist for various table and column names which currently break (like "order")
 
-- Extend DB protocol to allow for NoSQL and Datomic
-
 - Separate state from general Caribou configuration
+
+- Extend DB protocol to allow for NoSQL and Datomic
 
 - Heroku Support:  
 
