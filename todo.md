@@ -1,5 +1,7 @@
 # TODO
 
+- Integrate Polaris into frontend routing
+
 - Add .gitkeep to /app
 
 - Remove immutant dependency from project.clj
