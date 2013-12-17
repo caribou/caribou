@@ -41,4 +41,7 @@
 
     - Explain associations
 
+    - Show how to swap out new template renderer
+
     - Improve Heroku and Immutant docs
+
