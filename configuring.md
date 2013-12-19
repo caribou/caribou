@@ -109,9 +109,10 @@ Here is a map of all default configuration options:
           :root ""}
  :aws {:bucket nil
        :credentials nil}
- :cljs {:root "resources/clj"
+ :cljs {:root "resources/cljs"
         :reload true
-        :options {:output-dir "resources/public/js/out"
+        :options {:output-to "resources/public/js/app/skel.js"
+                  :optimizations :whitespace
                   :pretty-print true}}
  :controller {:namespace "{project}.controllers"
               :reload true
@@ -222,6 +223,16 @@ The name of the s3 bucket that assets will be stored in.
 
 A map containing your AWS credentials of the form `{:access-key
 "YOUR-ACCESS-KEY" :secret-key "YOUR-SECRET-KEY"}`
+
+### cljs
+
+This is where you can trigger clojurescript to build automatically on page load.
+
+* **:reload** Set this to true to see the modified clojurescript files in :root compiled to
+javascript.  To require them uncomment the bottom line of the default
+resources/templates/home.html template which requires the compiled output.
+
+* **:root** A map of the various options that get passed to the clojurescript compiler.
 
 ### controller
 
