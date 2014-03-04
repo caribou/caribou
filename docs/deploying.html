@@ -29,11 +29,11 @@
   :ring {:handler taiga.core/handler
          :init taiga.core/init
          :port 33333}&#41;
-</pre><p>Set the port to any viable port number and restart!</p><h2>Tomcat</h2><p>For Tomcat, the process is simple.</p><pre class="brush: bash">
+</pre><p>Set the port to any viable port number and restart!</p><h2>Tomcat</h2><p>For Tomcat, the process is simple.  First, change your <code>{:assets {:dir ...}}</code> from <code>&quot;app/&quot;</code> to something absolute on your filesystem (as you cannot add files into your deployed uberwar).</p><p>Then build the uberwar:</p><pre class="brush: bash">
     % lein ring uberwar
 </pre><p>Once this has completed, drop the resulting jar into your running Tomcat container's webapps directory.  Voila!</p><h2>Immutant (JBoss)</h2><p>To deploy to Immutant, set up the <a href='http://github.com/immutant/lein-immutant'>lein-immutant</a> plugin and then in your Caribou project root simply type:</p><pre class="brush: bash">
     % lein immutant deploy
-</pre><p>There is a generated Immutant configuration file that lives in <code>src/immutant/init.clj</code>.  Any additional Immutant configuration can be done there.  See the <a href='http://immutant.org/'>Immutant docs</a> for help.</p><h2>Beanstalk</h2><p>To deploy to Beanstalk running Tomcat, the key is to use the <a href='http://github.com/weavejester/lein-beanstalk'>lein-beanstalk</a> plugin and have the right set of values in your <code>project.clj</code>.  Here is an example configuration:</p><pre class="brush: clj">
+</pre><p>Immutant is configured through the <code>:immutant</code> key in your project.clj.  See the <a href='http://immutant.org/'>Immutant docs</a> for help.</p><h2>Beanstalk</h2><p>To deploy to Beanstalk running Tomcat, the key is to use the <a href='http://github.com/weavejester/lein-beanstalk'>lein-beanstalk</a> plugin and have the right set of values in your <code>project.clj</code>.  Here is an example configuration:</p><pre class="brush: clj">
 :aws {:access-key &quot;YOUR-AWS-ACCESS-KEY&quot;
       :secret-key &quot;YOUR-AWS-SECRET-KEY&quot;
       :region &quot;us-west-1&quot;
@@ -45,17 +45,34 @@
                                   :env {&quot;environment&quot; &quot;production&quot;}}&#93;}}
 </pre><p>Then, run the <code>lein-beanstalk</code> command:</p><pre class="brush: bash">
     % lein beanstalk deploy
-</pre><p>If your Beanstalk configuration with AWS is set up right, you now have a Caribou project running in the cloud somewhere!  Congratulations.</p><h2>Heroku</h2><p>Caribou by default is already set up to deploy to Heroku.  The main key is to create a git repo and set the remote heroku target:</p><ul><li>set up the git repository</li></ul><pre class="brush: bash">
+</pre><p>If your Beanstalk configuration with AWS is set up right, you now have a Caribou project running in the cloud somewhere!  Congratulations.</p><h2>Heroku</h2><p>Caribou by default is already set up to deploy to Heroku.  The main thing to deal with is setting up and migrating the Postgresql database.</p><p>We will start from the beginning.<br /></p><ul><li>Provision a new Caribou app:</li></ul><pre class="brush: bash">
+    % lein new caribou orbmaster
+    % cd orbmaster
+</pre><ul><li>Create the heroku app and provision a new Postgresql database:</li></ul><pre class="brush: bash">
     % git init
+    % heroku apps:create
+    % heroku addons:add heroku-postgresql:dev
+    % heroku config:set CARIBOU&#95;ENVIRONMENT=heroku
+</pre><ul><li>Find the heroku credentials for your remote db and populate your  <code>resources/config/heroku.clj</code> config file with the right values (this is the  most elaborate part).  The values to swap out will be obvious by their  <code>heroku-</code> prefix in the map under the <code>:database</code> key.  This is only necessary  for migration, once deployed your app will just use the heroku supplied  environment variable <code>DATABASE&#95;URL</code> for its database information:</li></ul><pre class="brush: bash">
+    % heroku config | grep HEROKU&#95;POSTGRESQL             # note the color!
+    % heroku pg:promote HEROKU&#95;POSTGRESQL&#95;{{color}}&#95;URL  # replace with your color!
+    % heroku pg:credentials DATABASE   # note host, port, database, user and password
+    % vim resources/config/heroku.clj  # add values discovered from previous command!
+</pre><ul><li>Build the base Caribou tables in the remote database using `lein caribou  migrate` (This takes a long time, let it run to completion!):  </li></ul><pre class="brush: bash">
+    % lein caribou migrate resources/config/heroku.clj
+</pre><ul><li>Commit the git repository and and push it to heroku:</li></ul><pre class="brush: bash">
     % git add .
     % git commit -m &quot;init&quot;
-</pre><ul><li>create the heroku remote and deploy</li></ul><pre class="brush: bash">
-    % heroku apps:create
     % git push heroku master
+</pre><ul><li>Finally, start the dyno!</li></ul><pre class="brush: bash">
     % heroku ps:scale web=1
-</pre><ul><li>open the deployed site</li></ul><pre class="brush: bash">
+</pre><ul><li>Once complete, open the deployed site:</li></ul><pre class="brush: bash">
     % heroku open
-</pre><p>For any additional Heroku support, refer to the <a href='http://devcenter.heroku.com/articles/clojure'>Heroku docs</a>.</p>        </div>
+</pre><p>You should see your new app up and running!<br /></p><p>If you want to use the Caribou image support, you have to set up an s3 bucket (as heroku does not have a persistent filesystem).  To do this, add the following entry to your <code>resources/config/heroku.clj</code> config file:</p><pre class="brush: clj">
+  :aws {:bucket &quot;your.bucket.name&quot;
+        :credentials {:access-key &quot;YOUR-ACCESS-KEY&quot;
+                      :secret-key &quot;YOUR-SECRET-KEY&quot;}}
+</pre><p>This will allow uploading images in the admin and resizing images from templates (or elsewhere).</p><p>Most of the above is standard Heroku procedure.  For any additional Heroku support, refer to the <a href='http://devcenter.heroku.com/articles/clojure'>Heroku docs</a>.</p>        </div>
       </div>
     </div>
     <footer>

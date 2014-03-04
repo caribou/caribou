@@ -52,10 +52,10 @@ on how to do this.
 To run the site as it exists, simply:
 
 ```bash
-    % lein ring server
+    % lein run
 ```
 
-A new window will appear in your browser under [http://localhost:33333](http://localhost:33333).
+Then navigate to [http://localhost:33333](http://localhost:33333).
 
 Congratulations!  You are now running Caribou.
 

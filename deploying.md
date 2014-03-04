@@ -21,7 +21,11 @@ Set the port to any viable port number and restart!
 
 ## Tomcat
 
-For Tomcat, the process is simple.
+For Tomcat, the process is simple.  First, change your `{:assets {:dir ...}}`
+from `"app/"` to something absolute on your filesystem (as you cannot add files
+into your deployed uberwar).
+
+Then build the uberwar:
 
 ```bash
     % lein ring uberwar
@@ -40,9 +44,8 @@ your Caribou project root simply type:
     % lein immutant deploy
 ```
 
-There is a generated Immutant configuration file that lives in
-`src/immutant/init.clj`.  Any additional Immutant configuration can be done
-there.  See the [Immutant docs](http://immutant.org/) for help.
+Immutant is configured through the `:immutant` key in your project.clj.  See the
+[Immutant docs](http://immutant.org/) for help.
 
 ## Beanstalk
 
@@ -73,31 +76,85 @@ project running in the cloud somewhere!  Congratulations.
 
 ## Heroku
 
-Caribou by default is already set up to deploy to Heroku.  The main key is to
-create a git repo and set the remote heroku target:
+Caribou by default is already set up to deploy to Heroku.  The main thing to
+deal with is setting up and migrating the Postgresql database.
 
-* set up the git repository
+We will start from the beginning.  
+
+* Provision a new Caribou app:
+
+```bash
+    % lein new caribou orbmaster
+    % cd orbmaster
+```
+
+* Create the heroku app and provision a new Postgresql database:
 
 ```bash
     % git init
-    % git add .
-    % git commit -m "init"
+    % heroku apps:create
+    % heroku addons:add heroku-postgresql:dev
+    % heroku config:set CARIBOU_ENVIRONMENT=heroku
 ```
 
-* create the heroku remote and deploy
+* Find the heroku credentials for your remote db and populate your
+  `resources/config/heroku.clj` config file with the right values (this is the
+  most elaborate part).  The values to swap out will be obvious by their
+  `heroku-` prefix in the map under the `:database` key.  This is only necessary
+  for migration, once deployed your app will just use the heroku supplied
+  environment variable `DATABASE_URL` for its database information:
 
 ```bash
-    % heroku apps:create
+    % heroku config | grep HEROKU_POSTGRESQL             # note the color!
+    % heroku pg:promote HEROKU_POSTGRESQL_{{color}}_URL  # replace with your color!
+    % heroku pg:credentials DATABASE   # note host, port, database, user and password
+    % vim resources/config/heroku.clj  # add values discovered from previous command!
+```
+
+* Build the base Caribou tables in the remote database using `lein caribou
+  migrate` (This takes a long time, let it run to completion!):
+  
+```bash
+    % lein caribou migrate resources/config/heroku.clj
+```
+
+* Commit the git repository and and push it to heroku:
+
+```bash
+    % git add .
+    % git commit -m "init"
     % git push heroku master
+```
+
+* Finally, start the dyno!
+
+```bash
     % heroku ps:scale web=1
 ```
 
-* open the deployed site
+* Once complete, open the deployed site:
 
 ```bash
     % heroku open
 ```
 
-For any additional Heroku support, refer to the [Heroku docs](http://devcenter.heroku.com/articles/clojure).
+You should see your new app up and running!  
+
+If you want to use the Caribou image support, you have to set up an s3 bucket
+(as heroku does not have a persistent filesystem).  To do this, add the
+following entry to your `resources/config/heroku.clj` config file:
+
+```clj
+  :aws {:bucket "your.bucket.name"
+        :credentials {:access-key "YOUR-ACCESS-KEY"
+                      :secret-key "YOUR-SECRET-KEY"}}
+```
+
+This will allow uploading images in the admin and resizing images from templates
+(or elsewhere).
+
+Most of the above is standard Heroku procedure.  For any additional Heroku
+support, refer to the
+[Heroku docs](http://devcenter.heroku.com/articles/clojure).
 
 

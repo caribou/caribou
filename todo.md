@@ -1,18 +1,22 @@
 # TODO
 
-- Integrate Polaris into frontend routing
+*- Integrate Polaris into frontend routing
 
-- Add .gitkeep to /app
+*- Add .gitkeep to /app
 
-- Remove immutant dependency from project.clj
+*- Remove immutant dependency from project.clj
 
-- Drop default memory size to 512MB
+*- Drop default memory size to 512MB
+
+*- Fix issue with triggering routes of different HTTP methods from the same route
+
+*- Fix error in API
 
 - Provide means to change the Antlers delimiters from {{ to [[ (or any two chars)
 
-- Allow indexing to be disabled
+*- Allow indexing to be disabled
 
-- Put template helpers in their own key in the request map and merge them into the root request on render
+*- Put template helpers in their own key in the request map and merge them into the root request on render
 
 - Provide blacklist for various table and column names which currently break (like "order")
 
@@ -35,13 +39,15 @@
 
 - Improve Docs:
 
+    - Add section for clojurescript
+
     - Boot http-kit rather than ring now (lein run vs lein ring server)
 
     - Explain how to create values of all the various field types (addresses, assets, enums)
 
     - Explain associations
 
-    - Show how to swap out new template renderer
+    *- Show how to swap out new template renderer
 
     - Improve Heroku and Immutant docs
 

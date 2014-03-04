@@ -2,13 +2,14 @@
 
 Caribou comes with a built-in template rendering system called
 [antlers](https://github.com/caribou/antlers).  When a defined page specifies a
-`:template` key, it will search for the given template in the
-`resources/templates` directory of your project and associate a function to
-render that template into the incoming request in a controller action under the
-`:template` key.  When that action calls `caribou.app.controller/render`, it
-will look for this function under the `:template` key and pass it the map
-`render` receives as its main argument.  This is reflected in the canonical
-controller action pattern of usage:
+`:template` key, then at render time it will search for the given template in
+the `resources/templates` directory of your project.  If found, it will render
+that template by substituting in values from the map given to render.  In this
+way, the map given to render provides an environment of bindings accessible from
+inside the template.
+
+The simplest usage of `render` passes the request in directly, so that any value
+in the request is accessible in the template:
 
 ```clj
 (defn some-action
@@ -17,9 +18,7 @@ controller action pattern of usage:
 ```
 
 In this case the controller is doing nothing but passing the request map it
-received on to the template to be rendered.  Inside `request` lives a key
-`:template` which is a function taking a single argument: the map of data
-available to the template during render time.  Any key in this map can be
+received on to the template to be rendered.  Any key in this map can be
 accessed from inside a template like so:
 
 ```handlebars
@@ -299,18 +298,34 @@ different.
 
 ## Swapping out the template engine
 
-There is nothing special about the function that lives under the `:template` key
-passed into `caribou.app.controller/render` besides the fact that it takes a map
-of values as an argument and produces a string representing a rendered template.
-
-If you want to use a different template engine simply swap out the function
-living under `:template` with your own, as long as you can wrap it into the same
-form:
+There is nothing binding you to using
+[Antlers](https://github.com/caribou/antlers) as your template rendering engine.
+In fact, any render function can be used if it of the right form.  A render
+function takes two arguments: a template to be rendered and the map representing
+the values available to the template.  Any function of this form can be passed
+in under the key `:render-fn` during render time and it will be used in place of
+the built in rendering engine.
 
 ```clj
+(defn custom-render
+  [template environment]
+  (let [template-contents (read-template-somehow template)]
+    (substitute-values-somehow template-contents environment)))
+
 (defn some-action
   [request]
-  (let [template (fn [render-values] (my-template-engine/render "where.html" render-values))]
-    (caribou.app.controller/render (assoc request :template template))))
+  (caribou.app.controller/render (assoc request :render-fn custom-render)))
 ```
 
+You may even want to define your own render if you are using the same
+`:render-fn` over and over again:
+
+```clj
+(defn render
+  [request]
+  (caribou.app.controller/render (assoc request :render-fn custom-render)))
+  
+(defn some-other-action
+  [request]
+  (render request))
+```

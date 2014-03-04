@@ -102,20 +102,20 @@ reciprocal association field that lives in another model somewhere.
 
 The different types of associations available in Caribou are:
 
-* **collection** - This association field type represents a collection of
-    things, meaning there are potentially many pieces of content associated to
-    any content of this model type.  The reciprocal type of association is the
+* **collection** - This association field type represents a collection of 
+    things, meaning there are potentially many pieces of content associated to 
+    any content of this model type.  The reciprocal type of association is the 
     "part".  This is the classic many-to-one relationship.
     
-* **part** - The reciprocal to "collection", this means that any content of this
-    model type will potentially belong to content of the model that it is a
-    "part" of.  Each item can only be a part of one collection of that variety,
-    but it can be a part of many different kinds of collections.  Each
+* **part** - The reciprocal to "collection", this means that any content of this 
+    model type will potentially belong to content of the model that it is a 
+    "part" of.  Each item can only be a part of one collection of that variety, 
+    but it can be a part of many different kinds of collections.  Each 
     collection maintains an independent set of parts.  
     
-* **link** - The link association type is its own reciprocal, and represents a
-    many to many relationship to another model.  This behaves just like a
-    collection except that the associated content can have many associations as
+* **link** - The link association type is its own reciprocal, and represents a 
+    many to many relationship to another model.  This behaves just like a 
+    collection except that the associated content can have many associations as 
     well.
 
 ## Default Model Fields
@@ -124,36 +124,36 @@ There are a number of default fields that are added to a model automatically.
 These play various roles in managing the content internally, and also provide
 some handy features that all content is likely to need.  These fields are:
 
-* **:id** -- The `:id` represents a unique integer identifier that is used
-    throughout Caribou.  Every content item in Caribou is given an `:id`, and
-    all content can be retrieved based on its model type and its `:id`.  This is
-    also the mechanism under the scenes that tracks how different items are
-    associated to one another.  `:id` always increments starting from `1`, so
+* **:id** -- The `:id` represents a unique integer identifier that is used 
+    throughout Caribou.  Every content item in Caribou is given an `:id`, and 
+    all content can be retrieved based on its model type and its `:id`.  This is 
+    also the mechanism under the scenes that tracks how different items are 
+    associated to one another.  `:id` always increments starting from `1`, so 
     every item obtains a unique `:id` within its model table.
 
-* **:position** -- The `:position` field allows content to be ordered in an
-    arbitrary fasion.  Without the `:position` field we would be stuck
-    retrieving content only by name, or id or title or something.  `:position`
-    allows people to order content exactly how it should appear.  Without
-    outside intervention, `:position` increments automatically starting from
-    `1`, just like `:id`.  `:position` however can change, whereas once an `:id`
+* **:position** -- The `:position` field allows content to be ordered in an 
+    arbitrary fasion.  Without the `:position` field we would be stuck 
+    retrieving content only by name, or id or title or something.  `:position` 
+    allows people to order content exactly how it should appear.  Without 
+    outside intervention, `:position` increments automatically starting from 
+    `1`, just like `:id`.  `:position` however can change, whereas once an `:id` 
     is acquired it is invariant for the lifetime of the application.
 
-* **:locked** -- This boolean field, if `true`, prevents the given content item
-    from being modified by a `caribou.model/update` call.  This is handy to
-    protect the built in model fields from arbitrary changes which could
-    undermine the very functioning of Caribou itself.  That is not to say built
-    in models are unchangeable: new fields can be added to any model.  But
-    someone cannot remove the "Name" field from a model, for instance.  Caribou
-    needs this field to run.  Probably you will not need to set this field
-    yourself, but you could have a vital content item that plays a similar role
-    in the application as a whole, in which case setting it to `locked` will
+* **:locked** -- This boolean field, if `true`, prevents the given content item 
+    from being modified by a `caribou.model/update` call.  This is handy to 
+    protect the built in model fields from arbitrary changes which could 
+    undermine the very functioning of Caribou itself.  That is not to say built 
+    in models are unchangeable: new fields can be added to any model.  But 
+    someone cannot remove the "Name" field from a model, for instance.  Caribou 
+    needs this field to run.  Probably you will not need to set this field 
+    yourself, but you could have a vital content item that plays a similar role 
+    in the application as a whole, in which case setting it to `locked` will 
     safeguard that content from changing out from under you.
 
-* **:created-at** -- This is a timestamp that is set automatically when a piece
+* **:created-at** -- This is a timestamp that is set automatically when a piece 
     of content is created.  This way you always know when something was created!
 
-* **:updated-at** -- This is another timestamp, but it gets set every time
-    something is updated.  Can be useful to order by this if you always want the
+* **:updated-at** -- This is another timestamp, but it gets set every time 
+    something is updated.  Can be useful to order by this if you always want the 
     most recent content (or least recent!)
 

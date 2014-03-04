@@ -116,7 +116,7 @@ Here there are three separate routes.  Any incoming request will match one of
 these routes, or trigger a 404.  Caribou routes match given a trailing slash or
 not, so:
 
-```
+```bash
 http://localhost:33333                   --->  :home
 http://localhost:33333/                  --->  :home
 http://localhost:33333/place             --->  :place
@@ -147,7 +147,7 @@ Here is an example:
 In this case, the router will match any URL of the form "/place/*" and assign
 whatever the * is to a parameter called `:name`.  So:
 
-```
+```bash
 http://localhost:33333                   --->  :home
 http://localhost:33333/place             --->  :general-place
 http://localhost:33333/place/hello       --->  :specific-place  {:name "hello"}
@@ -212,7 +212,7 @@ This generates a moderately comprehensive routing structure for a
 presentation-based application.  Here is a representative sample of routes that
 will be matched by this routing tree:
 
-```
+```bash
 .../                                      --->  :home
 .../presentations                         --->  :presentations
 .../presentations/caribou                 --->  :presentation-detail {:presentation "caribou"}

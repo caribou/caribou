@@ -31,7 +31,7 @@
 &#40;defn basic-action
   &#91;request&#93;
   {:status 200 :body &quot;This is a simple response&quot;}&#41;
-</pre><p>Here we are ignoring anything in the request map and simply returning a response of 200 with the body "This is a simple response".  No fancy markup, no database transactions, nothing.  If you have simple needs, this may be all you require. </p><p>However, it is likely that you will want some information that lives in the request.  That is the subject of the next section.  <br /></p><h2>Contents of the Request Map</h2><p>Living in the request map are a variety of helpful keys that provide information about the nature of the incoming request.  This is the basic information any controller action can use to tailor a response to that specific request.  <br /></p><p>There are some basic keys that are available in any Ring request, currently the following:</p><pre class="brush: clj">
+</pre><p>Here we are ignoring anything in the request map and simply returning a response of 200 with the body "This is a simple response".  No fancy markup, no database transactions, nothing.  If you have simple needs, this may be all you require. </p><p>However, it is likely that you will want some information that lives in the request.  That is the subject of the next section.<br /></p><h2>Contents of the Request Map</h2><p>Living in the request map are a variety of helpful keys that provide information about the nature of the incoming request.  This is the basic information any controller action can use to tailor a response to that specific request.<br /></p><p>There are some basic keys that are available in any Ring request, currently the following:</p><pre class="brush: clj">
 :uri 
 :scheme 
 :content-type 

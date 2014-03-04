@@ -29,8 +29,8 @@
     % cd taiga
     % lein caribou migrate resources/config/development.clj
 </pre><p>Bootstrapped!</p><p>You can run Caribou without a database if you just want the routing, controllers and template rendering, but you need a database to use the Admin or API and much of the other functionality.</p><p>By default Caribou uses <a href='http://www.h2database.com/html/main.html'>H2</a> (an all Java database engine) so that it does not depend on anything besides the JVM. If you don't want to use H2 you can configure Caribou to use other database backends.  See the section on <a href='configuring.html'>database configuration</a> for more on how to do this.</p><h2>Running the Site</h2><p>To run the site as it exists, simply:</p><pre class="brush: bash">
-    % lein ring server
-</pre><p>A new window will appear in your browser under <a href='http://localhost:33333'>http://localhost:33333</a>.</p><p>Congratulations!  You are now running Caribou.</p>        </div>
+    % lein run
+</pre><p>Then navigate to <a href='http://localhost:33333'>http://localhost:33333</a>.</p><p>Congratulations!  You are now running Caribou.</p>        </div>
       </div>
     </div>
     <footer>

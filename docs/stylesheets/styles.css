@@ -3,3 +3,25 @@
 code {
   font-size: 14px;
 }
+
+p code, li code {
+  font-size: 16px;
+  color: #1a9cbc;
+  /* background-color: #474949; */
+  padding: 0px 3px;
+}
+
+h3 {
+  font-size: 24px;
+  margin: 20px 0px;
+  color: #1abc9c;
+}
+
+li strong {
+  margin-right: 15px;
+}
+
+li em {
+  margin-right: 10px;
+  font-size: 14px;
+}

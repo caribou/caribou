@@ -23,11 +23,11 @@
     <div class="container">
       <div class="grid-block">
         <div class="col-6">
-<h1>Rendering Templates</h1><p>Caribou comes with a built-in template rendering system called <a href='https://github.com/caribou/antlers'>antlers</a>.  When a defined page specifies a <code>:template</code> key, it will search for the given template in the <code>resources/templates</code> directory of your project and associate a function to render that template into the incoming request in a controller action under the <code>:template</code> key.  When that action calls <code>caribou.app.controller/render</code>, it will look for this function under the <code>:template</code> key and pass it the map <code>render</code> receives as its main argument.  This is reflected in the canonical controller action pattern of usage:</p><pre class="brush: clj">
+<h1>Rendering Templates</h1><p>Caribou comes with a built-in template rendering system called <a href='https://github.com/caribou/antlers'>antlers</a>.  When a defined page specifies a <code>:template</code> key, then at render time it will search for the given template in the <code>resources/templates</code> directory of your project.  If found, it will render that template by substituting in values from the map given to render.  In this way, the map given to render provides an environment of bindings accessible from inside the template.</p><p>The simplest usage of <code>render</code> passes the request in directly, so that any value in the request is accessible in the template:</p><pre class="brush: clj">
 &#40;defn some-action
   &#91;request&#93;
   &#40;caribou.app.controller/render request&#41;&#41;
-</pre><p>In this case the controller is doing nothing but passing the request map it received on to the template to be rendered.  Inside <code>request</code> lives a key <code>:template</code> which is a function taking a single argument: the map of data available to the template during render time.  Any key in this map can be accessed from inside a template like so:</p><pre class="brush: handlebars">
+</pre><p>In this case the controller is doing nothing but passing the request map it received on to the template to be rendered.  Any key in this map can be accessed from inside a template like so:</p><pre class="brush: handlebars">
     Hello template argument :tundra -- {{tundra}}
 </pre><p>Now if the request map contains the value "Arctic" under the key <code>:tundra</code>, this will render as:</p><pre class="brush: handlebars">
     Hello template argument :tundra -- Arctic
@@ -133,11 +133,23 @@ loop.outer       --&gt;  a reference to any loop variables from an outer loop.
     HEADER
       This is a more conversational body for the same layout template
     FOOTER
-</pre><p>In this way you can reuse layouts repeatedly and only need to specify what is different.</p><h2>Swapping out the template engine</h2><p>There is nothing special about the function that lives under the <code>:template</code> key passed into <code>caribou.app.controller/render</code> besides the fact that it takes a map of values as an argument and produces a string representing a rendered template.</p><p>If you want to use a different template engine simply swap out the function living under <code>:template</code> with your own, as long as you can wrap it into the same form:</p><pre class="brush: clj">
+</pre><p>In this way you can reuse layouts repeatedly and only need to specify what is different.</p><h2>Swapping out the template engine</h2><p>There is nothing binding you to using <a href='https://github.com/caribou/antlers'>Antlers</a> as your template rendering engine. In fact, any render function can be used if it of the right form.  A render function takes two arguments: a template to be rendered and the map representing the values available to the template.  Any function of this form can be passed in under the key <code>:render-fn</code> during render time and it will be used in place of the built in rendering engine.</p><pre class="brush: clj">
+&#40;defn custom-render
+  &#91;template environment&#93;
+  &#40;let &#91;template-contents &#40;read-template-somehow template&#41;&#93;
+    &#40;substitute-values-somehow template-contents environment&#41;&#41;&#41;
+
 &#40;defn some-action
   &#91;request&#93;
-  &#40;let &#91;template &#40;fn &#91;render-values&#93; &#40;my-template-engine/render &quot;where.html&quot; render-values&#41;&#41;&#93;
-    &#40;caribou.app.controller/render &#40;assoc request :template template&#41;&#41;&#41;&#41;
+  &#40;caribou.app.controller/render &#40;assoc request :render-fn custom-render&#41;&#41;&#41;
+</pre><p>You may even want to define your own render if you are using the same <code>:render-fn</code> over and over again:</p><pre class="brush: clj">
+&#40;defn render
+  &#91;request&#93;
+  &#40;caribou.app.controller/render &#40;assoc request :render-fn custom-render&#41;&#41;&#41;
+  
+&#40;defn some-other-action
+  &#91;request&#93;
+  &#40;render request&#41;&#41;
 </pre>        </div>
       </div>
     </div>

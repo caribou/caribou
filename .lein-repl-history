@@ -1,0 +1,7 @@
+(float (/ 144 255))
+(float (/ 150 255))
+(float (/ 93 255))
+(defn polarize [c] (float (/ c 255)))
+(defn ramify [a b c] (mapv polarize [a b c]))
+(ramify 115 70 135)
+(ramify 135 79 161)

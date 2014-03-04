@@ -99,61 +99,40 @@ become necessary.
 Here is a map of all default configuration options:
 
 ```clj
-{:app {:use-database        true
-       :public-dir "public"
-       :default-locale "global"
-       :localize-routes ""}
- :actions (atom {})
- :assets {:dir "app/"
-          :prefix nil
-          :root ""}
- :aws {:bucket nil
-       :credentials nil}
- :cljs {:root "resources/cljs"
-        :reload true
-        :options {:output-to "resources/public/js/app/skel.js"
-                  :optimizations :whitespace
-                  :pretty-print true}}
- :controller {:namespace "{project}.controllers"
-              :reload true
-              :session-defaults (atom {})}
- :database {:classname    "org.h2.Driver"
-            :subprotocol  "h2"
-            :host         "localhost"
-            :protocol     "file"
-            :path         "/tmp/"
-            :database     "taiga_development"
-            :user         "h2"
-            :password     ""}
- :error {:handlers (atom {})
-         :templates (atom {})
-         :show-stacktrace false}
- :field {:constructors (atom {})
-         :namespace "{project}.fields"
-         :slug-transform [[#"['\"]+" ""]
-                          [#"[_ \\/?%:#^\[\]<>@!|$&*+;,.()]+" "-"]
-                          [#"^-+|-+$" ""]]}
- :handler (atom nil)
- :hooks {:namespace "{project}.hooks"
-         :lifecycle (atom {})}
- :index {:path "caribou-index"
-         :default-limit 1000
-         :store (atom nil)}
- :logging {:loggers [{:type :stdout :level :debug}]}
- :models (atom {})
- :nrepl {:port nil
-         :server (atom nil)}
- :pages (atom ())
- :pre-actions (atom {})
- :query {:queries (atom {})
-         :enable-query-cache  false
-         :query-defaults {}
-         :reverse-cache (atom {})}
- :reset (atom nil)
- :routes (atom (flatland/ordered-map))
- :template {:helpers (atom {})
-            :cache-strategy :never}
-}
+  {:app {:use-database true
+         :public-dir "public"
+         :default-locale "global"
+         :localize-routes ""}
+   :assets {:dir "app/"
+            :prefix nil
+            :root ""}
+   :aws {:bucket nil
+         :credentials nil}
+   :cljs {:root "resources/cljs"
+          :reload false
+          :options {:output-to "resources/public/js/app/taiga.js"
+                    :output-dir "resources/public/js/app/out"
+                    :pretty-print true}}
+   :controller {:namespace "taiga.controllers"
+                :reload true}
+   :database {:classname    "org.postgresql.Driver"
+              :subprotocol  "postgresql"
+              :ssl          true
+              :sslfactory   "org.postgresql.ssl.NonValidatingFactory"}
+   :error {:show-stacktrace false
+           :catch-exceptions true}
+   :field {:namespace "taiga.fields"
+           :slug-transform [[#"['\"]+" ""]
+                            [#"[_ \\/?%:#^\[\]<>@!|$&*+;,.()]+" "-"]
+                            [#"^-+|-+$" ""]]}
+   :hooks {:namespace "taiga.hooks"}
+   :index {:path "caribou-index"
+           :default-limit 1000}
+   :logging {:loggers [{:type :stdout :level :debug}]}
+   :nrepl {:port nil}
+   :query {:enable-query-cache  false
+           :query-defaults {}}
+   :template {:cache-strategy :never}}
 ```
 
 As you can see, there is a whole rainbow of options to choose from.  Let's take
@@ -163,74 +142,70 @@ them one by one.
 
 Here is where we hold the most general configuration level options.
 
-* **use-database**
-
+* **use-database** 
 Determines whether or not a database is in use.  Usually left at `true`.
 
-* **public-dir**
-
-The directory that holds all of the static resources a site contains.  Anything
-placed in the public directory is available at the url representing its file
+* **public-dir** 
+The directory that holds all of the static resources a site contains.  Anything 
+placed in the public directory is available at the url representing its file 
 path without having to go through the router.
 
 * **default-locale**
-
-The name given to the default locale.  If you are not using localization you can
-safely ignore this option.  If you are using localization, this is the locale
+The name given to the default locale.  If you are not using localization you can 
+safely ignore this option.  If you are using localization, this is the locale 
 that is given to request maps if no other locale is specified.
 
-### actions
-
-This is an atom with a map containing all controller actions in the site.  You
-probably won't have to interact with this one directly, unless you have custom
-actions that are not defined in controller files.
+* **localize-routes**
+This is a string holding a prefix to all routes that you can set to acquire the 
+current locale.  Usually set to something sensible like ":locale" so that the 
+locale string shows up in your requests under (-> request :params :locale), but 
+you can set it to whatever you want.
 
 ### assets
 
-Anything having to do with uploaded files is configured in this map.  The
+Anything having to do with uploaded files is configured in this map.  The 
 available keys in the assets map are:
 
 * **dir**
-
-This specifies where local files on disk will be stored after upload.  "app/" by
+This specifies where local files on disk will be stored after upload.  "app/" by 
 default, could be anywhere on the filesystem.
 
 * **prefix**
-
-When using s3 for storing assets, this defines the prefix inside the bucket that
-will be appended to the beginning of any asset path.  This provides a means to
+When using s3 for storing assets, this defines the prefix inside the bucket that 
+will be appended to the beginning of any asset path.  This provides a means to 
 have assets from many sites stored in a single bucket (if desired).
 
 * **root**
-
-The asset root can be used in templates to prefix a given asset with a different
-host.  This way different environments can have assets that originate from
-different hosts, like one set of assets for staging and one set for production
+The asset root can be used in templates to prefix a given asset with a different 
+host.  This way different environments can have assets that originate from 
+different hosts, like one set of assets for staging and one set for production 
 for example.
 
 ### aws
 
-Information about how to connect to amazon is stored here.  Because the
-configuration can be different for different environments, you could have one
-amazon bucket or account for one environment, and a different account or bucket
+Information about how to connect to amazon is stored here.  Because the 
+configuration can be different for different environments, you could have one 
+amazon bucket or account for one environment, and a different account or bucket 
 for another environment.
 
 * **bucket**
-
 The name of the s3 bucket that assets will be stored in.
 
 * **credentials**
+A map containing your AWS credentials of the form 
 
-A map containing your AWS credentials of the form `{:access-key
-"YOUR-ACCESS-KEY" :secret-key "YOUR-SECRET-KEY"}`
+```clj
+{:access-key "YOUR-ACCESS-KEY" 
+ :secret-key "YOUR-SECRET-KEY"}
+```
 
 ### cljs
 
 This is where you can trigger clojurescript to build automatically on page load.
 
-* **:reload** Set this to true to see the modified clojurescript files in :root compiled to
-javascript.  To require them uncomment the bottom line of the default
-resources/templates/home.html template which requires the compiled output.
+* **:reload** Set this to true to see the modified clojurescript files in :root compiled to 
+javascript.  To require them uncomment the bottom line of the default 
+resources/templates/home.html template which requires the compiled output. 
 
 * **:root** A map of the various options that get passed to the clojurescript compiler.
 
@@ -239,71 +214,56 @@ resources/templates/home.html template which requires the compiled output.
 The various options for configuring controllers.
 
 * **namespace**
-
-The namespace prefix where all of the controllers in your site live.  Defaults
-to `{project}.controllers`, which means that any controller namespace you want
-to reference must start with `{project}.controllers.{controller}`.  Actions are
-functions inside your controller namespace, so the `index` action inside your
-`home` controller in the `taiga` project would be found at
+The namespace prefix where all of the controllers in your site live.  Defaults 
+to `{project}.controllers`, which means that any controller namespace you want 
+to reference must start with `{project}.controllers.{controller}`.  Actions are 
+functions inside your controller namespace, so the `index` action inside your 
+`home` controller in the `taiga` project would be found at 
 `taiga.controllers.home/index`.
 
 * **reload**
-
-Defaults to true.  This reloads every action on every request, which is helpful
-in development when you are modifying them all the time, but you probably want
-to turn it off in production unless you are modifying your controllers at
+Defaults to true.  This reloads every action on every request, which is helpful 
+in development when you are modifying them all the time, but you probably want 
+to turn it off in production unless you are modifying your controllers at 
 runtime (which is not suggested for production!)
-
-* **session-defaults**
-
-Anything placed into the session-defaults atom will be available in a fresh
-session created when a user first visits your site.
 
 ### database
 
-Any and all information for connecting to a database go in this map.  Usually
-the main feature of each environment's config file, it holds a variety of
+Any and all information for connecting to a database go in this map.  Usually 
+the main feature of each environment's config file, it holds a variety of 
 options, some of which are relevant only to certain databases:
 
 * **classname** -- *required*
-
-The Java class representing the driver for the database.  You can't really
-connect to the db unless there is a class that handles the connection, which
+The Java class representing the driver for the database.  You can't really 
+connect to the db unless there is a class that handles the connection, which 
 there is for every database we have encountered.
 
 * **subprotocol** -- *required*
-
-This string represents the subprotocol that is used to connect to the database
+This string represents the subprotocol that is used to connect to the database 
 through the driver.  Every driver has some specific options (usually only one).
 
 Current possible values: postgresql, mysql, h2
 
 * **host** -- *required*
-
-What host does your database live on?  For local database development this will
+What host does your database live on?  For local database development this will 
 most likely be `localhost`, but in many situations this is a remote server.
 
 * **database** -- *required*
-
 The actual name of your database.
 
 * **user** -- *required*
-
 The user that is being used to access the database.
 
 * **password** -- *required*
-
 The password that belongs to the given user.
 
 * **protocol**
-
-This is a string representing the mode the database is connected to with, if
-applicable.  For instance, H2 can use file access, tcp access or a variety of
+This is a string representing the mode the database is connected to with, if 
+applicable.  For instance, H2 can use file access, tcp access or a variety of 
 others.  Ignore if this does not apply.
 
 * **path**
-
-For accessing file based databases, this represents the location of your
+For accessing file based databases, this represents the location of your 
 database on disk.  Again, only necessary for file based databases.
 
 #### Some example database configurations
@@ -336,8 +296,8 @@ Here are a couple of examples of database configurations to get you started:
 
 * H2
 
-H2 requires a couple more fields to identify that you are using a file based
-database and to specify the path.  (notice `:protocol` and `:path` are both
+H2 requires a couple more fields to identify that you are using a file based 
+database and to specify the path.  (notice `:protocol` and `:path` are both 
 present, but not `:host`)
 
 ```clj
@@ -355,54 +315,35 @@ present, but not `:host`)
 
 When errors occur, these options governs how they are handled.
 
-* **handlers**
-
-This map holds custom error handlers for specific error codes.  So if you wanted
-to do some custom action when a 404 is hit for instance, you could associate a
-:404 key into this map with the value of a function to be run whenever a 404
-occurs.  If no handler exists for that error, the default error handler is run.
-
-* **templates**
-
-A map holding templates that will be rendered in the case of various error
-codes.  So a template that lives under the :404 key will be rendered whenever a
-404 error occurs.
-
 * **show-stacktrace**
-
-Set this option to true if you want the stacktrace of any exception to appear in
-the browser.  Not desirable for production when it is better practice to render
-a custom 500 page, but in development this can be handy (especially if you
-conjure a lot of stacktraces!)  Otherwise, the stacktrace is rendered out to the
+Set this option to true if you want the stacktrace of any exception to appear in 
+the browser.  Not desirable for production when it is better practice to render 
+a custom 500 page, but in development this can be handy (especially if you 
+conjure a lot of stacktraces!)  Otherwise, the stacktrace is rendered out to the 
 logs and a 500 template is rendered in the browser.  Defaults to false.
+
+* **catch-exceptions**
+Usually set to true, this will determine whether exceptions triggered by your 
+application are caught at the outermost handler or are allowed to percolate up 
+to the top level.
 
 ### field
 
-* **constructors**
-
-A map that contains all the Field constructors.  Since Field is a protocol, to
-create one requires calling a constructor.  This is a map of Field type names to
-functions which construct a Field of that type.  Handled automatically by
-Caribou, you probably don't need to mess with this, but it is here if you need
-it.
-
 * **namespace**
-
-A namespace to hold any custom user-defined Field types.  Any records you define
-that implement the Field protocol that live in this namespace will be added as
+A namespace to hold any custom user-defined Field types.  Any records you define 
+that implement the Field protocol that live in this namespace will be added as 
 types that can be created like any other built in Field type.
 
 * **slug-transform**
-
-Whenever a piece of content of a Model with a Field of type "slug" is saved, the
-value for that Field is generated from a linked text Field according to the
-transformation encoded in this configuration property.  By default this
-transformation removes quotes and turns special characters and spaces into a
+Whenever a piece of content of a Model with a Field of type "slug" is saved, the 
+value for that Field is generated from a linked text Field according to the 
+transformation encoded in this configuration property.  By default this 
+transformation removes quotes and turns special characters and spaces into a 
 dash (-).  Want underscores instead?  Override this config option.
 
 ### hooks
 
-Hooks are run at specific point during every piece of content's lifecycle.  The
+Hooks are run at specific point during every piece of content's lifecycle.  The 
 various hook points are:
 
 * **During create these hooks are called in order:**
@@ -431,53 +372,39 @@ various hook points are:
 ```
 
 * **namespace**
-
-The namespace where the various hooks into the Model lifecycle go.  Every hook
-namespace has a name of the form {hooks-namespace}.{model-name}, and hooks are
+The namespace where the various hooks into the Model lifecycle go.  Every hook 
+namespace has a name of the form {hooks-namespace}.{model-name}, and hooks are 
 added in a function called {hooks-namespace}.{model-name}/add-hooks.
-
-* **lifecycle**
-
-The actual hooks that get run.  Rather than modifying this directly, just call
-`caribou.hooks/add-hooks` from a file named after that model in your hooks
-namespace.
 
 ### index
 
-The index options control how content is indexed in the built in Lucene search
-engine.  This is used in the Admin but you can also use it in your own site.
+The index options control how content is indexed in the built in Lucene search 
+engine.  This is used in the Admin but you can also use it in your own site. 
 http://lucene.apache.org/
 
 Caribou uses the clucy library to abstract over the raw Java Lucene interface:
 https://github.com/weavejester/clucy
 
 * **path**
-
-The directory that will hold the index files.  Defaults to "caribou-index".
+The directory that will hold the index files.  Defaults to "caribou-index". 
 
 * **default-limit**
-
-The maximum number of documents a search will return.  Defaults to 1000.
-
-* **store**
-
-An atom of the actual clucy index object, if you need to perform any custom
-operations on it.
+The maximum number of documents a search will return.  Defaults to 1000. 
 
 ### logging
 
-Logging contains a list of logger specifications under the :loggers key.  These
-specifications are a map containing two keys: `:type` and `:level`.  `:type`
-indicates what endpoint the logger will output to (the default logger writes to
-:stdout), and `:level` indicates what level of Caribou events to pay attention
+Logging contains a list of logger specifications under the :loggers key.  These 
+specifications are a map containing two keys: `:type` and `:level`.  `:type` 
+indicates what endpoint the logger will output to (the default logger writes to 
+:stdout), and `:level` indicates what level of Caribou events to pay attention 
 to.
 
-The different types currently supported are `:stdout`, `:file` and `:remote`.
-`:stdout` simply outputs to stdout, and is the default logger type.  If `:file`
-is chosen, you must also add a `:file` key to the map pointing at the file to
-log to.  If the logger type is `:remote` then you must also include a `:host`
-key which indicates what remote host to log to.  In the case of a remote host,
-it uses UDP to send packets to the host, so the host must be running syslog and
+The different types currently supported are `:stdout`, `:file` and `:remote`. 
+`:stdout` simply outputs to stdout, and is the default logger type.  If `:file` 
+is chosen, you must also add a `:file` key to the map pointing at the file to 
+log to.  If the logger type is `:remote` then you must also include a `:host` 
+key which indicates what remote host to log to.  In the case of a remote host, 
+it uses UDP to send packets to the host, so the host must be running syslog and 
 must be configured to allow access from the server sending the packets.
 
 The levels in order from most critical to least critical are:
@@ -496,51 +423,22 @@ The levels in order from most critical to least critical are:
 :trace 7
 ```
 
-If you set a logger to watch at `:warn` level for instance, it will ignore any
-event below `:warn`, but output all messages from `:warn` level up to
+If you set a logger to watch at `:warn` level for instance, it will ignore any 
+event below `:warn`, but output all messages from `:warn` level up to 
 `:emergency`.  `:emergency` level events are always output.
-
-### models
-
-This is a map that contains all Models in the system.  During a call to
-`caribou.core/init` the Models are loaded from memory and added to this map
-under a key containing the slug of the Model.  If you want to define Models that
-are not represented in the Model table, you can add more keys to this map
-(though this is probably unnecessary).
-
-There is a whole section on [Creating Models](models.md) later on.
 
 ### nrepl
 
-Nrepl provides a repl running inside the Caribou process that can be connected
-to from the command line or from inside an editor with
-[nrepl](https://github.com/clojure/tools.nrepl) support.  This is a great way to
-interact with a running Caribou process and inspect or alter state using a given
+Nrepl provides a repl running inside the Caribou process that can be connected 
+to from the command line or from inside an editor with 
+[nrepl](https://github.com/clojure/tools.nrepl) support.  This is a great way to 
+interact with a running Caribou process and inspect or alter state using a given 
 configuration.
 
-If a `:port` is provided, then an nrepl server will be booted at that port when
-Caribou is initialized.  In that case, a reference to the running server will be
-stored in the atom under `:server`.  If no `:port` option is present, nrepl will not
+If a `:port` is provided, then an nrepl server will be booted at that port when 
+Caribou is initialized.  In that case, a reference to the running server will be 
+stored in the atom under `:server`.  If no `:port` option is present, nrepl will not 
 be booted.
-
-### pages
-
-This provides a reference to the page tree for this Caribou instance.  Most
-likely this will be populated during the definition of the handler in your
-`{project}.core` namespace.  `{project}.core/reload-pages` is a function that
-adds whatever routes you have to your site, which gets passed into the
-invocation of the root handler, `caribou.app.handler/handler`, so that it can
-reload the pages whenever necessary.  This is all covered in the section on
-[Defining Routes and Pages](routes.md).
-
-### pre-actions
-
-This configuration option holds the current map of existing pre-actions for
-different pages.  Keyed by the slug of a page, pre-actions will be run before a
-given action is evaluated.  This could be used for things like authorization or
-processing of request parameters.  See the section on
-[Defining Pre-Actions](controllers.md) in the documentation for controllers for
-more details.
 
 ### query
 
@@ -550,57 +448,22 @@ query cache will cache the results of every query map that
 play different roles in the inner workings of the query cache.
 
 * **enable-query-cache**
-
-To turn on the query-cache, simply set this option to `true` in your config.
-Not necessary for development, but a good thing to do in production if you know
-that your content is not necessarily changing often.  Even if it does change,
-the cache will be invalidated on any update to that model, so your site will
+To turn on the query-cache, simply set this option to `true` in your config. 
+Not necessary for development, but a good thing to do in production if you know 
+that your content is not necessarily changing often.  Even if it does change, 
+the cache will be invalidated on any update to that model, so your site will 
 remain current.
 
-* **queries**
-
-An atom containing the map of queries to results.  Populated automatically by
-the query cache (but fun to inspect, if you are into that kind of thing).
-
-* **reverse-cache**
-
-Tracks the models that are hit by each query.  Invalidates those caches in the
-case of an update.
-
 * **query-defaults**
-
-This map will be added automatically to any query issues through a
-`caribou.model/gather`.  Want to restrict your content to only those "enabled"?
+This map will be added automatically to any query issues through a 
+`caribou.model/gather`.  Want to restrict your content to only those "enabled"? 
 This is the place to do it.
-
-### reset
-
-This is a reference to a user-defined function passed into the initial creation
-of the frontend Caribou handler in your `{project}.core/init` function.  It
-should do any kind of necessary initialization work that your site requires
-(like loading pages or defining routes, for instance).  It is added
-automatically in a newly generated Caribou site.
-
-### routes
-
-This is an ordered map of your routes.  The routes map url patterns to the
-actions that are triggered by them.  One by one each pattern is tested against
-an incoming url until it is matched or a 404 is issued.  Once a route is matched
-the corresponding action is called with the request map as a parameter.  See
-more at [Defining Routes and Pages](routes.md).
 
 ### template
 
 The various options pertaining to the built-in template rendering live here.
 
 * **cache-strategy**
-
-This option governs the caching strategy used by the template engine.  The
+This option governs the caching strategy used by the template engine.  The 
 possible values are currently `:never` or `:always`.
-
-* **helpers**
-
-This is a map containing the default helpers that will be available during the
-rendering of every template.  To find out all about helpers check out the
-section on [Template Helpers](templates.md).
 
