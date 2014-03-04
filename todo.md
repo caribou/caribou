@@ -24,24 +24,13 @@
 
 - Extend DB protocol to allow for NoSQL and Datomic
 
-- Heroku Support:  
-
-    - Allow direct string config of DB
-
-    - Enable migrations on boot
-
-    - Heroku DB config options:  
-
-```clj
-:ssl true
-:sslfactory org.postgresql.ssl.NonValidatingFactory
-```
+* - Heroku Support
 
 - Improve Docs:
 
     - Add section for clojurescript
 
-    - Boot http-kit rather than ring now (lein run vs lein ring server)
+    *- Boot http-kit rather than ring now (lein run vs lein ring server)
 
     - Explain how to create values of all the various field types (addresses, assets, enums)
 
@@ -49,5 +38,6 @@
 
     *- Show how to swap out new template renderer
 
-    - Improve Heroku and Immutant docs
+    *- Improve Heroku and Immutant docs
 
+- Make upgrade doc for existing caribou sites
