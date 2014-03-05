@@ -40,4 +40,6 @@
 
     *- Improve Heroku and Immutant docs
 
-- Make upgrade doc for existing caribou sites
+*- Make upgrade doc for existing caribou sites
+
+*- Update Roadmap

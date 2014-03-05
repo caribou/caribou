@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>let-caribou-in - Powered By Caribou</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Source Sans Pro:300,400,700">
+    <link href="//let-caribou.in/css/let-caribou-in.css" type="text/css" rel="stylesheet">
+    <link href="/caribou/docs/stylesheets/styles.css" type="text/css" rel="stylesheet">
+    <link href="/caribou/docs/highlight/styles/rainbow.css" type="text/css" rel="stylesheet">
+    <script type="text/javascript" src="/caribou/docs/highlight/highlight.pack.js"></script>
+    <link rel="shortcut icon" href="favicon.ico">
+  </head>
+
+  <body>
+    <header>
+      <img src="//let-caribou.in/img/caribou-logo.png" width="158" height="139">
+      <h2><a href="outline.html">Documentation</a></h2>
+    </header>
+    <div class="container">
+      <div class="grid-block">
+        <div class="col-6">
+<h1>Upgrading Caribou from a Previous Version</h1><p>Caribou is changing fast.  Every version adds things and takes things away (hopefully in a way that makes it better!)  As time goes on things will stabilize, but for now its alpha status means that breaking changes may occur at any time.</p><p>This document exists to facilitate people who have created a site using one version who want to upgrade to a newer version.  Rather than let you flail in the dark, we have attempted to make this transition smoother.  While we will endeavor to make this document as complete as possible, let us know if you find anything that is missing!</p><h2>Upgrading from 0.13.&#42; to 0.14.&#42;</h2><h3>Versions</h3><p>First, you have to make some updates to your <code>project.clj</code>.  We have removed the Immutant dependency (since you can run it directly from information provided in <code>project.clj</code>!) and added <a href='https://github.com/prismofeverything/schmetterling'>Schmetterling</a>, which is an entirely optional debugger (so only add it if you want debugging support).</p><h4>Old way:</h4><pre class="brush: clj">
+:dependencies &#91;...
+               &#91;org.immutant/immutant &quot;1.0.2&quot;&#93;
+               &#91;caribou/caribou-admin &quot;0.13.0&quot;&#93;
+               &#91;caribou/caribou-api &quot;0.13.0&quot;&#93;
+               ...&#93;
+:plugins &#91;...
+          &#91;caribou/lein-caribou &quot;2.13.0&quot;&#93;
+          &#91;lein-cljsbuild &quot;0.3.3&quot;&#93;&#93;
+:immutant {:context-path &quot;/&quot;
+           :init {{name}}.immutant/init}
+</pre><h4>New way:</h4><pre class="brush: clj">
+:dependencies &#91;...
+               &#91;caribou/caribou-admin &quot;0.14.0&quot;&#93;
+               &#91;caribou/caribou-api &quot;0.14.0&quot;&#93;
+               &#91;schmetterling &quot;0.0.8&quot;&#93;
+               ...&#93;
+:plugins &#91;...
+          &#91;caribou/lein-caribou &quot;2.14.0&quot;&#93;
+          &#91;lein-cljsbuild &quot;1.0.2&quot;&#93;&#93;
+:immutant {:context-path &quot;/&quot;}
+</pre><p>Also, there has been a lot of work to enable Heroku support.  Part of that is providing an uberjar profile:</p><pre class="brush: clj">
+  :uberjar-name &quot;{{project-name}}-standalone.jar&quot;
+  :profiles {:uberjar {:aot :all}}
+</pre><h3>Routes</h3><p>One of the biggest changes in the 0.14.&#42; version is that routing has been drastically simplified with the inclusion of <a href='https://github.com/caribou/polaris'>Polaris</a>.  Before there was a concept of distinct "routes" and "pages" which would later be merged and matched by their keyword identifier.  This has been consolidated into a single "routes" vector, which has been pretty unanimously appreciated by everyone. </p><p>From <code>routes.clj</code><h4>Old way:</h4></p><pre class="brush: clj">
+&#40;def routes
+  &#91;&#91;&quot;/&quot;            :home           &#91;&#93;&#93;
+   &#91;&quot;/place&quot;       :general-place  &#91;&#93;&#93;
+   &#91;&quot;/place/:name&quot; :specific-place &#91;&#93;&#93;&#93;&#41;
+
+&#40;def pages
+  {:home           {:GET  {:controller 'home :action 'index :template &quot;index.html&quot;}}
+   :general-place  {:GET  {:controller 'home :action 'general :template &quot;general.html&quot;}
+                    :POST {:controller 'home :action 'general-post :template &quot;general-response.html&quot;}}
+   :specific-place {:GET  {:controller 'home :action 'specific :template &quot;specific.html&quot;}}}&#41;
+
+&#40;def page-tree
+  &#40;caribou.app.pages/build-page-tree routes pages&#41;&#41;
+</pre><h4>New way:</h4><pre class="brush: clj">
+&#40;def routes
+  &#91;&#91;&quot;/&quot; :home {:GET {:controller 'home :action 'index :template}}&#93;
+   &#91;&quot;/place&quot; :general-place 
+             {:GET &#40;fn &#91;request&#93; 
+                     &#40;lets-respond-directly-to-this &#40;do-stuff-to request&#41;&#41;&#41;
+              :POST {:controller 'home :action 'general-post :template &quot;general-response.html&quot;}}&#93;
+   &#91;&quot;/place/:name&quot; :specific-place
+             {:GET  {:controller 'home :action 'specific :template &quot;specific.html&quot;}}&#93;&#93;&#41;
+</pre><p>Things to note:</p><ul><li>No more matching keywords across two different structures!  Yay!</li><li>No need to have the empty vector of child routes if there aren't any.</li><li>You can now provide functions directly to the routes, rather than being forced  to reference functions from a controller namespace.</li></ul><p>This change has consequences for the rest of your <code>routes.clj</code> and <code>core.clj</code> as well.</p><p>From <code>routes.clj</code>, the old way:</p><pre class="brush: clj">
+&#40;defn page-tree
+  &#91;&#93;
+  &#40;pages/build-page-tree routes pages&#41;&#41;
+
+&#40;defn gather-pages
+  &#91;&#93;
+  &#40;let &#91;db-pages &#40;try 
+                   &#40;pages/all-pages&#41;
+                   &#40;catch Exception e nil&#41;&#41;&#93;
+    &#40;pages/merge-page-trees db-pages &#40;page-tree&#41;&#41;&#41;&#41;
+</pre><h4>New way:</h4><pre class="brush: clj">
+&#40;defn build-routes
+  &#91;routes namespace&#93;
+  &#40;pages/bind-actions routes namespace&#41;&#41;
+
+&#40;defn gather-pages
+  &#91;&#93;
+  &#40;try 
+    &#40;pages/all-pages&#41;
+    &#40;catch Exception e nil&#41;&#41;&#41;
+</pre><p>Before, you would take the routes and pages and merge them into a page tree, then get the pages from the database and merge the two trees for processing in <code>core.clj</code>.  Now you simply bind the routes to their controller functions and return the database pages separately.</p><p>This comes to fruition in <code>core.clj</code>, where all the routes are added to the handler.</p><h4>Old way:</h4><pre class="brush: clj">
+&#40;defn reload-pages
+  &#91;&#93;
+  &#40;pages/add-page-routes
+   admin-routes/admin-routes
+   'caribou.admin.controllers
+   &quot;/&#95;admin&quot;
+   admin-core/admin-wrapper&#41;
+
+  &#40;pages/add-page-routes
+   api-routes/api-routes
+   'caribou.api.controllers
+   &quot;/&#95;api&quot;
+   api-core/api-wrapper&#41;
+
+  &#40;pages/add-page-routes
+   &#40;routes/gather-pages&#41;
+   &#40;config/draw :controller :namespace&#41;&#41;&#41;
+</pre><h4>New way:</h4><pre class="brush: clj">
+&#40;defn reload-pages
+  &#91;&#93;
+  &#40;concat 
+   &#40;pages/convert-pages-to-routes
+    admin-routes/admin-routes
+    'caribou.admin.controllers
+    &quot;/&#95;admin&quot;
+    admin-core/admin-wrapper&#41;
+
+   &#40;pages/convert-pages-to-routes
+    api-routes/api-routes
+    'caribou.api.controllers
+    &quot;/&#95;api&quot;
+    api-core/api-wrapper&#41;
+
+   &#40;routes/build-routes
+    routes/routes
+    &#40;config/draw :controller :namespace&#41;&#41;
+
+   &#40;pages/convert-pages-to-routes
+    &#40;routes/gather-pages&#41;
+    &#40;config/draw :controller :namespace&#41;&#41;&#41;&#41;
+</pre><p>This may seem more verbose, but that is because the routes from <code>routes.clj</code> are being added separately from any routes created through making Pages in the Admin.  The new <code>pages/convert-pages-to-routes</code> reflects the fact that before, routes were being converted to their database format in order to be added to the handler, whereas now the reverse is happening and the database pages are being converted into <a href='https://github.com/caribou/polaris'>Polaris</a> routes.<br /></p><h3>Helpers</h3><p>Another difference in <code>core.clj</code> is that built-in template helpers are now provided through a middleware, and you can provide your own helpers from a new file <code>helpers.clj</code>.</p><h4>Old way:</h4><pre class="brush: clj">
+&#40;:require &#91;caribou.app.helpers :as helpers&#93;&#41;
+
+...
+
+&#40;defn provide-helpers
+  &#91;handler&#93;
+  &#40;fn &#91;request&#93;
+    &#40;let &#91;request &#40;merge request helpers/helpers&#41;&#93;
+      &#40;handler request&#41;&#41;&#41;&#41;
+
+...
+
+&#40;-&gt; &#40;handler/handler reload-pages&#41;
+    &#40;provide-helpers&#41;&#41;
+</pre><h4>New way:</h4><pre class="brush: clj">
+&#40;:require &#91;caribou.app.helpers :as helpers&#93;
+          &#91;{{project-name}}.helpers :as user-helpers&#93;&#41;
+          
+...
+
+&#40;-&gt; &#40;handler/handler reload-pages&#41;
+    &#40;helpers/wrap-helpers user-helpers/additional-helpers&#41;&#41;
+</pre><p>The new <code>helpers.clj</code> file looks like this:</p><pre class="brush: clj">
+&#40;ns {{project-name}}.helpers&#41;
+
+&#40;def additional-helpers
+  {:hello 
+   &#40;fn &#91;x&#93; 
+     &#40;str &quot;Hello &quot; x &quot;!&quot;&#41;&#41;}&#41;
+</pre><p>You can add any helpers you need in your templates here.<br /></p><h3>Config</h3><p>The last change is that configuration has been enhanced to accept a database connection from an environment string if it is present.  This is another change to support Heroku deployment, and makes the whole thing fairly seamless.  Even with this change, you shouldn't see any difference if you are not deploying to Heroku.</p><h4>Old way:</h4><pre class="brush: clj">
+&#40;defn boot
+  &#91;&#93;
+  &#40;let &#91;default &#40;app-config/default-config&#41;
+        local &#40;config/merge-config default local-config&#41;
+        config &#40;config/config-from-environment local&#41;&#93;
+    &#40;caribou/init config&#41;&#41;&#41;
+</pre><h4>New way:</h4><pre class="brush: clj">
+&#40;defn boot
+  &#91;&#93;
+  &#40;-&gt; &#40;app-config/default-config&#41;
+      &#40;config/merge-config local-config&#41;
+      &#40;config/config-from-environment&#41;
+      &#40;config/merge-db-connection {:connection &quot;DATABASE&#95;URL&quot;}&#41;
+      &#40;config/process-config&#41;
+      &#40;caribou/init&#41;&#41;&#41;
+</pre><p>Cleaner with threading as well?  You decide.</p><h3>Feedback</h3><p>There are many more features in the new version, but that should be everything you need to do to upgrade your Caribou instance from 0&#46;13&#46;&#42; to 0&#46;14&#46;&#42;. Please let us know if you run into any additional issues!  And let us know anything else for that matter.</p><p>Thanks for using Caribou!</p>        </div>
+      </div>
+    </div>
+    <footer>
+        <a href="http://caribou.github.io/caribou/docs/outline.html" target="_blank"><img src="//let-caribou.in/img/teepee_golden.svg"></a>
+    </footer>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(document).ready(function() {
+      $('pre').each(function(i, e) {
+          var $e = $(e);
+          if ($e.hasClass("clj") || $(e).hasClass("bash") || $e.hasClass("javascript") ||
+              $e.hasClass("html") || $(e).hasClass("handlebars") || $(e).hasClass("txt")) {
+              $e.html("<code>" + $e.html() + "</code>");
+          }
+          hljs.highlightBlock(e)
+      });
+    });
+    </script>
+    <!-- <script type="text/javascript" src="/js/let-caribou-in.js"></script> -->
+    <!-- script type="text/javascript" src="/js/app/out/goog/base.js"></script -->
+    <!-- script type="text/javascript" src="/js/app/let-caribou-in.js"></script -->
+    <!-- script type="text/javascript">goog.require('let-caribou-in');</script -->
+  </body>
+</html>

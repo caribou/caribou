@@ -24,6 +24,7 @@
    "api"
    "deploying"
    "debugging"
+   "upgrading"
    "roadmap"])
 
 (def pre-layout (slurp "resources/header.html"))

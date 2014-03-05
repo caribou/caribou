@@ -22,4 +22,5 @@ individual pages for comprehensive documentation:
 * [Using the API](api.md)
 * [Deploying Caribou](deploying.md)
 * [Debugging Caribou](debugging.md)
+* [Upgrading Caribou](upgrading.md)
 * [Roadmap](roadmap.md)
