@@ -116,6 +116,14 @@ We will start from the beginning.
   
 ```bash
     % lein caribou migrate resources/config/heroku.clj
+    # IGNORE EVERYTHING BELOW THIS, IT IS ACTUALLY WORKING
+    # --------------------------------------
+    # ERROR  no current database connection
+    # INFO  Already used these: 
+    # nil
+    # INFO   -> migration caribou.migrations.bootstrap started.
+    # DEBUG :INVOKE_MODELS No models table yet!
+    # DEBUG :stacktrace >>> org.postgresql.util.PSQLException: ERROR: relation "model" does not exist    
 ```
 
 * Commit the git repository and and push it to heroku:

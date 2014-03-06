@@ -59,6 +59,14 @@
     % vim resources/config/heroku.clj  # add values discovered from previous command!
 </pre><ul><li>Build the base Caribou tables in the remote database using `lein caribou  migrate` (This takes a long time, let it run to completion!):  </li></ul><pre class="brush: bash">
     % lein caribou migrate resources/config/heroku.clj
+    # IGNORE EVERYTHING BELOW THIS, IT IS ACTUALLY WORKING
+    # --------------------------------------
+    # ERROR  no current database connection
+    # INFO  Already used these: 
+    # nil
+    # INFO   -&gt; migration caribou.migrations.bootstrap started.
+    # DEBUG :INVOKE&#95;MODELS No models table yet!
+    # DEBUG :stacktrace &gt;&gt;&gt; org.postgresql.util.PSQLException: ERROR: relation &quot;model&quot; does not exist    
 </pre><ul><li>Commit the git repository and and push it to heroku:</li></ul><pre class="brush: bash">
     % git add .
     % git commit -m &quot;init&quot;
