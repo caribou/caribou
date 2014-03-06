@@ -287,9 +287,9 @@ Cleaner with threading as well?  You decide.
 
 ### Feedback
 
-There are many more features in the new version, but that should be everything
-you need to do to upgrade your Caribou instance from 0\.13\.\* to 0\.14\.\*.
-Please let us know if you run into any additional issues!  And let us know
-anything else for that matter.
+There are many more features and improvements in the new version, but that
+should be everything you need to do to upgrade your Caribou instance from
+0\.13\.\* to 0\.14\.\*.  Please let us know if you run into any additional
+issues!  And let us know anything else for that matter.
 
 Thanks for using Caribou!

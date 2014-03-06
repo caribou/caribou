@@ -24,7 +24,11 @@
 
 - Extend DB protocol to allow for NoSQL and Datomic
 
-* - Heroku Support
+*- Replace lame font with open source font
+
+*- Heroku Support
+
+*- Add ability to swap out templating engine.
 
 - Improve Docs:
 
