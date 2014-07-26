@@ -18,6 +18,6 @@ Docs are constantly evolving.  To get started, check out:
 
 # LICENSE
 
-Copyright (C) Instrument
+Copyright © [Instrument](http://weareinstrument.com/)
 
 Distributed under the Eclipse Public License
