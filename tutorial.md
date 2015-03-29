@@ -218,8 +218,8 @@ Open the file _site/src/pictograph/controllers/home.clj_ and add the following c
                       :presentation
                       {:where {:title title}
                        :include {:slides {}}})]
-    (render (assoc request
-              :presentation presentation))))
+    (controller/render (assoc request
+                              :presentation presentation))))
 ```
 
 This is what a simple action looks like.  It grabs the title of presentation from the URL,
@@ -234,13 +234,10 @@ Oh no! Now there's no template.  But the application is telling you what's missi
 exactly what to do.   Let's create a new template for the page in _site/resources/templates/presentation.html_.
 
 ```html
-{{< templates/layout.html}}
-{{%body}}
 <h1>{{presentation.title}}</h1>
 {{#presentation.slides}}
 <a href="{{route-for :slide {:title presentation.title :slide title} }}"><img src="{{resize image {:height 200} }}" /></a>
 {{/presentation.slides}}
-{{/body}}
 ```
 
 Refresh your browser, and presto!  Here are your presentation's slides.
