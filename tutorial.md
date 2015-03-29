@@ -268,10 +268,10 @@ and you know that this means you need to write the action for this page:
                    :slide slide
                    :presentation_position
                    {:where (select-keys slide [:presentation_id])})]
-    (render (assoc request
-              :slide slide
-              :following following
-              :previous previous))))
+    (controller/render (assoc request
+                              :slide slide
+                              :following following
+                              :previous previous))))
 ```
 
 This action looks a bit more complicated but really it's not.  It fetches
@@ -281,14 +281,11 @@ slides in the presentation.  Then it makes all three available to the template.
 You'll also need to create the template in _site/resources/templates/slide.html_:
 
 ```html
-{{< templates/layout.html}}
-{{%body}}
 <h1>{{slide.title}}</h1>
 <img src="{{resize slide.image {:height 500} }}" />
 <h2>{{slide.caption}}</h2>
 {{#previous}}<p><<< <a href="{{route-for :slide {:title slide.presentation.title :slide previous.title} }}">{{previous.title}}</a></p>{{/previous}}
 {{#following}}<p><a href="{{route-for :slide {:title slide.presentation.title :slide following.title} }}">{{following.title}}</a> >>></p>{{/following}}
-{{/body}}
 ```
 
 and now here's your slide page:
