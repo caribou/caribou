@@ -84,16 +84,13 @@ pictograph
                       :presentation
                       {:where {:title title}
                        :include {:slides {}}}&#41;&#93;
-    &#40;render &#40;assoc request
-              :presentation presentation&#41;&#41;&#41;&#41;
+    &#40;controller/render &#40;assoc request
+                              :presentation presentation&#41;&#41;&#41;&#41;
 </pre><p>This is what a simple action looks like.  It grabs the title of presentation from the URL, and then retrieves that presentation.  Finally, it renders the page, adding in the newly-fetched presentation, making it available to the template(s).</p><p>Now, if you refresh your browser, you'll see this:</p><p><img src="images/tutorial/Screenshot&#95;3&#95;21&#95;13&#95;4&#95;07&#95;PM.png" alt="Presentation page" /></p><p>Oh no! Now there's no template.  But the application is telling you what's missing, so you know exactly what to do.   Let's create a new template for the page in <i>site/resources/templates/presentation.html</i>.</p><pre class="brush: html">
-{{&lt; templates/layout.html}}
-{{%body}}
 &lt;h1&gt;{{presentation.title}}&lt;/h1&gt;
 {{#presentation.slides}}
 &lt;a href=&quot;{{route-for :slide {:title presentation.title :slide title} }}&quot;&gt;&lt;img src=&quot;{{resize image {:height 200} }}&quot; /&gt;&lt;/a&gt;
 {{/presentation.slides}}
-{{/body}}
 </pre><p>Refresh your browser, and presto!  Here are your presentation's slides.</p><p><img src="images/tutorial/Screenshot&#95;3&#95;21&#95;13&#95;4&#95;44&#95;PM.png" alt="Presentation page" title="Presentation page" /></p><p>Each slide is clickable (thanks to the <i>route-for</i> in the above HTML snippet) and the images are conveniently resized (and cached!) thanks to the <i>resize</i>.   More on those later.</p><p>If you click one of the images, you'll see something familiar:</p><p><img src="images/tutorial/Screenshot&#95;3&#95;21&#95;13&#95;5&#95;00&#95;PM.png" alt="Slide page" title="Slide page" /></p><p>and you know that this means you need to write the action for this page:</p><pre class="brush: clj">
 &#40;defn slide
   &#91;request&#93;
@@ -110,19 +107,16 @@ pictograph
                    :slide slide
                    :presentation&#95;position
                    {:where &#40;select-keys slide &#91;:presentation&#95;id&#93;&#41;}&#41;&#93;
-    &#40;render &#40;assoc request
-              :slide slide
-              :following following
-              :previous previous&#41;&#41;&#41;&#41;
+    &#40;controller/render &#40;assoc request
+                              :slide slide
+                              :following following
+                              :previous previous&#41;&#41;&#41;&#41;
 </pre><p>This action looks a bit more complicated but really it's not.  It fetches the slide that's mentioned in the URL, then fetches the following and previous slides in the presentation.  Then it makes all three available to the template.</p><p>You'll also need to create the template in <i>site/resources/templates/slide.html</i>:</p><pre class="brush: html">
-{{&lt; templates/layout.html}}
-{{%body}}
 &lt;h1&gt;{{slide.title}}&lt;/h1&gt;
 &lt;img src=&quot;{{resize slide.image {:height 500} }}&quot; /&gt;
 &lt;h2&gt;{{slide.caption}}&lt;/h2&gt;
 {{#previous}}&lt;p&gt;&lt;&lt;&lt; &lt;a href=&quot;{{route-for :slide {:title slide.presentation.title :slide previous.title} }}&quot;&gt;{{previous.title}}&lt;/a&gt;&lt;/p&gt;{{/previous}}
 {{#following}}&lt;p&gt;&lt;a href=&quot;{{route-for :slide {:title slide.presentation.title :slide following.title} }}&quot;&gt;{{following.title}}&lt;/a&gt; &gt;&gt;&gt;&lt;/p&gt;{{/following}}
-{{/body}}
 </pre><p>and now here's your slide page:</p><p><img src="images/tutorial/Screenshot&#95;3&#95;21&#95;13&#95;5&#95;09&#95;PM.png" alt="Slide page" title="Slide page" /></p><p>and you can click the links at the bottom to go to the next and previous slides.</p><h2>10. Bonus Feature!</h2><p>Go into the admin, and edit your presentation under "Presentations" -> "See all" -> "edit". Click <i>"Edit"</i> in the <em>Slides</em> field, taking you to a view of the slides association with your <em>Presentation</em>.  Drag them into a different order, and click <em>Save</em>.</p><p><img src="images/tutorial/Screenshot&#95;3&#95;21&#95;13&#95;5&#95;13&#95;PM.png" alt="Presentation editor page" title="Presentation editor page" /></p><p>Now refresh your "Presentation" page, and the order of the slides will have changed!</p><p><img src="images/tutorial/Screenshot&#95;3&#95;21&#95;13&#95;5&#95;15&#95;PM.png" alt="Presentation with reordered slides" title="Presentation with reordered slides" /></p>        </div>
       </div>
     </div>
